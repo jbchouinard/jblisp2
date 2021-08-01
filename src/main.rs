@@ -1,16 +1,19 @@
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
+use crate::reader::tokenize::{Token, Tokenizer};
+use crate::reader::ReaderError;
+
 pub mod reader;
 
 const HISTORY_FILE: &str = ".jblisp2_history";
 
-fn jeval(s: String) -> String {
-    s.to_string()
+fn jeval(s: String) -> Result<Vec<Token>, ReaderError> {
+    Tokenizer::new(&s).tokenize()
 }
 
-fn jprint(s: &str) {
-    println!("{}", s);
+fn jprint(t: &Result<Vec<Token>, ReaderError>) {
+    println!("{:#?}", t);
 }
 
 fn main() {
