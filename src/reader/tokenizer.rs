@@ -2,15 +2,27 @@ use lazy_static::lazy_static;
 use regex::Regex;
 
 use super::{ReaderError, Result};
+use crate::types::JTInt;
 
 #[derive(Debug, PartialEq)]
-pub enum Token {
+pub enum TokenValue {
     Whitespace,
     LParen,
     RParen,
-    Int(i64),
+    Int(JTInt),
     Ident(String),
     Eof,
+}
+
+pub struct Token {
+    pub value: TokenValue,
+    pub pos: usize,
+}
+
+impl Token {
+    pub fn new(value: TokenValue, pos: usize) -> Self {
+        Self { value, pos }
+    }
 }
 
 lazy_static! {
@@ -18,32 +30,33 @@ lazy_static! {
     static ref RE_LPAREN: Regex = Regex::new(r"^\(").unwrap();
     static ref RE_RPAREN: Regex = Regex::new(r"^\)").unwrap();
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
-    static ref RE_IDENT: Regex = Regex::new(r"^[a-z%=~<>?!*/+-][0-9a-z%=~<>?!*/+-]*").unwrap();
+    static ref RE_IDENT: Regex =
+        Regex::new(r"^[a-zA-Z%=~<>?!*/+-][0-9a-zA-Z%=~<>?!*/+-]*").unwrap();
 }
 
-type TResult = std::result::Result<Token, String>;
+type TResult = std::result::Result<TokenValue, String>;
 
 fn t_lparen(_: &str) -> TResult {
-    Ok(Token::LParen)
+    Ok(TokenValue::LParen)
 }
 
 fn t_rparen(_: &str) -> TResult {
-    Ok(Token::RParen)
+    Ok(TokenValue::RParen)
 }
 
 fn t_int(val: &str) -> TResult {
-    match val.parse::<i64>() {
-        Ok(n) => Ok(Token::Int(n)),
+    match val.parse::<JTInt>() {
+        Ok(n) => Ok(TokenValue::Int(n)),
         Err(e) => Err(format!("int error: {}", e)),
     }
 }
 
 fn t_ident(val: &str) -> TResult {
-    Ok(Token::Ident(val.to_string()))
+    Ok(TokenValue::Ident(val.to_string()))
 }
 
 fn t_ws(_: &str) -> TResult {
-    Ok(Token::Whitespace)
+    Ok(TokenValue::Whitespace)
 }
 
 pub struct Tokenizer<'a> {
@@ -63,9 +76,9 @@ impl<'a> Tokenizer<'a> {
         match re.find(&self.input[self.pos..]) {
             Some(mat) => {
                 let spos = self.pos;
-                self.pos = self.pos + mat.end();
+                self.pos += mat.end();
                 match cons(mat.as_str()) {
-                    Ok(token) => Ok(Some(token)),
+                    Ok(tokval) => Ok(Some(Token::new(tokval, spos))),
                     Err(reason) => Err(ReaderError::new(&reason, spos)),
                 }
             }
@@ -75,7 +88,7 @@ impl<'a> Tokenizer<'a> {
 
     pub fn next_token(&mut self) -> Result<Token> {
         if self.pos >= self.input.len() {
-            return Ok(Token::Eof);
+            return Ok(Token::new(TokenValue::Eof, self.pos));
         }
         if let Some(token) = self.try_token(&RE_WS, t_ws)? {
             return Ok(token);
@@ -105,10 +118,10 @@ impl<'a> Tokenizer<'a> {
         let mut tokens = vec![];
         loop {
             let next = self.next_token()?;
-            if next == Token::Eof {
+            if next.value == TokenValue::Eof {
                 break;
             }
-            if next != Token::Whitespace {
+            if next.value != TokenValue::Whitespace {
                 tokens.push(next);
             }
         }
@@ -124,16 +137,18 @@ mod tests {
     fn test_tokenizer_1() {
         let input = "(* 12 -15)";
         let mut tokenizer = Tokenizer::new(input);
+        let tokens = tokenizer.tokenize().unwrap();
+        let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
 
         assert_eq!(
             vec![
-                Token::LParen,
-                Token::Ident("*".to_string()),
-                Token::Int(12),
-                Token::Int(-15),
-                Token::RParen,
+                TokenValue::LParen,
+                TokenValue::Ident("*".to_string()),
+                TokenValue::Int(12),
+                TokenValue::Int(-15),
+                TokenValue::RParen,
             ],
-            tokenizer.tokenize().unwrap()
+            tokvalues
         );
     }
 }

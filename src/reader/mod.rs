@@ -1,6 +1,8 @@
+use crate::JError;
 use std::fmt;
 
-pub mod tokenize;
+pub mod parser;
+pub mod tokenizer;
 
 #[derive(Debug)]
 pub struct ReaderError {
@@ -22,7 +24,13 @@ impl ReaderError {
 
 impl fmt::Display for ReaderError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::result::Result<(), fmt::Error> {
-        write!(f, "Reader error: {} at {}", self.reason, self.pos)
+        write!(f, "Syntax error: {} at {}", self.reason, self.pos)
+    }
+}
+
+impl From<ReaderError> for JError {
+    fn from(re: ReaderError) -> Self {
+        Self::new("SyntaxError", &format!("{} at {}", re.reason, re.pos))
     }
 }
 
