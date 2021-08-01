@@ -1,7 +1,17 @@
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
+pub mod reader;
+
 const HISTORY_FILE: &str = ".jblisp2_history";
+
+fn jeval(s: String) -> String {
+    s.to_string()
+}
+
+fn jprint(s: &str) {
+    println!("{}", s);
+}
 
 fn main() {
     // `()` can be used when no completer is required
@@ -12,7 +22,7 @@ fn main() {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                println!("{}", line);
+                jprint(&jeval(line));
             }
             Err(ReadlineError::Interrupted) => {
                 println!("^C");
