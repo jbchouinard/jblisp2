@@ -19,13 +19,15 @@ pub mod repr;
 pub mod types;
 
 const HISTORY_FILE: &str = ".jblisp2_history";
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn repl() {
+    println!("jblisp2 v{}", VERSION);
     let mut rl = Editor::<()>::new();
     let _ = rl.load_history(HISTORY_FILE);
     let mut env = JEnv::default();
     loop {
-        let readline = rl.readline(">> ");
+        let readline = rl.readline(">>> ");
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
