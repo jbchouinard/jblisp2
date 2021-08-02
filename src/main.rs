@@ -2,6 +2,7 @@ use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
 pub use crate::env::JEnv;
+pub use crate::error::*;
 pub use crate::eval::jeval;
 pub use crate::reader::parser::Parser;
 pub use crate::repr::jrepr;
@@ -11,6 +12,7 @@ pub use crate::types::*;
 
 pub mod builtin;
 pub mod env;
+pub mod error;
 pub mod eval;
 pub mod reader;
 pub mod repr;
@@ -28,7 +30,7 @@ fn repl() {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
                 let expr = Parser::new(&line).parse();
-                println!("{}", jrepr(&jeval(expr, &mut env)));
+                println!("{}", jrepr(&jeval(expr, &mut env).into()));
             }
             Err(ReadlineError::Interrupted) => {
                 println!("^C");

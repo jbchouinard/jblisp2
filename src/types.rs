@@ -1,32 +1,19 @@
 use std::fmt;
 use std::rc::Rc;
 
+use crate::*;
+
 pub type JTInt = i128;
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct JError {
-    pub etype: String,
-    pub emsg: String,
-}
-
-impl JError {
-    pub fn new(etype: &str, emsg: &str) -> Self {
-        Self {
-            etype: etype.to_string(),
-            emsg: emsg.to_string(),
-        }
-    }
-}
 
 #[derive(Clone)]
 pub struct JBuiltin {
     pub name: String,
-    pub f: Rc<dyn Fn(Vec<JValue>) -> JValue>,
+    pub f: Rc<dyn Fn(Vec<JValue>, &mut JEnv) -> JResult>,
 }
 
 impl fmt::Debug for JBuiltin {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "<builtin function {}>", self.name)
+        write!(f, "builtin {}", self.name)
     }
 }
 
@@ -37,12 +24,21 @@ impl PartialEq for JBuiltin {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub struct JLambda {
+    pub closure: JEnv,
+    pub params: Vec<String>,
+    pub code: JValue,
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum JValue {
     SExpr(Vec<JValue>),
     Int(JTInt),
     Symbol(String),
     Error(JError),
     Builtin(JBuiltin),
+    BuiltinMacro(JBuiltin),
+    Lambda(Box<JLambda>),
 }
 
 impl JValue {

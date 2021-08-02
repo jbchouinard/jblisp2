@@ -1,11 +1,11 @@
 use std::collections::HashMap;
-use std::rc::Rc;
 
 use crate::builtin::add_builtins;
 use crate::*;
 
+#[derive(Debug, PartialEq, Clone)]
 pub struct JEnv {
-    parent: Option<Rc<JEnv>>,
+    parent: Option<Box<JEnv>>,
     vars: HashMap<String, JValue>,
 }
 
@@ -31,7 +31,7 @@ impl JEnv {
         self.vars.insert(v.to_string(), val);
     }
 
-    pub fn set_parent(&mut self, parent: Option<Rc<JEnv>>) {
+    pub fn set_parent(&mut self, parent: Option<Box<JEnv>>) {
         self.parent = parent
     }
 }

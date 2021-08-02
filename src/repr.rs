@@ -19,6 +19,8 @@ pub fn jrepr(expr: &JValue) -> String {
         JValue::Int(n) => format!("{}", n),
         JValue::Symbol(s) => s.to_string(),
         JValue::Error(e) => format!("{}: {}", e.etype, e.emsg),
-        JValue::Builtin(b) => format!("{:?}", b),
+        JValue::Builtin(b) => format!("<function {:?}>", b),
+        JValue::BuiltinMacro(b) => format!("<macro {:?}>", b),
+        JValue::Lambda(l) => format!("fn[{}]", l.params.len()),
     }
 }
