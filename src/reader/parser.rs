@@ -10,11 +10,13 @@ pub struct Parser<'a> {
 impl<'a> Parser<'a> {
     pub fn new(input: &'a str) -> Self {
         let tokenizer = Tokenizer::new(input);
-        Self {
+        let mut this = Self {
             tokenizer,
             // Dummy value until we read the first real token
             peek: Token::new(TokenValue::Whitespace, 0),
-        }
+        };
+        this.next().unwrap();
+        this
     }
 
     fn next(&mut self) -> Result<Token> {
@@ -29,7 +31,7 @@ impl<'a> Parser<'a> {
             Ok(next)
         } else {
             Err(ReaderError::new(
-                &format!("expected token {:?}", tok),
+                &format!("expected token {:?}, got {:?}", tok, next.value),
                 next.pos,
             ))
         }
@@ -56,7 +58,7 @@ impl<'a> Parser<'a> {
             TokenValue::Int(n) => Ok(JValue::Int(n)),
             TokenValue::Ident(s) => Ok(JValue::Symbol(s)),
             _ => Err(ReaderError::new(
-                &format!("expected int or symbol, got {:?}", next.value),
+                &format!("unexpected token {:?}", next.value),
                 next.pos,
             )),
         }
@@ -74,14 +76,23 @@ impl<'a> Parser<'a> {
         Ok(JValue::SExpr(list))
     }
 
-    pub fn parse(&mut self) -> JValue {
-        if let Err(re) = self.next() {
-            return JValue::Error(re.into());
+    pub fn parse_form(&mut self) -> Result<Option<JValue>> {
+        self.eat(TokenValue::Whitespace)?;
+        if self.peek.value == TokenValue::Eof {
+            return Ok(None);
         }
         match self.expr() {
-            Ok(val) => val,
-            Err(re) => JValue::Error(re.into()),
+            Ok(val) => Ok(Some(val)),
+            Err(e) => Err(e),
         }
+    }
+
+    pub fn parse_forms(&mut self) -> Result<Vec<JValue>> {
+        let mut forms = vec![];
+        while let Some(form) = self.parse_form()? {
+            forms.push(form)
+        }
+        Ok(forms)
     }
 }
 
@@ -92,7 +103,7 @@ mod tests {
     #[test]
     fn test_parser_1() {
         let mut parser = Parser::new("(+ 12 -15)");
-        let val = parser.parse();
+        let val = parser.expr().unwrap();
 
         assert_eq!(val, jsexpr![jsym("+"), jint(12), jint(-15)]);
     }
@@ -100,7 +111,7 @@ mod tests {
     #[test]
     fn test_parser_2() {
         let mut parser = Parser::new("(* (+ 12 -33) 42)");
-        let val = parser.parse();
+        let val = parser.parse_form().unwrap().unwrap();
 
         assert_eq!(
             val,

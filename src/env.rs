@@ -1,45 +1,53 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 
-use crate::builtin::add_builtins;
 use crate::*;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct JEnv {
-    parent: Option<Box<JEnv>>,
-    vars: HashMap<String, JValue>,
+    parent: Option<JEnvRef>,
+    vars: RefCell<HashMap<String, JValue>>,
 }
 
+pub type JEnvRef = Rc<JEnv>;
+
 impl JEnv {
-    pub fn new() -> Self {
+    pub fn new(parent: Option<JEnvRef>) -> Self {
         Self {
-            parent: None,
-            vars: HashMap::new(),
+            parent,
+            vars: RefCell::new(HashMap::new()),
         }
     }
 
-    pub fn get(&self, v: &str) -> Option<JValue> {
-        match self.vars.get(v) {
+    /// Look for value of binding.
+    pub fn lookup(&self, v: &str) -> Option<JValue> {
+        match self.vars.borrow().get(v) {
             Some(val) => Some(val.clone()),
             None => match &self.parent {
-                Some(parent) => parent.get(v),
+                Some(parent) => parent.lookup(v),
                 None => None,
             },
         }
     }
 
-    pub fn set(&mut self, v: &str, val: JValue) {
-        self.vars.insert(v.to_string(), val);
+    /// Create a new binding.
+    pub fn define(&self, v: &str, val: JValue) {
+        self.vars.borrow_mut().insert(v.to_string(), val);
     }
 
-    pub fn set_parent(&mut self, parent: Option<Box<JEnv>>) {
-        self.parent = parent
+    /// Change existing binding.
+    pub fn set(&self, _v: &str, _val: JValue) {
+        todo!()
+    }
+
+    pub fn into_ref(self) -> JEnvRef {
+        Rc::new(self)
     }
 }
 
 impl Default for env::JEnv {
     fn default() -> Self {
-        let mut env = Self::new();
-        add_builtins(&mut env);
-        env
+        Self::new(None)
     }
 }

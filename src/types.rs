@@ -1,6 +1,7 @@
 use std::fmt;
 use std::rc::Rc;
 
+use crate::env::JEnvRef;
 use crate::*;
 
 pub type JTInt = i128;
@@ -8,7 +9,7 @@ pub type JTInt = i128;
 #[derive(Clone)]
 pub struct JBuiltin {
     pub name: String,
-    pub f: Rc<dyn Fn(Vec<JValue>, &mut JEnv) -> JResult>,
+    pub f: Rc<dyn Fn(Vec<JValue>, JEnvRef) -> JResult>,
 }
 
 impl fmt::Debug for JBuiltin {
@@ -25,7 +26,7 @@ impl PartialEq for JBuiltin {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct JLambda {
-    pub closure: JEnv,
+    pub closure: JEnvRef,
     pub params: Vec<String>,
     pub code: JValue,
 }

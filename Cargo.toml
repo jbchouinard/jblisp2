@@ -1,12 +1,13 @@
 [package]
 name = "jblisp2"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Jérome Boisvert-Chouinard"]
 license = "MIT"
 readme = "README.md"
 edition = "2018"
 
 [dependencies]
+lazy_static = "1.4"
 regex = "1"
 rustyline = "8.2"
-lazy_static = "1.4"
+structopt = "0.3"
