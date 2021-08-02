@@ -6,10 +6,43 @@ use crate::*;
 
 pub type JTInt = i128;
 
+#[derive(Debug, PartialEq, Clone)]
+pub enum JCell {
+    Nil,
+    Pair(JValueRef, JValueRef),
+}
+
+impl JCell {
+    pub fn cons(x: JValueRef, y: JValueRef) -> Self {
+        Self::Pair(x, y)
+    }
+    pub fn car(&self) -> JResult {
+        match self {
+            Self::Nil => Err(JError::new("ValueError", "cannot call car on nil")),
+            Self::Pair(x, _) => Ok(Rc::clone(x)),
+        }
+    }
+    pub fn cdr(&self) -> JResult {
+        match self {
+            Self::Nil => Err(JError::new("ValueError", "cannot call cdr on nil")),
+            Self::Pair(_, y) => Ok(Rc::clone(y)),
+        }
+    } // Will blow the stack on circular list...
+    pub fn is_list(&self) -> bool {
+        match self {
+            Self::Nil => true,
+            Self::Pair(_, y) => match &**y {
+                JValue::Cell(c) => c.is_list(),
+                _ => false,
+            },
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct JBuiltin {
     pub name: String,
-    pub f: Rc<dyn Fn(Vec<JValue>, JEnvRef) -> JResult>,
+    pub f: Rc<dyn Fn(Vec<JValueRef>, JEnvRef) -> JResult>,
 }
 
 impl fmt::Debug for JBuiltin {
@@ -28,14 +61,17 @@ impl PartialEq for JBuiltin {
 pub struct JLambda {
     pub closure: JEnvRef,
     pub params: Vec<String>,
-    pub code: JValue,
+    pub code: JValueRef,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum JValue {
-    SExpr(Vec<JValue>),
+    SExpr(Vec<JValueRef>),
+    Cell(JCell),
     Int(JTInt),
+    Bool(bool),
     Symbol(String),
+    String(String),
     Error(JError),
     Builtin(JBuiltin),
     BuiltinMacro(JBuiltin),
@@ -43,20 +79,29 @@ pub enum JValue {
 }
 
 impl JValue {
-    pub fn into_int(self) -> Result<JTInt, JError> {
+    pub fn into_ref(self) -> JValueRef {
+        Rc::new(self)
+    }
+    pub fn to_int(&self) -> Result<JTInt, JError> {
         match self {
-            Self::Int(n) => Ok(n),
+            Self::Int(n) => Ok(*n),
             _ => Err(JError::new("TypeError", "expected an int")),
         }
     }
 }
 
-pub fn jint(n: JTInt) -> JValue {
-    JValue::Int(n)
+pub type JValueRef = Rc<JValue>;
+
+pub fn jint(n: JTInt) -> JValueRef {
+    JValue::Int(n).into_ref()
 }
 
-pub fn jsym(s: &str) -> JValue {
-    JValue::Symbol(s.to_string())
+pub fn jsym(s: &str) -> JValueRef {
+    JValue::Symbol(s.to_string()).into_ref()
+}
+
+pub fn jstr(s: &str) -> JValueRef {
+    JValue::String(s.to_string()).into_ref()
 }
 
 #[macro_export]
@@ -66,6 +111,6 @@ macro_rules! jsexpr {
         $(
             list.push($args);
         )*
-        JValue::SExpr(list)
+        JValue::SExpr(list).into_ref()
     }}
 }

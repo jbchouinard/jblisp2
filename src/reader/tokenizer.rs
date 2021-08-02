@@ -11,6 +11,7 @@ pub enum TokenValue {
     RParen,
     Int(JTInt),
     Ident(String),
+    String(String),
     Eof,
 }
 
@@ -32,6 +33,7 @@ lazy_static! {
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_IDENT: Regex =
         Regex::new(r"^[a-zA-Z%=~<>?!*/+-][0-9a-zA-Z%=~<>?!*/+-]*").unwrap();
+    static ref RE_STRING: Regex = Regex::new(r#""([^"]|\\")*""#).unwrap();
 }
 
 type TResult = std::result::Result<TokenValue, String>;
@@ -53,6 +55,10 @@ fn t_int(val: &str) -> TResult {
 
 fn t_ident(val: &str) -> TResult {
     Ok(TokenValue::Ident(val.to_string()))
+}
+
+fn t_string(val: &str) -> TResult {
+    Ok(TokenValue::String(val[1..val.len() - 1].to_string()))
 }
 
 fn t_ws(_: &str) -> TResult {
@@ -105,6 +111,9 @@ impl<'a> Tokenizer<'a> {
         if let Some(token) = self.try_token(&RE_IDENT, t_ident)? {
             return Ok(token);
         }
+        if let Some(token) = self.try_token(&RE_STRING, t_string)? {
+            return Ok(token);
+        }
         Err(ReaderError::new(
             &format!(
                 "unexpected character {}",
@@ -146,6 +155,25 @@ mod tests {
                 TokenValue::Ident("*".to_string()),
                 TokenValue::Int(12),
                 TokenValue::Int(-15),
+                TokenValue::RParen,
+            ],
+            tokvalues
+        );
+    }
+
+    #[test]
+    fn test_tokenizer_2() {
+        let input = "(concat \"foo\" \"bar\")";
+        let mut tokenizer = Tokenizer::new(input);
+        let tokens = tokenizer.tokenize().unwrap();
+        let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
+
+        assert_eq!(
+            vec![
+                TokenValue::LParen,
+                TokenValue::Ident("concat".to_string()),
+                TokenValue::String("foo".to_string()),
+                TokenValue::String("bar".to_string()),
                 TokenValue::RParen,
             ],
             tokvalues

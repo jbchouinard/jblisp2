@@ -57,6 +57,7 @@ impl<'a> Parser<'a> {
         match next.value {
             TokenValue::Int(n) => Ok(JValue::Int(n)),
             TokenValue::Ident(s) => Ok(JValue::Symbol(s)),
+            TokenValue::String(s) => Ok(JValue::String(s)),
             _ => Err(ReaderError::new(
                 &format!("unexpected token {:?}", next.value),
                 next.pos,
@@ -69,7 +70,7 @@ impl<'a> Parser<'a> {
         self.eat(TokenValue::Whitespace)?;
         let mut list = vec![];
         while self.peek.value != TokenValue::RParen {
-            list.push(self.expr()?);
+            list.push(self.expr()?.into_ref());
             self.eat(TokenValue::Whitespace)?;
         }
         self.expect(TokenValue::RParen)?;
@@ -103,7 +104,7 @@ mod tests {
     #[test]
     fn test_parser_1() {
         let mut parser = Parser::new("(+ 12 -15)");
-        let val = parser.expr().unwrap();
+        let val = parser.expr().unwrap().into_ref();
 
         assert_eq!(val, jsexpr![jsym("+"), jint(12), jint(-15)]);
     }
@@ -111,11 +112,19 @@ mod tests {
     #[test]
     fn test_parser_2() {
         let mut parser = Parser::new("(* (+ 12 -33) 42)");
-        let val = parser.parse_form().unwrap().unwrap();
+        let val = parser.parse_form().unwrap().unwrap().into_ref();
 
         assert_eq!(
             val,
             jsexpr![jsym("*"), jsexpr![jsym("+"), jint(12), jint(-33)], jint(42)]
         );
+    }
+
+    #[test]
+    fn test_parser_3() {
+        let mut parser = Parser::new("(concat \"foo\" \"bar\")");
+        let val = parser.parse_form().unwrap().unwrap().into_ref();
+
+        assert_eq!(val, jsexpr![jsym("concat"), jstr("foo"), jstr("bar")]);
     }
 }

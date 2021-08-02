@@ -1,1 +1,3 @@
 (def nil ())
+(def true (eq? nil nil))
+(def false (not true))
