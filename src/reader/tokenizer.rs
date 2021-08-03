@@ -9,6 +9,7 @@ pub enum TokenValue {
     Whitespace,
     LParen,
     RParen,
+    Quote,
     Int(JTInt),
     Ident(String),
     String(String),
@@ -30,6 +31,7 @@ lazy_static! {
     static ref RE_WS: Regex = Regex::new(r"^\s+").unwrap();
     static ref RE_LPAREN: Regex = Regex::new(r"^\(").unwrap();
     static ref RE_RPAREN: Regex = Regex::new(r"^\)").unwrap();
+    static ref RE_QUOTE: Regex = Regex::new(r"'").unwrap();
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_IDENT: Regex =
         Regex::new(r"^[a-zA-Z%=~<>?!*/+-][0-9a-zA-Z%=~<>?!*/+-]*").unwrap();
@@ -44,6 +46,10 @@ fn t_lparen(_: &str) -> TResult {
 
 fn t_rparen(_: &str) -> TResult {
     Ok(TokenValue::RParen)
+}
+
+fn t_quote(_: &str) -> TResult {
+    Ok(TokenValue::Quote)
 }
 
 fn t_int(val: &str) -> TResult {
@@ -103,6 +109,9 @@ impl<'a> Tokenizer<'a> {
             return Ok(token);
         }
         if let Some(token) = self.try_token(&RE_RPAREN, t_rparen)? {
+            return Ok(token);
+        }
+        if let Some(token) = self.try_token(&RE_QUOTE, t_quote)? {
             return Ok(token);
         }
         if let Some(token) = self.try_token(&RE_INT, t_int)? {

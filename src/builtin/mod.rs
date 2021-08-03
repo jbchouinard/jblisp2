@@ -11,7 +11,7 @@ mod error;
 mod list;
 mod math;
 
-// TODO: BASE: begin eval apply quote truthy?
+// TODO: BASE: begin eval apply quote truthy? set! defmacro
 // TODO: LIST: list list? nil?
 // TODO: CONDITIONALS: and or if cond
 

@@ -102,14 +102,15 @@ pub struct JLambda {
 #[derive(Debug, PartialEq, Clone)]
 pub enum JValue {
     Cell(JCell),
+    Quoted(JValueRef),
     Int(JTInt),
     Bool(bool),
     Symbol(String),
     String(String),
     Error(JError),
+    Lambda(Box<JLambda>),
     Builtin(JBuiltin),
     BuiltinMacro(JBuiltin),
-    Lambda(Box<JLambda>),
 }
 
 impl JValue {

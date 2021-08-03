@@ -14,5 +14,6 @@ pub fn jrepr(expr: JValueRef) -> String {
             JCell::Nil => "()".to_string(),
             JCell::Pair(x, y) => format!("({} . {})", jrepr(Rc::clone(x)), jrepr(Rc::clone(y))),
         },
+        JValue::Quoted(val) => format!("'{}", jrepr(Rc::clone(val))),
     }
 }

@@ -50,6 +50,7 @@ fn eval_sexpr(list: &JCell, env: JEnvRef) -> JResult {
 
 pub fn jeval(expr: JValueRef, env: JEnvRef) -> JResult {
     match &*expr {
+        JValue::Quoted(val) => Ok(Rc::clone(val)),
         JValue::Cell(c) => eval_sexpr(c, env),
         JValue::Symbol(sym) => match env.lookup(sym) {
             Some(val) => Ok(val),
