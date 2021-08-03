@@ -1,3 +1,13 @@
-(def nil ())
 (def true (eq? nil nil))
+
 (def false (not true))
+
+(def display
+	(fn (x)
+		(print (repr x))
+		))
+
+(def assert
+	(fn (pred reason)
+		(if pred () (raise (error reason))
+		)))

@@ -37,6 +37,41 @@ impl JCell {
             },
         }
     }
+    pub fn iter(&self) -> Result<JCellIterator, JError> {
+        if !self.is_list() {
+            return Err(JError::new("ValueError", "cannot iter a non-list"));
+        }
+        Ok(JCellIterator { head: self })
+    }
+}
+
+pub struct JCellIterator<'a> {
+    head: &'a JCell,
+}
+
+impl Iterator for JCellIterator<'_> {
+    type Item = JValueRef;
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        match self.head {
+            JCell::Nil => None,
+            JCell::Pair(x, y) => {
+                match &**y {
+                    JValue::Cell(c) => self.head = c,
+                    _ => self.head = &JCell::Nil,
+                };
+                Some(Rc::clone(x))
+            }
+        }
+    }
+}
+
+pub fn vec_to_list(mut v: Vec<JValueRef>) -> JValueRef {
+    let mut cur = JValue::Cell(JCell::Nil).into_ref();
+    v.reverse();
+    for val in v {
+        cur = JValue::Cell(JCell::cons(val, cur)).into_ref();
+    }
+    cur
 }
 
 #[derive(Clone)]
@@ -66,7 +101,6 @@ pub struct JLambda {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum JValue {
-    SExpr(Vec<JValueRef>),
     Cell(JCell),
     Int(JTInt),
     Bool(bool),
@@ -111,6 +145,6 @@ macro_rules! jsexpr {
         $(
             list.push($args);
         )*
-        JValue::SExpr(list).into_ref()
+        vec_to_list(list)
     }}
 }

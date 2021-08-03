@@ -1,5 +1,6 @@
 use super::tokenizer::{Token, TokenValue, Tokenizer};
 use super::Result;
+use crate::types::vec_to_list;
 use crate::*;
 
 pub struct Parser<'a> {
@@ -44,7 +45,7 @@ impl<'a> Parser<'a> {
         Ok(())
     }
 
-    fn expr(&mut self) -> Result<JValue> {
+    fn expr(&mut self) -> Result<JValueRef> {
         self.eat(TokenValue::Whitespace)?;
         match self.peek.value {
             TokenValue::LParen => self.sexpr(),
@@ -52,12 +53,12 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn atom(&mut self) -> Result<JValue> {
+    fn atom(&mut self) -> Result<JValueRef> {
         let next = self.next()?;
         match next.value {
-            TokenValue::Int(n) => Ok(JValue::Int(n)),
-            TokenValue::Ident(s) => Ok(JValue::Symbol(s)),
-            TokenValue::String(s) => Ok(JValue::String(s)),
+            TokenValue::Int(n) => Ok(JValue::Int(n).into_ref()),
+            TokenValue::Ident(s) => Ok(JValue::Symbol(s).into_ref()),
+            TokenValue::String(s) => Ok(JValue::String(s).into_ref()),
             _ => Err(ReaderError::new(
                 &format!("unexpected token {:?}", next.value),
                 next.pos,
@@ -65,19 +66,19 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn sexpr(&mut self) -> Result<JValue> {
+    fn sexpr(&mut self) -> Result<JValueRef> {
         self.expect(TokenValue::LParen)?;
         self.eat(TokenValue::Whitespace)?;
         let mut list = vec![];
         while self.peek.value != TokenValue::RParen {
-            list.push(self.expr()?.into_ref());
+            list.push(self.expr()?);
             self.eat(TokenValue::Whitespace)?;
         }
         self.expect(TokenValue::RParen)?;
-        Ok(JValue::SExpr(list))
+        Ok(vec_to_list(list))
     }
 
-    pub fn parse_form(&mut self) -> Result<Option<JValue>> {
+    pub fn parse_form(&mut self) -> Result<Option<JValueRef>> {
         self.eat(TokenValue::Whitespace)?;
         if self.peek.value == TokenValue::Eof {
             return Ok(None);
@@ -88,7 +89,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_forms(&mut self) -> Result<Vec<JValue>> {
+    pub fn parse_forms(&mut self) -> Result<Vec<JValueRef>> {
         let mut forms = vec![];
         while let Some(form) = self.parse_form()? {
             forms.push(form)
@@ -104,7 +105,7 @@ mod tests {
     #[test]
     fn test_parser_1() {
         let mut parser = Parser::new("(+ 12 -15)");
-        let val = parser.expr().unwrap().into_ref();
+        let val = parser.expr().unwrap();
 
         assert_eq!(val, jsexpr![jsym("+"), jint(12), jint(-15)]);
     }
@@ -112,7 +113,7 @@ mod tests {
     #[test]
     fn test_parser_2() {
         let mut parser = Parser::new("(* (+ 12 -33) 42)");
-        let val = parser.parse_form().unwrap().unwrap().into_ref();
+        let val = parser.parse_form().unwrap().unwrap();
 
         assert_eq!(
             val,
@@ -123,7 +124,7 @@ mod tests {
     #[test]
     fn test_parser_3() {
         let mut parser = Parser::new("(concat \"foo\" \"bar\")");
-        let val = parser.parse_form().unwrap().unwrap().into_ref();
+        let val = parser.parse_form().unwrap().unwrap();
 
         assert_eq!(val, jsexpr![jsym("concat"), jstr("foo"), jstr("bar")]);
     }

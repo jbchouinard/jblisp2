@@ -30,10 +30,10 @@ fn apply_lambda(lambda: &JLambda, args: Vec<JValueRef>, _env: JEnvRef) -> JResul
     jeval(Rc::clone(&lambda.code), env)
 }
 
-fn eval_sexpr(list: &[JValueRef], env: JEnvRef) -> JResult {
-    let mut list: Vec<JValueRef> = list.to_vec();
+fn eval_sexpr(list: &JCell, env: JEnvRef) -> JResult {
+    let mut list: Vec<JValueRef> = list.iter()?.collect();
     if list.is_empty() {
-        Ok(JValue::SExpr(vec![]).into_ref())
+        Ok(JValue::Cell(JCell::Nil).into_ref())
     } else {
         let args = list.split_off(1);
         let func = list.pop().unwrap();
@@ -50,7 +50,7 @@ fn eval_sexpr(list: &[JValueRef], env: JEnvRef) -> JResult {
 
 pub fn jeval(expr: JValueRef, env: JEnvRef) -> JResult {
     match &*expr {
-        JValue::SExpr(list) => eval_sexpr(list, env),
+        JValue::Cell(c) => eval_sexpr(c, env),
         JValue::Symbol(sym) => match env.lookup(sym) {
             Some(val) => Ok(val),
             None => Err(JError::new("Undefined", sym)),

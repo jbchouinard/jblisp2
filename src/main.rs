@@ -54,7 +54,7 @@ fn eval_text(text: &str, env: JEnvRef) -> Result<Option<JValueRef>, JError> {
     let forms = Parser::new(text).parse_forms()?;
     let mut last_eval = None;
     for form in forms {
-        last_eval = Some(jeval(form.into_ref(), Rc::clone(&env))?);
+        last_eval = Some(jeval(form, Rc::clone(&env))?);
     }
     Ok(last_eval)
 }
