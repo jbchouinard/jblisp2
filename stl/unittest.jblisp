@@ -2,17 +2,17 @@
 (def failed-count 0)
 
 (defmacro test (name code)
-	(catch
-		(begin
-			code
-			(set! success-count (+ success-count 1))
-			(print (concat "success: " name)))
-		(begin
-			(set! failed-count (+ failed-count 1))
-			(print (concat "failed: " name)))))
+    (catch
+        (begin
+            code
+            (set! success-count (+ success-count 1))
+            (print (concat "success: " name)))
+        (begin
+            (set! failed-count (+ failed-count 1))
+            (print (concat "failed: " name)))))
 
 (defn test-summary () (begin
-	(print (concat (repr success-count) "failed"))
-	(print (concat (repr failed-count) "success"))))
+    (print (concat (repr success-count) "failed"))
+    (print (concat (repr failed-count) "success"))))
 
 (export test test-summary)
