@@ -2,12 +2,39 @@ use std::rc::Rc;
 
 use crate::*;
 
-fn eval_args(args: &JCell, env: JEnvRef) -> Result<(usize, JCell), JError> {
-    let mut evaluated = vec![];
-    for arg in args.iter()? {
-        evaluated.push(jeval(arg, Rc::clone(&env))?);
+pub fn jeval(expr: JValueRef, env: JEnvRef) -> JResult {
+    match &*expr {
+        JValue::Quoted(val) => Ok(Rc::clone(val)),
+        JValue::Cell(c) => eval_sexpr(c, env),
+        JValue::Symbol(sym) => match env.lookup(sym) {
+            Some(val) => Ok(val),
+            None => Err(JError::new("Undefined", sym)),
+        },
+        JValue::Lambda(_) => Ok(expr),
+        _ => Ok(expr),
     }
-    Ok((evaluated.len(), vec_to_list(evaluated)))
+}
+
+fn eval_sexpr(list: &JCell, env: JEnvRef) -> JResult {
+    if list.is_nil() {
+        Ok(JValue::Cell(JCell::Nil).into_ref())
+    } else {
+        let func = list.car()?;
+        let func = jeval(func, Rc::clone(&env))?;
+        let args = list.cdr()?;
+        let args = match &*args {
+            JValue::Cell(c) => c,
+            _ => panic!(),
+        };
+
+        match &*func {
+            JValue::Builtin(b) => apply_builtin(b, args, env),
+            JValue::SpecialForm(b) => apply_special_form(b, args, env),
+            JValue::Lambda(l) => apply_lambda(l, args, env),
+            JValue::Macro(l) => apply_macro(l, args, env),
+            _ => Err(JError::new("TypeError", "expected a callable")),
+        }
+    }
 }
 
 fn apply_builtin(b: &JBuiltin, args: &JCell, env: JEnvRef) -> JResult {
@@ -52,37 +79,10 @@ fn apply_macro(lambda: &JLambda, args: &JCell, fenv: JEnvRef) -> JResult {
     jeval(code, fenv)
 }
 
-fn eval_sexpr(list: &JCell, env: JEnvRef) -> JResult {
-    if list.is_nil() {
-        Ok(JValue::Cell(JCell::Nil).into_ref())
-    } else {
-        let func = list.car()?;
-        let func = jeval(func, Rc::clone(&env))?;
-        let args = list.cdr()?;
-        let args = match &*args {
-            JValue::Cell(c) => c,
-            _ => panic!(),
-        };
-
-        match &*func {
-            JValue::Builtin(b) => apply_builtin(b, args, env),
-            JValue::SpecialForm(b) => apply_special_form(b, args, env),
-            JValue::Lambda(l) => apply_lambda(l, args, env),
-            JValue::Macro(l) => apply_macro(l, args, env),
-            _ => Err(JError::new("TypeError", "expected a callable")),
-        }
+fn eval_args(args: &JCell, env: JEnvRef) -> Result<(usize, JCell), JError> {
+    let mut evaluated = vec![];
+    for arg in args.iter()? {
+        evaluated.push(jeval(arg, Rc::clone(&env))?);
     }
-}
-
-pub fn jeval(expr: JValueRef, env: JEnvRef) -> JResult {
-    match &*expr {
-        JValue::Quoted(val) => Ok(Rc::clone(val)),
-        JValue::Cell(c) => eval_sexpr(c, env),
-        JValue::Symbol(sym) => match env.lookup(sym) {
-            Some(val) => Ok(val),
-            None => Err(JError::new("Undefined", sym)),
-        },
-        JValue::Lambda(_) => Ok(expr),
-        _ => Ok(expr),
-    }
+    Ok((evaluated.len(), vec_to_list(evaluated)))
 }

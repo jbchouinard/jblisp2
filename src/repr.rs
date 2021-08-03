@@ -11,10 +11,28 @@ pub fn jrepr(expr: &JValue) -> String {
         JValue::SpecialForm(b) => format!("<special form {:?}>", b),
         JValue::Lambda(l) => format!("<{}-param lambda>", l.params.len()),
         JValue::Macro(l) => format!("<{}-param macro>", l.params.len()),
-        JValue::Cell(c) => match c {
+        JValue::Cell(c) => repr_cell(c),
+        JValue::Quoted(val) => format!("'{}", jrepr(&*val)),
+    }
+}
+
+fn repr_cell(cell: &JCell) -> String {
+    match cell.iter() {
+        Ok(iterator) => {
+            let mut parts = vec!["(".to_string()];
+            for val in iterator {
+                parts.push(jrepr(&val));
+                parts.push(" ".to_string());
+            }
+            if parts.len() > 1 {
+                parts.pop();
+            }
+            parts.push(")".to_string());
+            parts.join("")
+        }
+        _ => match cell {
             JCell::Nil => "()".to_string(),
             JCell::Pair(x, y) => format!("({} . {})", jrepr(&*x), jrepr(&*y)),
         },
-        JValue::Quoted(val) => format!("'{}", jrepr(&*val)),
     }
 }

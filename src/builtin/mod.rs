@@ -163,14 +163,14 @@ pub fn add_builtins(env: &JEnv) {
     add_builtin("print", jbuiltin_print, env);
     add_builtin("+", jbuiltin_add, env);
     add_builtin("*", jbuiltin_mul, env);
+    add_special_form("try", jspecial_try, env);
     add_builtin("error", jbuiltin_error, env);
     add_builtin("raise", jbuiltin_raise, env);
     add_builtin("list", jbuiltin_list, env);
-    add_special_form("quote", jspecial_quote, env);
     add_builtin("cons", jbuiltin_cons, env);
     add_builtin("car", jbuiltin_car, env);
     add_builtin("cdr", jbuiltin_cdr, env);
-    add_special_form("try", jspecial_try, env);
+    add_special_form("quote", jspecial_quote, env);
     add_special_form("def", jspecial_def, env);
     add_special_form("fn", jspecial_lambda, env);
     add_special_form("macro", jspecial_macro, env);

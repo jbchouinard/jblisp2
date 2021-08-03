@@ -22,7 +22,7 @@ pub mod reader;
 pub mod repr;
 pub mod types;
 
-const PRELUDE: &str = include_str!("prelude.jblisp");
+const PRELUDE: &str = include_str!("../stl/prelude.jblisp");
 const HISTORY_FILE: &str = ".jblisp2_history";
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -48,29 +48,6 @@ fn main() {
     if opt.interactive || opt.files.is_empty() {
         repl(globals);
     }
-}
-
-fn eval_text(text: &str, env: JEnvRef) -> Result<Option<JValueRef>, JError> {
-    let forms = Parser::new(text).parse_forms()?;
-    let mut last_eval = None;
-    for form in forms {
-        last_eval = Some(jeval(form, Rc::clone(&env))?);
-    }
-    Ok(last_eval)
-}
-
-fn eval_file<P: AsRef<Path>>(path: P, env: JEnvRef) -> Result<Option<JValueRef>, JError> {
-    eval_text(&std::fs::read_to_string(path).unwrap(), env)
-}
-
-fn make_globals() -> JEnvRef {
-    let env = JEnv::default().into_ref();
-    add_builtins(&env);
-    if let Err(je) = eval_text(PRELUDE, Rc::clone(&env)) {
-        eprintln!("prelude: {}", je);
-        std::process::exit(1);
-    }
-    env
 }
 
 fn repl(globals: JEnvRef) {
@@ -103,4 +80,27 @@ fn repl(globals: JEnvRef) {
         }
     }
     rl.save_history(HISTORY_FILE).unwrap();
+}
+
+fn eval_text(text: &str, env: JEnvRef) -> Result<Option<JValueRef>, JError> {
+    let forms = Parser::new(text).parse_forms()?;
+    let mut last_eval = None;
+    for form in forms {
+        last_eval = Some(jeval(form, Rc::clone(&env))?);
+    }
+    Ok(last_eval)
+}
+
+fn eval_file<P: AsRef<Path>>(path: P, env: JEnvRef) -> Result<Option<JValueRef>, JError> {
+    eval_text(&std::fs::read_to_string(path).unwrap(), env)
+}
+
+fn make_globals() -> JEnvRef {
+    let env = JEnv::default().into_ref();
+    add_builtins(&env);
+    if let Err(je) = eval_text(PRELUDE, Rc::clone(&env)) {
+        eprintln!("prelude: {}", je);
+        std::process::exit(1);
+    }
+    env
 }

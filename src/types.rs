@@ -27,7 +27,8 @@ impl JCell {
             Self::Nil => Err(JError::new("ValueError", "cannot call cdr on nil")),
             Self::Pair(_, y) => Ok(Rc::clone(y)),
         }
-    } // Will blow the stack on circular list...
+    }
+    // Will blow the stack on circular list...
     pub fn is_list(&self) -> bool {
         match self {
             Self::Nil => true,

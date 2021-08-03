@@ -14,3 +14,5 @@
 (defn test-summary () (begin
 	(print (concat (repr success-count) "failed"))
 	(print (concat (repr failed-count) "success"))))
+
+(export test test-summary)

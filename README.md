@@ -4,8 +4,9 @@
 A Lisp dialect implemented in Rust. Not very complete yet.
 
 Features:
-- Exception handling with `raise` and `try`
-- Reference-counted values
+- Error handling with `raise` and `try`
+- First class functions and procedural macros
+- Reference-counting memory management
 - Hand-written tokenizer and parser
 
 ## Run Interpreter
@@ -15,7 +16,12 @@ cargo run
 ```
 
 ## Todo?
-- Import, namespaces
-- Tail call elimination
-- Mutable data structures
+- Add missing builtins
+- Module system
 - Tests
+- Interned values
+- Mutable data structures: mutcell, vector, table
+- Line numbers for errors
+- Memory leak check
+- Tail call elimination
+- stdlib
