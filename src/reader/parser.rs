@@ -81,7 +81,7 @@ impl<'a> Parser<'a> {
             self.eat(TokenValue::Whitespace)?;
         }
         self.expect(TokenValue::RParen)?;
-        Ok(vec_to_list(list))
+        Ok(JValue::Cell(vec_to_list(list)).into_ref())
     }
 
     pub fn parse_form(&mut self) -> Result<Option<JValueRef>> {
@@ -133,5 +133,16 @@ mod tests {
         let val = parser.parse_form().unwrap().unwrap();
 
         assert_eq!(val, jsexpr![jsym("concat"), jstr("foo"), jstr("bar")]);
+    }
+
+    #[test]
+    fn test_parser_4() {
+        let mut parser = Parser::new("(quote '(1 2 3))");
+        let val = parser.parse_form().unwrap().unwrap();
+
+        assert_eq!(
+            val,
+            jsexpr![jsym("quote"), jquote(jsexpr![jint(1), jint(2), jint(3)])]
+        )
     }
 }

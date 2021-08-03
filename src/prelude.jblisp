@@ -2,12 +2,17 @@
 
 (def false (not true))
 
-(def display
-	(fn (x)
-		(print (repr x))
-		))
+(def defmacro
+    (macro (name params code)
+        (list def name (list macro params code))))
 
-(def assert
-	(fn (pred reason)
-		(if pred () (raise (error reason))
-		)))
+(defmacro defn (name params code)
+    (list def name (list fn params code)))
+
+(defn display (x)
+    (print (repr x)))
+
+(defn assert (pred reason)
+    (if pred () (raise (error reason))))
+
+(defmacro apply (op args) (cons op args))

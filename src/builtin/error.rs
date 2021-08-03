@@ -1,6 +1,6 @@
 use crate::builtin::*;
 
-pub fn jbuiltin_error(args: Args, _env: JEnvRef) -> JResult {
+pub fn jbuiltin_error(args: &JCell, _env: JEnvRef) -> JResult {
     let [emsg] = get_n_args(args)?;
     match &*emsg {
         JValue::String(s) => Ok(JValue::Error(JError::new("Error", s)).into_ref()),
@@ -8,7 +8,7 @@ pub fn jbuiltin_error(args: Args, _env: JEnvRef) -> JResult {
     }
 }
 
-pub fn jbuiltin_raise(args: Args, _env: JEnvRef) -> JResult {
+pub fn jbuiltin_raise(args: &JCell, _env: JEnvRef) -> JResult {
     let [err] = get_n_args(args)?;
     match &*err {
         JValue::Error(je) => Err(je.clone()),
@@ -21,7 +21,7 @@ pub fn jbuiltin_raise(args: Args, _env: JEnvRef) -> JResult {
 // "caught"
 // >>> (try "no-error" "caught")
 // "no-error"
-pub fn jbuiltin_try(args: Args, env: JEnvRef) -> JResult {
+pub fn jspecial_try(args: &JCell, env: JEnvRef) -> JResult {
     let [code, except] = get_n_args(args)?;
     match jeval(code, Rc::clone(&env)) {
         Ok(val) => Ok(val),

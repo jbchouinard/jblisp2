@@ -83,7 +83,7 @@ fn repl(globals: JEnvRef) {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
                 match eval_text(&line, Rc::clone(&globals)) {
-                    Ok(Some(val)) => println!("{}", jrepr(val)),
+                    Ok(Some(val)) => println!("{}", jrepr(&val)),
                     Ok(None) => (),
                     Err(je) => eprintln!("Uncaught {}: {}", je.etype, je.emsg),
                 }

@@ -37,6 +37,9 @@ impl JCell {
             },
         }
     }
+    pub fn is_nil(&self) -> bool {
+        matches!(self, Self::Nil)
+    }
     pub fn iter(&self) -> Result<JCellIterator, JError> {
         if !self.is_list() {
             return Err(JError::new("ValueError", "cannot iter a non-list"));
@@ -65,11 +68,11 @@ impl Iterator for JCellIterator<'_> {
     }
 }
 
-pub fn vec_to_list(mut v: Vec<JValueRef>) -> JValueRef {
-    let mut cur = JValue::Cell(JCell::Nil).into_ref();
+pub fn vec_to_list(mut v: Vec<JValueRef>) -> JCell {
+    let mut cur = JCell::Nil;
     v.reverse();
     for val in v {
-        cur = JValue::Cell(JCell::cons(val, cur)).into_ref();
+        cur = JCell::cons(val, JValue::Cell(cur).into_ref());
     }
     cur
 }
@@ -77,7 +80,7 @@ pub fn vec_to_list(mut v: Vec<JValueRef>) -> JValueRef {
 #[derive(Clone)]
 pub struct JBuiltin {
     pub name: String,
-    pub f: Rc<dyn Fn(Vec<JValueRef>, JEnvRef) -> JResult>,
+    pub f: Rc<dyn Fn(&JCell, JEnvRef) -> JResult>,
 }
 
 impl fmt::Debug for JBuiltin {
@@ -109,13 +112,23 @@ pub enum JValue {
     String(String),
     Error(JError),
     Lambda(Box<JLambda>),
+    Macro(Box<JLambda>),
     Builtin(JBuiltin),
-    BuiltinMacro(JBuiltin),
+    SpecialForm(JBuiltin),
+}
+
+impl fmt::Display for JValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "{}", jrepr(self))
+    }
 }
 
 impl JValue {
     pub fn into_ref(self) -> JValueRef {
         Rc::new(self)
+    }
+    pub fn into_quoted(self) -> JValue {
+        JValue::Quoted(self.into_ref())
     }
     pub fn to_int(&self) -> Result<JTInt, JError> {
         match self {
@@ -139,6 +152,10 @@ pub fn jstr(s: &str) -> JValueRef {
     JValue::String(s.to_string()).into_ref()
 }
 
+pub fn jquote(v: JValueRef) -> JValueRef {
+    JValue::Quoted(Rc::clone(&v)).into_ref()
+}
+
 #[macro_export]
 macro_rules! jsexpr {
     ($($args:expr),*) => {{
@@ -146,6 +163,6 @@ macro_rules! jsexpr {
         $(
             list.push($args);
         )*
-        vec_to_list(list)
+        JValue::Cell(vec_to_list(list)).into_ref()
     }}
 }

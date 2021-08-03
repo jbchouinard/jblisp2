@@ -31,7 +31,7 @@ lazy_static! {
     static ref RE_WS: Regex = Regex::new(r"^\s+").unwrap();
     static ref RE_LPAREN: Regex = Regex::new(r"^\(").unwrap();
     static ref RE_RPAREN: Regex = Regex::new(r"^\)").unwrap();
-    static ref RE_QUOTE: Regex = Regex::new(r"'").unwrap();
+    static ref RE_QUOTE: Regex = Regex::new(r"^'").unwrap();
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_IDENT: Regex =
         Regex::new(r"^[a-zA-Z%=~<>?!*/+-][0-9a-zA-Z%=~<>?!*/+-]*").unwrap();
@@ -183,6 +183,29 @@ mod tests {
                 TokenValue::Ident("concat".to_string()),
                 TokenValue::String("foo".to_string()),
                 TokenValue::String("bar".to_string()),
+                TokenValue::RParen,
+            ],
+            tokvalues
+        );
+    }
+
+    #[test]
+    fn test_tokenizer_3() {
+        let input = "(quote '(1 2 3))";
+        let mut tokenizer = Tokenizer::new(input);
+        let tokens = tokenizer.tokenize().unwrap();
+        let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
+
+        assert_eq!(
+            vec![
+                TokenValue::LParen,
+                TokenValue::Ident("quote".to_string()),
+                TokenValue::Quote,
+                TokenValue::LParen,
+                TokenValue::Int(1),
+                TokenValue::Int(2),
+                TokenValue::Int(3),
+                TokenValue::RParen,
                 TokenValue::RParen,
             ],
             tokvalues
