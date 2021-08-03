@@ -37,8 +37,19 @@ impl JEnv {
     }
 
     /// Change existing binding.
-    pub fn set(&self, _v: &str, _val: JValueRef) {
-        todo!()
+    pub fn set(&self, v: &str, val: JValueRef) -> Result<(), JError> {
+        if self.vars.borrow().contains_key(v) {
+            self.vars.borrow_mut().insert(v.to_string(), val);
+            Ok(())
+        } else {
+            match &self.parent {
+                Some(penv) => penv.set(v, val),
+                None => Err(JError::new(
+                    "EnvError",
+                    &format!("cannot set! nonexistent binding {}", v),
+                )),
+            }
+        }
     }
 
     pub fn into_ref(self) -> JEnvRef {

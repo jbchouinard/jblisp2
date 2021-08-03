@@ -1,18 +1,38 @@
-(def success-count 0)
+(def ok-count 0)
 (def failed-count 0)
 
+(defn fn-assert-op (op)
+    (fn (x y)
+        (assert (op x y))))
+
+(def assert-eq (fn-assert-op eq?))
+
+(def assert-equal (fn-assert-op equal?))
+
+(defmacro assert-raise (code)
+    (let errnoraise (error "did not raise an error")
+        (list try
+            (list begin
+                code
+                (list raise errnoraise))
+            (list if (list equal? 'err errnoraise) (list raise errnoraise) ()))))
+
 (defmacro test (name code)
-    (catch
-        (begin
+    (list try
+        (list begin
             code
-            (set! success-count (+ success-count 1))
-            (print (concat "success: " name)))
-        (begin
-            (set! failed-count (+ failed-count 1))
-            (print (concat "failed: " name)))))
+            (list set! 'ok-count (list + ok-count 1))
+            (list print (list concat name ": ok")))
+        (list begin
+            (list set! 'failed-count (list + failed-count 1))
+            (list print (list concat name ": failed (" (list repr 'err) ")")))))
 
-(defn test-summary () (begin
-    (print (concat (repr success-count) "failed"))
-    (print (concat (repr failed-count) "success"))))
+(defn test-start (name) (begin
+    (print (concat "testing " name))
+    (set! ok-count 0)
+    (set! failed-count 0)))
 
-(export test test-summary)
+(defn test-exit () (begin
+    (print (concat (repr ok-count) " tests ok"))
+    (print (concat (repr failed-count) " tests failed"))
+    (exit (if (equal? failed-count 0) 0 1))))

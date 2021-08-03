@@ -1,15 +1,18 @@
+use std::convert::TryInto;
 use std::rc::Rc;
 
 use crate::builtin::args::*;
 use crate::builtin::error::*;
 use crate::builtin::list::*;
 use crate::builtin::math::*;
+use crate::builtin::string::*;
 use crate::*;
 
 mod args;
 mod error;
 mod list;
 mod math;
+mod string;
 
 // TODO: BASE: begin eval truthy? set!
 // TODO: LIST: list? nil?
@@ -57,6 +60,17 @@ fn jspecial_def(args: &JCell, env: JEnvRef) -> JResult {
     };
     let jval = jeval(jval, Rc::clone(&env))?;
     env.define(sym, jval);
+    Ok(JValue::Cell(JCell::Nil).into_ref())
+}
+
+fn jspecial_set(args: &JCell, env: JEnvRef) -> JResult {
+    let [jsym, jval] = get_n_args(args)?;
+    let sym = match &*jsym {
+        JValue::Symbol(s) => s,
+        _ => return Err(JError::new("TypeError", "expected a symbol")),
+    };
+    let jval = jeval(jval, Rc::clone(&env))?;
+    env.set(sym, jval)?;
     Ok(JValue::Cell(JCell::Nil).into_ref())
 }
 
@@ -132,6 +146,34 @@ fn jspecial_if(args: &JCell, env: JEnvRef) -> JResult {
     }
 }
 
+fn jspecial_eval(args: &JCell, env: JEnvRef) -> JResult {
+    let [expr] = get_n_args(args)?;
+    jeval(expr, env)
+}
+
+fn jbuiltin_evalfile(args: &JCell, env: JEnvRef) -> JResult {
+    let [file] = get_n_args(args)?;
+    match &*file {
+        JValue::String(s) => match eval_file(s, env)? {
+            Some(val) => Ok(val),
+            None => Ok(JValue::Cell(JCell::Nil).into_ref()),
+        },
+        _ => Err(JError::new("TypeError", "expected string")),
+    }
+}
+
+fn jbuiltin_begin(args: &JCell, _env: JEnvRef) -> JResult {
+    Ok(args.iter().unwrap().last().unwrap())
+}
+
+fn jbuiltin_exit(args: &JCell, _env: JEnvRef) -> JResult {
+    let [exitcode] = get_n_args(args)?;
+    match &*exitcode {
+        JValue::Int(n) => std::process::exit((*n).try_into().unwrap()),
+        _ => Err(JError::new("TypeError", "expected an int")),
+    }
+}
+
 fn add_builtin<T>(name: &str, f: T, env: &JEnv)
 where
     T: 'static + Fn(&JCell, JEnvRef) -> JResult,
@@ -155,24 +197,51 @@ where
 }
 
 pub fn add_builtins(env: &JEnv) {
+    // Constants
     env.define("nil", JValue::Cell(JCell::Nil).into_ref());
+
+    // Program flow
+    add_builtin("begin", jbuiltin_begin, env);
+    add_special_form("if", jspecial_if, env);
+    add_builtin("exit", jbuiltin_exit, env);
+
+    // Comparison
     add_builtin("eq?", jbuiltin_eq, env);
     add_builtin("equal?", jbuiltin_equal, env);
+
+    // Logical operators
     add_builtin("not", jbuiltin_not, env);
+
+    // Print
     add_builtin("repr", jbuiltin_repr, env);
     add_builtin("print", jbuiltin_print, env);
+
+    // Arithmetic
     add_builtin("+", jbuiltin_add, env);
     add_builtin("*", jbuiltin_mul, env);
-    add_special_form("try", jspecial_try, env);
-    add_builtin("error", jbuiltin_error, env);
-    add_builtin("raise", jbuiltin_raise, env);
+
+    // List
     add_builtin("list", jbuiltin_list, env);
     add_builtin("cons", jbuiltin_cons, env);
     add_builtin("car", jbuiltin_car, env);
     add_builtin("cdr", jbuiltin_cdr, env);
-    add_special_form("quote", jspecial_quote, env);
+
+    // String
+    add_builtin("concat", jbuiltin_concat, env);
+
+    // Var, function definition
     add_special_form("def", jspecial_def, env);
+    add_special_form("set!", jspecial_set, env);
     add_special_form("fn", jspecial_lambda, env);
+
+    // Error handling
+    add_special_form("try", jspecial_try, env);
+    add_builtin("error", jbuiltin_error, env);
+    add_builtin("raise", jbuiltin_raise, env);
+
+    // Metaprogramming
+    add_special_form("quote", jspecial_quote, env);
+    add_special_form("eval", jspecial_eval, env);
+    add_builtin("evalfile", jbuiltin_evalfile, env);
     add_special_form("macro", jspecial_macro, env);
-    add_special_form("if", jspecial_if, env);
 }

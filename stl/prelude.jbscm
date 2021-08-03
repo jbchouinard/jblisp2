@@ -12,7 +12,13 @@
 (defn display (x)
     (print (repr x)))
 
-(defn assert (pred reason)
+(defn assert (pred)
+    (if pred () (raise (error "assertion"))))
+
+(defn assert-msg (pred reason)
     (if pred () (raise (error reason))))
 
 (defmacro apply (op args) (cons op args))
+
+(defmacro let (sym val body)
+    (list (list fn (list sym) body) val))

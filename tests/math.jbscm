@@ -1,0 +1,2 @@
+(test "add" (assert-equal 100 (+ 50 50)))
+(test "mul" (assert-equal 670 (* 10 67)))

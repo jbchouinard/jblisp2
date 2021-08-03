@@ -62,7 +62,7 @@ fn repl(globals: JEnvRef) {
                 match eval_text(&line, Rc::clone(&globals)) {
                     Ok(Some(val)) => println!("{}", jrepr(&val)),
                     Ok(None) => (),
-                    Err(je) => eprintln!("Uncaught {}: {}", je.etype, je.emsg),
+                    Err(je) => eprintln!("Unhandled {}: {}", je.etype, je.emsg),
                 }
             }
             Err(ReadlineError::Interrupted) => {
@@ -91,8 +91,12 @@ fn eval_text(text: &str, env: JEnvRef) -> Result<Option<JValueRef>, JError> {
     Ok(last_eval)
 }
 
-fn eval_file<P: AsRef<Path>>(path: P, env: JEnvRef) -> Result<Option<JValueRef>, JError> {
-    eval_text(&std::fs::read_to_string(path).unwrap(), env)
+pub fn eval_file<P: AsRef<Path>>(path: P, env: JEnvRef) -> Result<Option<JValueRef>, JError> {
+    let text = match std::fs::read_to_string(path) {
+        Ok(text) => text,
+        Err(e) => return Err(JError::new("FileError", &format!("{}", e))),
+    };
+    eval_text(&text, env)
 }
 
 fn make_globals() -> JEnvRef {

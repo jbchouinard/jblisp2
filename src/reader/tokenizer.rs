@@ -34,7 +34,7 @@ lazy_static! {
     static ref RE_QUOTE: Regex = Regex::new(r"^'").unwrap();
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_IDENT: Regex =
-        Regex::new(r"^[a-zA-Z%=~<>?!*/+-][0-9a-zA-Z%=~<>?!*/+-]*").unwrap();
+        Regex::new(r"^[a-zA-Z_%=~<>?!*/+-][0-9a-zA-Z_%=~<>?!*/+-]*").unwrap();
     static ref RE_STRING: Regex = Regex::new(r#"^"([^"]|\\")*""#).unwrap();
 }
 

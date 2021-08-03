@@ -86,7 +86,7 @@ pub struct JBuiltin {
 
 impl fmt::Debug for JBuiltin {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "builtin {}", self.name)
+        write!(f, "{}", self.name)
     }
 }
 
