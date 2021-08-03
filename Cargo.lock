@@ -152,7 +152,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "jblisp2"
+name = "jbscheme"
 version = "0.0.2"
 dependencies = [
  "lazy_static",

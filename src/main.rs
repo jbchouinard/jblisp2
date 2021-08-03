@@ -22,8 +22,8 @@ pub mod reader;
 pub mod repr;
 pub mod types;
 
-const PRELUDE: &str = include_str!("../stl/prelude.jblisp");
-const HISTORY_FILE: &str = ".jblisp2_history";
+const PRELUDE: &str = include_str!("../stl/prelude.jbscm");
+const HISTORY_FILE: &str = ".jbscheme_history";
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(StructOpt, Debug)]
@@ -51,7 +51,7 @@ fn main() {
 }
 
 fn repl(globals: JEnvRef) {
-    println!("jblisp2 v{}", VERSION);
+    println!("jbscheme v{}", VERSION);
     let mut rl = Editor::<()>::new();
     let _ = rl.load_history(HISTORY_FILE);
     loop {
