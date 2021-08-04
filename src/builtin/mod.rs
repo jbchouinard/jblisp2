@@ -228,17 +228,17 @@ pub fn add_builtins(env: &JEnv) {
     add_builtin("eq?", jbuiltin_eq, env);
     add_builtin("equal?", jbuiltin_equal, env);
 
-    // Logical operators
-    add_builtin("not", jbuiltin_not, env);
-
     // Print, debug
     add_builtin("repr", jbuiltin_repr, env);
     add_builtin("print", jbuiltin_print, env);
     add_builtin("type", jbuiltin_type, env);
 
-    // Arithmetic
+    // Arithmetic operators
     add_builtin("+", jbuiltin_add, env);
     add_builtin("*", jbuiltin_mul, env);
+
+    // Logical operators
+    add_builtin("not", jbuiltin_not, env);
 
     // List
     add_builtin("list", jbuiltin_list, env);

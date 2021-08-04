@@ -5,7 +5,7 @@
     (assert-equal true (not false)))
 
 (test "string is string" 
-    (assert-type "foo" String))
+    (assert-type "foo" :string))
 
 (test "list is pair"
     (assert (pair? (list 1 2 3))))
