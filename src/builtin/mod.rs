@@ -6,6 +6,7 @@ use crate::builtin::error::*;
 use crate::builtin::list::*;
 use crate::builtin::math::*;
 use crate::builtin::string::*;
+use crate::builtin::sys::*;
 use crate::*;
 
 mod args;
@@ -13,9 +14,9 @@ mod error;
 mod list;
 mod math;
 mod string;
+mod sys;
 
-// TODO: BASE: begin eval truthy? set!
-// TODO: LIST: list? nil?
+// TODO: loop, map
 // TODO: CONDITIONALS: and or cond
 
 fn jbuiltin_equal(args: &JCell, _env: JEnvRef) -> JResult {
@@ -146,7 +147,28 @@ fn jspecial_if(args: &JCell, env: JEnvRef) -> JResult {
     }
 }
 
-fn jspecial_eval(args: &JCell, env: JEnvRef) -> JResult {
+fn jbuiltin_type(args: &JCell, _env: JEnvRef) -> JResult {
+    let [val] = get_n_args(args)?;
+    Ok(JValue::Symbol(
+        match *val {
+            JValue::Cell(_) => "pair",
+            JValue::Quoted(_) => "quoted",
+            JValue::Int(_) => "integer",
+            JValue::Bool(_) => "bool",
+            JValue::Symbol(_) => "symbol",
+            JValue::String(_) => "string",
+            JValue::Error(_) => "error",
+            JValue::Lambda(_) => "lambda",
+            JValue::Macro(_) => "macro",
+            JValue::Builtin(_) => "builtin",
+            JValue::SpecialForm(_) => "specialform",
+        }
+        .to_string(),
+    )
+    .into_ref())
+}
+
+fn jbuiltin_eval(args: &JCell, env: JEnvRef) -> JResult {
     let [expr] = get_n_args(args)?;
     jeval(expr, env)
 }
@@ -197,13 +219,10 @@ where
 }
 
 pub fn add_builtins(env: &JEnv) {
-    // Constants
-    env.define("nil", JValue::Cell(JCell::Nil).into_ref());
-
     // Program flow
     add_builtin("begin", jbuiltin_begin, env);
-    add_special_form("if", jspecial_if, env);
     add_builtin("exit", jbuiltin_exit, env);
+    add_special_form("if", jspecial_if, env);
 
     // Comparison
     add_builtin("eq?", jbuiltin_eq, env);
@@ -212,9 +231,10 @@ pub fn add_builtins(env: &JEnv) {
     // Logical operators
     add_builtin("not", jbuiltin_not, env);
 
-    // Print
+    // Print, debug
     add_builtin("repr", jbuiltin_repr, env);
     add_builtin("print", jbuiltin_print, env);
+    add_builtin("type", jbuiltin_type, env);
 
     // Arithmetic
     add_builtin("+", jbuiltin_add, env);
@@ -225,6 +245,7 @@ pub fn add_builtins(env: &JEnv) {
     add_builtin("cons", jbuiltin_cons, env);
     add_builtin("car", jbuiltin_car, env);
     add_builtin("cdr", jbuiltin_cdr, env);
+    add_builtin("list?", jbuiltin_is_list, env);
 
     // String
     add_builtin("concat", jbuiltin_concat, env);
@@ -235,13 +256,16 @@ pub fn add_builtins(env: &JEnv) {
     add_special_form("fn", jspecial_lambda, env);
 
     // Error handling
-    add_special_form("try", jspecial_try, env);
     add_builtin("error", jbuiltin_error, env);
     add_builtin("raise", jbuiltin_raise, env);
+    add_special_form("try", jspecial_try, env);
 
     // Metaprogramming
-    add_special_form("quote", jspecial_quote, env);
-    add_special_form("eval", jspecial_eval, env);
+    add_builtin("eval", jbuiltin_eval, env);
     add_builtin("evalfile", jbuiltin_evalfile, env);
+    add_special_form("quote", jspecial_quote, env);
     add_special_form("macro", jspecial_macro, env);
+
+    // Sys
+    add_builtin("getenv", jbuiltin_getenv, env);
 }

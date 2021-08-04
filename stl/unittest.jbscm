@@ -1,6 +1,11 @@
 (def ok-count 0)
 (def failed-count 0)
 
+(def test-verbose
+    (try
+        (equal? "1" (getenv "TEST_VERBOSE"))
+        false))
+
 (defn fn-assert-op (op)
     (fn (x y)
         (assert (op x y))))
@@ -8,6 +13,10 @@
 (def assert-eq (fn-assert-op eq?))
 
 (def assert-equal (fn-assert-op equal?))
+
+(defn assert-not (x) (assert (not x)))
+
+(defn assert-type (val t) (assert (type? val t)))
 
 (defmacro assert-raise (code)
     (let errnoraise (error "did not raise an error")
@@ -22,10 +31,12 @@
         (list begin
             code
             (list set! 'ok-count (list + ok-count 1))
-            (list print (list concat name ": ok")))
+            (list if test-verbose
+                (list print (list concat name ": ok")) ()))
         (list begin
             (list set! 'failed-count (list + failed-count 1))
-            (list print (list concat name ": failed (" (list repr 'err) ")")))))
+            (list if test-verbose
+                (list print (list concat name ": failed (" (list repr 'err) ")")) ()))))
 
 (defn test-start (name) (begin
     (print (concat "testing " name))
@@ -33,6 +44,10 @@
     (set! failed-count 0)))
 
 (defn test-exit () (begin
-    (print (concat (repr ok-count) " tests ok"))
-    (print (concat (repr failed-count) " tests failed"))
+    (print (concat
+        "test results: "
+        (repr ok-count)
+        " ok, "
+        (repr failed-count)
+        " failed"))
     (exit (if (equal? failed-count 0) 0 1))))

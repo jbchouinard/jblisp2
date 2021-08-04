@@ -1,8 +1,6 @@
 (evalfile "stl/unittest.jbscm")
-
 (test-start "jbscheme")
-
+(evalfile "tests/lang.jbscm")
 (evalfile "tests/math.jbscm")
 (evalfile "tests/string.jbscm")
-
 (test-exit)

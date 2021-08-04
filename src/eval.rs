@@ -24,7 +24,7 @@ fn eval_sexpr(list: &JCell, env: JEnvRef) -> JResult {
         let args = list.cdr()?;
         let args = match &*args {
             JValue::Cell(c) => c,
-            _ => panic!(),
+            _ => return Err(JError::new("EvalError", "not a list")),
         };
 
         match &*func {

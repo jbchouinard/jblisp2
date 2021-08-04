@@ -1,0 +1,3 @@
+(defn sum (lst) (apply + lst))
+
+(defn product (lst) (apply * lst))

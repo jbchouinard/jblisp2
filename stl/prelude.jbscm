@@ -1,6 +1,20 @@
+(def nil ())
+
 (def true (eq? nil nil))
 
 (def false (not true))
+
+(def String 'string)
+(def Symbol 'symbol)
+(def Integer 'integer)
+(def Pair 'pair)
+(def Error 'error)
+(def Bool 'bool)
+(def Lambda 'lambda)
+(def Macro 'macro)
+(def Builtin 'builtin)
+(def SpecialForm 'specialform)
+(def Quoted 'quoted)
 
 (def defmacro
     (macro (name params code)
@@ -8,6 +22,23 @@
 
 (defmacro defn (name params code)
     (list def name (list fn params code)))
+
+(defn type? (val t) (equal? (type val) t))
+
+(defn string? (val) (type? val String))
+(defn symbol? (val) (type? val Symbol))
+(defn integer? (val) (type? val Integer))
+(defn pair? (val) (type? val Pair))
+(defn error? (val) (type? val Error))
+(defn bool? (val) (type? val Bool))
+(defn lambda? (val) (type? val Lambda))
+(defn macro? (val) (type? val Macro))
+(defn builtin? (val) (type? val Builtin))
+(defn specialform? (val) (type? val SpecialForm))
+(defn quoted? (val) (type? val Quoted))
+
+(defn nil? (x)
+    (equal? x nil))
 
 (defn display (x)
     (print (repr x)))
@@ -18,7 +49,19 @@
 (defn assert-msg (pred reason)
     (if pred () (raise (error reason))))
 
-(defmacro apply (op args) (cons op args))
+(defn apply (op args) (eval (cons op args)))
 
 (defmacro let (sym val body)
     (list (list fn (list sym) body) val))
+
+(defn map (f lst)
+    (if (nil? lst)
+        ()
+        (cons
+            (f (car lst))
+            (map f (cdr lst)))))
+
+(defn fold (proc init lst)
+    (if (nil? lst)
+        init
+        (fold proc (proc (car lst) init) (cdr lst))))
