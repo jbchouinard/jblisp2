@@ -310,7 +310,7 @@ jbscheme has exception raising and handling with these forms:
 
 #### error
 ```
-(error "error-message")
+(error <msg:string>)
 ```
 
 #### raise
@@ -320,20 +320,19 @@ jbscheme has exception raising and handling with these forms:
 
 #### try
 ```
-(try <expr> <exception-expr>)
+(try <body:expr> <catch:expr>)
 ```
-
-The error value is bound to `err` in the invocation environment of the exception
-expression.
+Try evaluating `body`. If an error is raised, evaluate `catch`; the raised error
+is bound to `err`.
 
 ```
 >>> (defn errored () (begin (raise (error "oh no!")) (print "never evaluated")))
 >>> (errored)
 Unhandled Error: oh no!
->>> (try (print "no error") (display err))
+>>> (try (print "no error") (print (concat "handled " (repr err))))
 no error
->>> (try (errored) (display err))
-<error Error "oh no!">
+>>> (try (errored) (print (concat "handled " (repr err))))
+handled #[error Error "oh no!"]
 ```
 
 #### assert

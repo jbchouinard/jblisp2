@@ -2,6 +2,9 @@ ifeq ($(PREFIX),)
 	PREFIX := /usr/local
 endif
 
+build:
+	cargo build --release
+
 target/release/jbscheme:
 	cargo build --release
 
@@ -15,4 +18,4 @@ test:
 clean:
 	cargo clean
 
-.PHONY: test clean
+.PHONY: test clean build
