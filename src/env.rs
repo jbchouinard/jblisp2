@@ -31,6 +31,11 @@ impl JEnv {
         }
     }
 
+    pub fn try_lookup(&self, v: &str) -> JResult {
+        self.lookup(v)
+            .ok_or_else(|| JError::UndefError(v.to_string()))
+    }
+
     /// Create a new binding.
     pub fn define(&self, v: &str, val: JValRef) {
         self.vars.borrow_mut().insert(v.to_string(), val);

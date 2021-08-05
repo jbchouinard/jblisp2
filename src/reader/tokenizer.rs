@@ -1,12 +1,11 @@
 use lazy_static::lazy_static;
 use regex::Regex;
 
-use super::{ReaderError, Result};
 use crate::primitives::JTInt;
 
 #[derive(Debug, PartialEq)]
 pub enum TokenValue {
-    Whitespace,
+    Whitespace(String),
     LParen,
     RParen,
     Quote,
@@ -67,8 +66,8 @@ fn t_string(val: &str) -> TResult {
     Ok(TokenValue::String(val[1..val.len() - 1].to_string()))
 }
 
-fn t_ws(_: &str) -> TResult {
-    Ok(TokenValue::Whitespace)
+fn t_ws(s: &str) -> TResult {
+    Ok(TokenValue::Whitespace(s.to_string()))
 }
 
 pub struct Tokenizer<'a> {
@@ -81,7 +80,7 @@ impl<'a> Tokenizer<'a> {
         Self { input, pos: 0 }
     }
 
-    fn try_token<T>(&mut self, re: &Regex, cons: T) -> Result<Option<Token>>
+    fn try_token<T>(&mut self, re: &Regex, cons: T) -> Result<Option<Token>, TokenError>
     where
         T: Fn(&str) -> TResult,
     {
@@ -91,14 +90,14 @@ impl<'a> Tokenizer<'a> {
                 self.pos += mat.end();
                 match cons(mat.as_str()) {
                     Ok(tokval) => Ok(Some(Token::new(tokval, spos))),
-                    Err(reason) => Err(ReaderError::new(&reason, spos)),
+                    Err(reason) => Err(TokenError::new(&reason, spos)),
                 }
             }
             None => Ok(None),
         }
     }
 
-    pub fn next_token(&mut self) -> Result<Token> {
+    pub fn next_token(&mut self) -> Result<Token, TokenError> {
         if self.pos >= self.input.len() {
             return Ok(Token::new(TokenValue::Eof, self.pos));
         }
@@ -123,7 +122,7 @@ impl<'a> Tokenizer<'a> {
         if let Some(token) = self.try_token(&RE_STRING, t_string)? {
             return Ok(token);
         }
-        Err(ReaderError::new(
+        Err(TokenError::new(
             &format!(
                 "unexpected character {}",
                 &self.input[self.pos..self.pos + 1]
@@ -132,18 +131,34 @@ impl<'a> Tokenizer<'a> {
         ))
     }
 
-    pub fn tokenize(&mut self) -> Result<Vec<Token>> {
+    pub fn tokenize(&mut self) -> Result<Vec<Token>, TokenError> {
         let mut tokens = vec![];
         loop {
             let next = self.next_token()?;
             if next.value == TokenValue::Eof {
                 break;
             }
-            if next.value != TokenValue::Whitespace {
-                tokens.push(next);
+            if let TokenValue::Whitespace(_) = next.value {
+                continue;
             }
+            tokens.push(next)
         }
         Ok(tokens)
+    }
+}
+
+#[derive(Debug)]
+pub struct TokenError {
+    pub pos: usize,
+    pub reason: String,
+}
+
+impl TokenError {
+    pub fn new(reason: &str, pos: usize) -> Self {
+        Self {
+            pos,
+            reason: reason.to_string(),
+        }
     }
 }
 

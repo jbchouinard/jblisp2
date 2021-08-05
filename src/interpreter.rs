@@ -31,13 +31,14 @@ impl Interpreter {
     }
     fn setup_globals(&mut self) {
         add_builtins(&self.globals, &mut self.state);
-        if let Err(je) = self.eval_str(PRELUDE) {
-            eprintln!("prelude: {}", je);
+        if let Err(je) = self.eval_str("prelude", PRELUDE) {
+            eprintln!("{}", je);
             std::process::exit(1);
         }
     }
-    pub fn eval_str(&mut self, program: &str) -> Result<Option<JValRef>, JError> {
-        self.state.eval_str(program, Rc::clone(&self.globals))
+    pub fn eval_str(&mut self, filename: &str, program: &str) -> Result<Option<JValRef>, JError> {
+        self.state
+            .eval_str(filename, program, Rc::clone(&self.globals))
     }
     pub fn eval_file<P: AsRef<Path>>(&mut self, path: P) -> Result<Option<JValRef>, JError> {
         self.state.eval_file(path, Rc::clone(&self.globals))

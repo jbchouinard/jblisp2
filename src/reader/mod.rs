@@ -4,37 +4,49 @@ use std::fmt;
 pub mod parser;
 pub mod tokenizer;
 
-#[derive(Debug)]
-pub struct ReaderError {
-    pos: usize,
-    reason: String,
+#[derive(Debug, PartialEq, Clone)]
+pub struct PositionTag {
+    filename: String,
+    lineno: usize,
+    col: usize,
 }
 
-impl ReaderError {
-    pub fn new(reason: &str, pos: usize) -> Self {
+impl fmt::Display for PositionTag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "{}:{}:{}", self.filename, self.lineno, self.col)
+    }
+}
+
+#[derive(Debug)]
+pub struct ParserError {
+    pub position: PositionTag,
+    pub reason: String,
+}
+
+impl ParserError {
+    pub fn new(filename: &str, lineno: usize, col: usize, reason: &str) -> Self {
         Self {
-            pos,
+            position: PositionTag {
+                filename: filename.to_string(),
+                lineno,
+                col,
+            },
             reason: reason.to_string(),
         }
     }
-    pub fn set_pos(&mut self, pos: usize) {
-        self.pos = pos
-    }
 }
 
-impl fmt::Display for ReaderError {
+impl fmt::Display for ParserError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::result::Result<(), fmt::Error> {
-        write!(f, "Syntax error: {} at {}", self.reason, self.pos)
+        write!(f, "Error parsing {} {}", self.position, self.reason)
     }
 }
 
-impl From<ReaderError> for JError {
-    fn from(re: ReaderError) -> Self {
+impl From<ParserError> for JError {
+    fn from(pe: ParserError) -> Self {
         Self::SyntaxError {
-            position: re.pos,
-            reason: re.reason,
+            position: pe.position.clone(),
+            reason: pe.reason,
         }
     }
 }
-
-pub type Result<T> = std::result::Result<T, ReaderError>;

@@ -1,55 +1,80 @@
 use super::tokenizer::{Token, TokenValue, Tokenizer};
-use super::Result;
 
-use crate::reader::ReaderError;
+use super::ParserError;
 use crate::*;
 
 pub struct Parser<'a, 'b> {
+    filename: String,
+    lineno: usize,
+    last_newline_pos: usize,
     tokenizer: Tokenizer<'a>,
     peek: Token,
     state: &'b mut JState,
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-    pub fn new(input: &'a str, state: &'b mut JState) -> Self {
+    pub fn new(filename: &str, input: &'a str, state: &'b mut JState) -> Self {
         let tokenizer = Tokenizer::new(input);
         let mut this = Self {
+            filename: filename.to_string(),
+            lineno: 1,
+            last_newline_pos: 0,
             tokenizer,
             // Dummy value until we read the first real token
-            peek: Token::new(TokenValue::Whitespace, 0),
+            peek: Token::new(TokenValue::Whitespace("".to_string()), 0),
             state,
         };
         this.next().unwrap();
         this
     }
 
-    fn next(&mut self) -> Result<Token> {
-        let next: Token = self.tokenizer.next_token()?;
+    fn error(&self, pos: usize, reason: &str) -> ParserError {
+        ParserError::new(
+            &self.filename,
+            self.lineno,
+            pos - self.last_newline_pos,
+            reason,
+        )
+    }
+
+    fn next(&mut self) -> Result<Token, ParserError> {
+        let next = match self.tokenizer.next_token() {
+            Ok(tok) => tok,
+            Err(te) => return Err(self.error(te.pos, &te.reason)),
+        };
         let cur = std::mem::replace(&mut self.peek, next);
         Ok(cur)
     }
 
-    fn expect(&mut self, tok: TokenValue) -> Result<Token> {
+    fn expect(&mut self, tok: TokenValue) -> Result<Token, ParserError> {
         let next = self.next()?;
         if next.value == tok {
             Ok(next)
         } else {
-            Err(ReaderError::new(
-                &format!("expected token {:?}, got {:?}", tok, next.value),
+            Err(self.error(
                 next.pos,
+                &format!("expected token {:?}, got {:?}", tok, next.value),
             ))
         }
     }
 
-    fn eat(&mut self, tok: TokenValue) -> Result<()> {
-        while self.peek.value == tok {
+    fn whitespace(&mut self) -> Result<(), ParserError> {
+        while let TokenValue::Whitespace(ws) = &self.peek.value {
+            let mut newline_count = 0;
+            for (p, c) in ws.chars().enumerate() {
+                if c == '\n' {
+                    newline_count += 1;
+                    self.last_newline_pos = self.peek.pos + p;
+                }
+            }
+            self.lineno += newline_count;
             self.next()?;
         }
         Ok(())
     }
 
-    fn expr(&mut self) -> Result<JValRef> {
-        self.eat(TokenValue::Whitespace)?;
+    fn expr(&mut self) -> Result<JValRef, ParserError> {
+        self.whitespace()?;
         match self.peek.value {
             TokenValue::LParen => self.sexpr(),
             TokenValue::Quote => self.quoted(),
@@ -57,38 +82,35 @@ impl<'a, 'b> Parser<'a, 'b> {
         }
     }
 
-    fn quoted(&mut self) -> Result<JValRef> {
+    fn quoted(&mut self) -> Result<JValRef, ParserError> {
         self.expect(TokenValue::Quote)?;
         Ok(JVal::Quoted(self.expr()?).into_ref())
     }
 
-    fn atom(&mut self) -> Result<JValRef> {
+    fn atom(&mut self) -> Result<JValRef, ParserError> {
         let next = self.next()?;
         match next.value {
             TokenValue::Int(n) => Ok(self.state.int(n)),
             TokenValue::Ident(s) => Ok(self.state.sym(s)),
             TokenValue::String(s) => Ok(self.state.str(s)),
-            _ => Err(ReaderError::new(
-                &format!("unexpected token {:?}", next.value),
-                next.pos,
-            )),
+            _ => Err(self.error(next.pos, &format!("unexpected token {:?}", next.value))),
         }
     }
 
-    fn sexpr(&mut self) -> Result<JValRef> {
+    fn sexpr(&mut self) -> Result<JValRef, ParserError> {
         self.expect(TokenValue::LParen)?;
-        self.eat(TokenValue::Whitespace)?;
+        self.whitespace()?;
         let mut list = vec![];
         while self.peek.value != TokenValue::RParen {
             list.push(self.expr()?);
-            self.eat(TokenValue::Whitespace)?;
+            self.whitespace()?;
         }
         self.expect(TokenValue::RParen)?;
         Ok(self.state.list(list))
     }
 
-    pub fn parse_form(&mut self) -> Result<Option<JValRef>> {
-        self.eat(TokenValue::Whitespace)?;
+    pub fn parse_form(&mut self) -> Result<Option<JValRef>, ParserError> {
+        self.whitespace()?;
         if self.peek.value == TokenValue::Eof {
             return Ok(None);
         }
@@ -98,7 +120,7 @@ impl<'a, 'b> Parser<'a, 'b> {
         }
     }
 
-    pub fn parse_forms(&mut self) -> Result<Vec<JValRef>> {
+    pub fn parse_forms(&mut self) -> Result<Vec<JValRef>, ParserError> {
         let mut forms = vec![];
         while let Some(form) = self.parse_form()? {
             forms.push(form)
@@ -112,7 +134,7 @@ mod tests {
     use super::*;
 
     fn test_parser(state: &mut JState, input: &str, expected: JValRef) {
-        let mut parser = Parser::new(input, state);
+        let mut parser = Parser::new("test", input, state);
         let val = parser.expr().unwrap();
         assert_eq!(expected, val);
     }

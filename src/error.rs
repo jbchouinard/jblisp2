@@ -1,5 +1,6 @@
 use std::fmt;
 
+use crate::reader::PositionTag;
 use crate::*;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -11,7 +12,10 @@ pub enum JError {
     ApplyError(String),
     UndefError(String),
     OsError(String),
-    SyntaxError { position: usize, reason: String },
+    SyntaxError {
+        position: PositionTag,
+        reason: String,
+    },
 }
 
 impl fmt::Display for JError {

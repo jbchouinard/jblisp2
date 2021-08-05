@@ -45,8 +45,13 @@ impl JState {
             interned_str: Interned::new(Box::new(make_str)),
         }
     }
-    pub fn eval_str(&mut self, program: &str, env: JEnvRef) -> Result<Option<JValRef>, JError> {
-        let forms = Parser::new(program, self).parse_forms()?;
+    pub fn eval_str(
+        &mut self,
+        filename: &str,
+        program: &str,
+        env: JEnvRef,
+    ) -> Result<Option<JValRef>, JError> {
+        let forms = Parser::new(filename, program, self).parse_forms()?;
         let mut last_eval = None;
         for form in forms {
             last_eval = Some(eval(form, Rc::clone(&env), self)?);
@@ -58,11 +63,12 @@ impl JState {
         path: P,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, JError> {
+        let path = path.as_ref();
         let text = match std::fs::read_to_string(path) {
             Ok(text) => text,
             Err(e) => return Err(JError::OsError(format!("{}", e))),
         };
-        self.eval_str(&text, env)
+        self.eval_str(&path.to_string_lossy(), &text, env)
     }
 
     // Constructors

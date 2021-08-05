@@ -4,18 +4,14 @@ use crate::*;
 
 pub fn eval(expr: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     match &*expr {
+        JVal::Pair(list) => apply(list, env, state),
+        JVal::Symbol(sym) => env.try_lookup(sym),
         JVal::Quoted(val) => Ok(Rc::clone(val)),
-        JVal::Pair(c) => eval_sexpr(c, env, state),
-        JVal::Symbol(sym) => match env.lookup(sym) {
-            Some(val) => Ok(val),
-            None => Err(JError::UndefError(sym.to_string())),
-        },
-        JVal::Lambda(_) => Ok(expr),
         _ => Ok(expr),
     }
 }
 
-fn eval_sexpr(list: &JPair, env: JEnvRef, state: &mut JState) -> JResult {
+fn apply(list: &JPair, env: JEnvRef, state: &mut JState) -> JResult {
     let func = eval(list.car(), Rc::clone(&env), state)?;
     let args = list.cdr();
     match &*func {

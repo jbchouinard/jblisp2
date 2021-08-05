@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use rustyline::Editor;
 use structopt::StructOpt;
 
-use jbscheme::{Interpreter, JError};
+use jbscheme::Interpreter;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -17,19 +17,20 @@ struct Opt {
     interactive: bool,
 }
 
-fn main() -> Result<(), JError> {
+fn main() {
     let opt = Opt::from_args();
     let mut interpreter = Interpreter::default();
 
     for file in &opt.files {
-        interpreter.eval_file(&file)?;
+        if let Err(e) = interpreter.eval_file(&file) {
+            eprintln!("{}", e);
+            std::process::exit(1);
+        }
     }
 
     if opt.interactive || opt.files.is_empty() {
         repl(interpreter);
     }
-
-    Ok(())
 }
 
 fn repl(mut interpreter: Interpreter) {
@@ -38,7 +39,7 @@ fn repl(mut interpreter: Interpreter) {
     let _ = rl.load_history(HISTORY_FILE);
     while let Ok(line) = rl.readline(">>> ") {
         rl.add_history_entry(line.as_str());
-        match interpreter.eval_str(&line) {
+        match interpreter.eval_str("stdin", &line) {
             Ok(Some(val)) => println!("{}", val),
             Ok(None) => (),
             Err(err) => eprintln!("Unhandled {}", err),
