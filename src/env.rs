@@ -7,7 +7,7 @@ use crate::*;
 #[derive(Debug, PartialEq, Clone)]
 pub struct JEnv {
     parent: Option<JEnvRef>,
-    vars: RefCell<HashMap<String, JValueRef>>,
+    vars: RefCell<HashMap<String, JValRef>>,
 }
 
 pub type JEnvRef = Rc<JEnv>;
@@ -21,7 +21,7 @@ impl JEnv {
     }
 
     /// Look for value of binding.
-    pub fn lookup(&self, v: &str) -> Option<JValueRef> {
+    pub fn lookup(&self, v: &str) -> Option<JValRef> {
         match self.vars.borrow().get(v) {
             Some(val) => Some(Rc::clone(val)),
             None => match &self.parent {
@@ -32,12 +32,12 @@ impl JEnv {
     }
 
     /// Create a new binding.
-    pub fn define(&self, v: &str, val: JValueRef) {
+    pub fn define(&self, v: &str, val: JValRef) {
         self.vars.borrow_mut().insert(v.to_string(), val);
     }
 
     /// Change existing binding.
-    pub fn set(&self, v: &str, val: JValueRef) -> Result<(), JError> {
+    pub fn set(&self, v: &str, val: JValRef) -> Result<(), JError> {
         if self.vars.borrow().contains_key(v) {
             self.vars.borrow_mut().insert(v.to_string(), val);
             Ok(())

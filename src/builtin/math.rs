@@ -1,8 +1,8 @@
 use crate::*;
 
-pub fn jbuiltin_add(args: &JCell, _env: JEnvRef) -> JResult {
+pub fn jbuiltin_add(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let mut sum: JTInt = 0;
-    for arg in args.iter()? {
+    for arg in args.iter_list()? {
         match arg.to_int() {
             Ok(n) => {
                 sum += n;
@@ -10,12 +10,12 @@ pub fn jbuiltin_add(args: &JCell, _env: JEnvRef) -> JResult {
             Err(e) => return Err(e),
         }
     }
-    Ok(JValue::Int(sum).into_ref())
+    Ok(JVal::int(sum, state))
 }
 
-pub fn jbuiltin_mul(args: &JCell, _env: JEnvRef) -> JResult {
+pub fn jbuiltin_mul(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let mut acc: JTInt = 1;
-    for arg in args.iter()? {
+    for arg in args.iter_list()? {
         match arg.to_int() {
             Ok(n) => {
                 acc *= n;
@@ -23,5 +23,5 @@ pub fn jbuiltin_mul(args: &JCell, _env: JEnvRef) -> JResult {
             Err(e) => return Err(e),
         }
     }
-    Ok(JValue::Int(acc).into_ref())
+    Ok(JVal::int(acc, state))
 }

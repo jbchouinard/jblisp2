@@ -35,8 +35,7 @@
                 (list print (list concat name ": ok")) ()))
         (list begin
             (list set! 'failed-count (list + failed-count 1))
-            (list if test-verbose
-                (list print (list concat name ": failed (" (list repr 'err) ")")) ()))))
+            (list print (list concat name ": failed (" (list repr 'err) ")")) ())))
 
 (defn test-start (name) (begin
     (print (concat "testing " name))

@@ -4,7 +4,8 @@
 
 (def false (not true))
 
-(def :pair (type ()))
+(def :nil (type ()))
+(def :pair (type (cons nil nil)))
 (def :lambda (type (fn () ())))
 (def :macro (type (macro () ())))
 (def :integer (type 1))

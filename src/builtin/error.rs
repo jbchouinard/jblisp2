@@ -1,17 +1,17 @@
 use crate::builtin::*;
 
-pub fn jbuiltin_error(args: &JCell, _env: JEnvRef) -> JResult {
+pub fn jbuiltin_error(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
     let [emsg] = get_n_args(args)?;
     match &*emsg {
-        JValue::String(s) => Ok(JValue::Error(JError::new("Error", s)).into_ref()),
+        JVal::String(s) => Ok(JVal::err("Error", s)),
         _ => Err(JError::new("TypeError", "expected a string")),
     }
 }
 
-pub fn jbuiltin_raise(args: &JCell, _env: JEnvRef) -> JResult {
+pub fn jbuiltin_raise(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
     let [err] = get_n_args(args)?;
     match &*err {
-        JValue::Error(je) => Err(je.clone()),
+        JVal::Error(je) => Err(je.clone()),
         _ => Err(JError::new("TypeError", "expected an error")),
     }
 }
@@ -21,14 +21,14 @@ pub fn jbuiltin_raise(args: &JCell, _env: JEnvRef) -> JResult {
 // "caught"
 // >>> (try "no-error" "caught")
 // "no-error"
-pub fn jspecial_try(args: &JCell, env: JEnvRef) -> JResult {
+pub fn jspecial_try(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let [code, except] = get_n_args(args)?;
-    match jeval(code, Rc::clone(&env)) {
+    match jeval(code, Rc::clone(&env), state) {
         Ok(val) => Ok(val),
         Err(je) => {
             let errenv = JEnv::new(Some(env));
-            errenv.define("err", JValue::Error(je).into_ref());
-            jeval(except, errenv.into_ref())
+            errenv.define("err", JVal::from_error(je));
+            jeval(except, errenv.into_ref(), state)
         }
     }
 }

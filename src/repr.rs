@@ -1,22 +1,23 @@
 use crate::*;
 
-pub fn jrepr(expr: &JValue) -> String {
+pub fn jrepr(expr: &JVal) -> String {
     match &*expr {
-        JValue::Int(n) => format!("{}", n),
-        JValue::Bool(b) => (if *b { "true" } else { "false" }).to_string(),
-        JValue::Symbol(s) => s.to_string(),
-        JValue::String(s) => format!("\"{}\"", s),
-        JValue::Error(e) => format!("#[error {} \"{}\"]", e.etype, e.emsg),
-        JValue::Builtin(b) => format!("#[builtin {:?}]", b),
-        JValue::SpecialForm(b) => format!("#[specialform {:?}]", b),
-        JValue::Lambda(l) => format!("#[lambda {} {:p}]", l.params.len(), l),
-        JValue::Macro(l) => format!("#[macro {} {:p}]", l.params.len(), l),
-        JValue::Cell(c) => repr_cell(c),
-        JValue::Quoted(val) => format!("'{}", jrepr(&*val)),
+        JVal::Nil => "()".to_string(),
+        JVal::Int(n) => format!("{}", n),
+        JVal::Bool(b) => (if *b { "true" } else { "false" }).to_string(),
+        JVal::Symbol(s) => s.to_string(),
+        JVal::String(s) => format!("\"{}\"", s),
+        JVal::Error(e) => format!("#[error {} \"{}\"]", e.etype, e.emsg),
+        JVal::Builtin(b) => format!("#[builtin {:?}]", b),
+        JVal::SpecialForm(b) => format!("#[specialform {:?}]", b),
+        JVal::Lambda(l) => format!("#[lambda {} {:p}]", l.params.len(), l),
+        JVal::Macro(l) => format!("#[macro {} {:p}]", l.params.len(), l),
+        JVal::Pair(c) => repr_cell(c),
+        JVal::Quoted(val) => format!("'{}", jrepr(&*val)),
     }
 }
 
-fn repr_cell(cell: &JCell) -> String {
+fn repr_cell(cell: &JPair) -> String {
     match cell.iter() {
         Ok(iterator) => {
             let mut parts = vec!["(".to_string()];
@@ -30,9 +31,7 @@ fn repr_cell(cell: &JCell) -> String {
             parts.push(")".to_string());
             parts.join("")
         }
-        _ => match cell {
-            JCell::Nil => "()".to_string(),
-            JCell::Pair(x, y) => format!("({} . {})", jrepr(&*x), jrepr(&*y)),
-        },
+        // Not a list
+        Err(_) => format!("({} . {})", jrepr(&cell.car()), jrepr(&cell.cdr())),
     }
 }

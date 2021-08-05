@@ -23,4 +23,4 @@ impl fmt::Display for JError {
     }
 }
 
-pub type JResult = Result<JValueRef, JError>;
+pub type JResult = Result<JValRef, JError>;

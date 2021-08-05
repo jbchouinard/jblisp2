@@ -7,6 +7,12 @@
 (test "string is string" 
     (assert-type "foo" :string))
 
+(test "nil is nil"
+    (assert-eq () (list)))
+
+(test "true is true"
+    (assert-eq (not false) (not false)))
+
 (test "list is pair"
     (assert (pair? (list 1 2 3))))
 

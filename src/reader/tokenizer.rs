@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 
 use super::{ReaderError, Result};
-use crate::types::JTInt;
+use crate::primitives::JTInt;
 
 #[derive(Debug, PartialEq)]
 pub enum TokenValue {
@@ -151,14 +151,18 @@ impl<'a> Tokenizer<'a> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_tokenizer_1() {
-        let input = "(* 12 -15)";
+    fn test_tokenizer(input: &str, expected: Vec<TokenValue>) {
         let mut tokenizer = Tokenizer::new(input);
         let tokens = tokenizer.tokenize().unwrap();
         let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
 
-        assert_eq!(
+        assert_eq!(expected, tokvalues);
+    }
+
+    #[test]
+    fn test_tokenizer_1() {
+        test_tokenizer(
+            "(* 12 -15)",
             vec![
                 TokenValue::LParen,
                 TokenValue::Ident("*".to_string()),
@@ -166,18 +170,13 @@ mod tests {
                 TokenValue::Int(-15),
                 TokenValue::RParen,
             ],
-            tokvalues
         );
     }
 
     #[test]
     fn test_tokenizer_2() {
-        let input = "(concat \"foo\" \"bar\")";
-        let mut tokenizer = Tokenizer::new(input);
-        let tokens = tokenizer.tokenize().unwrap();
-        let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
-
-        assert_eq!(
+        test_tokenizer(
+            "(concat \"foo\" \"bar\")",
             vec![
                 TokenValue::LParen,
                 TokenValue::Ident("concat".to_string()),
@@ -185,18 +184,13 @@ mod tests {
                 TokenValue::String("bar".to_string()),
                 TokenValue::RParen,
             ],
-            tokvalues
         );
     }
 
     #[test]
     fn test_tokenizer_3() {
-        let input = "(quote '(1 2 3))";
-        let mut tokenizer = Tokenizer::new(input);
-        let tokens = tokenizer.tokenize().unwrap();
-        let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
-
-        assert_eq!(
+        test_tokenizer(
+            "(quote '(1 2 3))",
             vec![
                 TokenValue::LParen,
                 TokenValue::Ident("quote".to_string()),
@@ -208,7 +202,6 @@ mod tests {
                 TokenValue::RParen,
                 TokenValue::RParen,
             ],
-            tokvalues
         );
     }
 }
