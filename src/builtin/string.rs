@@ -5,8 +5,8 @@ pub fn jbuiltin_concat(args: JValRef, _env: JEnvRef, state: &mut JState) -> JRes
     for arg in args.iter_list().unwrap() {
         match &*arg {
             JVal::String(s) => strings.push(s.clone()),
-            _ => return Err(JError::new("TypeError", "expected strings")),
+            _ => return Err(JError::TypeError("expected strings".to_string())),
         }
     }
-    Ok(JVal::str(strings.join(""), state))
+    Ok(state.str(strings.join("")))
 }

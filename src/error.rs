@@ -3,23 +3,31 @@ use std::fmt;
 use crate::*;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct JError {
-    pub etype: String,
-    pub emsg: String,
-}
-
-impl JError {
-    pub fn new(etype: &str, emsg: &str) -> Self {
-        Self {
-            etype: etype.to_string(),
-            emsg: emsg.to_string(),
-        }
-    }
+pub enum JError {
+    Exception(String),
+    AssertionError(String),
+    TypeError(String),
+    EvalError(String),
+    ApplyError(String),
+    UndefError(String),
+    OsError(String),
+    SyntaxError { position: usize, reason: String },
 }
 
 impl fmt::Display for JError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{}: {}", self.etype, self.emsg)
+        match self {
+            Self::Exception(s) => write!(f, "Exception: {}", s),
+            Self::AssertionError(s) => write!(f, "AssertionError: {}", s),
+            Self::TypeError(s) => write!(f, "TypeError: {}", s),
+            Self::EvalError(s) => write!(f, "EvalError: {}", s),
+            Self::ApplyError(s) => write!(f, "ApplyError: {}", s),
+            Self::UndefError(s) => write!(f, "UndefError: var {} is not defined", s),
+            Self::OsError(s) => write!(f, "OsError: {}", s),
+            Self::SyntaxError { position, reason } => {
+                write!(f, "SyntaxError: {} at {}", reason, position)
+            }
+        }
     }
 }
 

@@ -44,10 +44,7 @@ impl JEnv {
         } else {
             match &self.parent {
                 Some(penv) => penv.set(v, val),
-                None => Err(JError::new(
-                    "EnvError",
-                    &format!("cannot set! nonexistent binding {}", v),
-                )),
+                None => Err(JError::UndefError(v.to_string())),
             }
         }
     }

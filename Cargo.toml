@@ -6,6 +6,14 @@ license = "MIT"
 readme = "README.md"
 edition = "2018"
 
+[lib]
+name = "jbscheme"
+path = "src/lib.rs"
+
+[[bin]]
+name = "jbscheme"
+path = "src/main.rs"
+
 [dependencies]
 lazy_static = "1.4"
 regex = "1"

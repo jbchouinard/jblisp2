@@ -1,3 +1,5 @@
 (defn sum (lst) (apply + lst))
 
 (defn product (lst) (apply * lst))
+
+(defn factorial (n) (fold * 1 (range 1 (+ n 1))))

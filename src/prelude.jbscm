@@ -1,7 +1,5 @@
 (def nil ())
-
 (def true (eq? nil nil))
-
 (def false (not true))
 
 (def :nil (type ()))
@@ -66,3 +64,14 @@
     (if (nil? lst)
         init
         (fold f (f (car lst) init) (cdr lst))))
+
+(defn range (start end) (begin
+    (defn range-rec (n)
+        (if (eq? 0 (- n end))
+            nil
+            (cons n (range-rec (+ n 1)))))
+    (range-rec start)))
+
+(defn neg (n) (* n -1))
+
+(defn - (x y) (+ x (neg y)))

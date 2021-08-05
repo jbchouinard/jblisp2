@@ -32,7 +32,7 @@ impl JPair {
     }
     pub fn iter(&self) -> Result<JListIterator, JError> {
         if !self.is_list() {
-            return Err(JError::new("ValueError", "cannot iter a non-list"));
+            return Err(JError::TypeError("can only iter lists".to_string()));
         }
         Ok(JListIterator { head: Some(self) })
     }
@@ -83,6 +83,7 @@ pub struct JLambda {
     pub code: JValRef,
 }
 
+// JVal's should only be constructed by JState, which manages interned values
 #[derive(Debug, PartialEq, Clone)]
 pub enum JVal {
     Nil,
@@ -103,7 +104,7 @@ pub type JValRef = Rc<JVal>;
 
 impl fmt::Display for JVal {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{}", jrepr(self))
+        write!(f, "{}", repr(self))
     }
 }
 
@@ -114,11 +115,8 @@ impl JVal {
     pub fn to_int(&self) -> Result<JTInt, JError> {
         match self {
             Self::Int(n) => Ok(*n),
-            _ => Err(JError::new("TypeError", "expected an int")),
+            _ => Err(JError::TypeError("expected an int".to_string())),
         }
-    }
-    pub fn from_error(je: JError) -> JValRef {
-        JVal::Error(je).into_ref()
     }
     pub fn is_list(&self) -> bool {
         match self {
@@ -131,66 +129,7 @@ impl JVal {
         match self {
             JVal::Nil => Ok(JListIterator { head: None }),
             JVal::Pair(p) => p.iter(),
-            _ => Err(JError::new("TypeError", "not a list")),
+            _ => Err(JError::TypeError("can only iter lists".to_string())),
         }
-    }
-
-    // Constructors
-    pub fn quote(v: JValRef) -> JValRef {
-        JVal::Quoted(v).into_ref()
-    }
-    pub fn list(mut v: Vec<JValRef>) -> JValRef {
-        let mut cur = Self::nil();
-        v.reverse();
-        for val in v {
-            cur = Self::cons(val, cur);
-        }
-        cur
-    }
-    pub fn cons(left: JValRef, right: JValRef) -> JValRef {
-        JVal::Pair(JPair::cons(left, right)).into_ref()
-    }
-    pub fn nil() -> JValRef {
-        JVal::Nil.into_ref()
-    }
-    pub fn _int(n: JTInt) -> JValRef {
-        JVal::Int(n).into_ref()
-    }
-    pub fn int(n: JTInt, state: &mut JState) -> JValRef {
-        state.make_int(n)
-    }
-    pub fn bool(p: bool, state: &JState) -> JValRef {
-        state.get_bool(p)
-    }
-    pub fn _sym(s: String) -> JValRef {
-        JVal::Symbol(s).into_ref()
-    }
-    pub fn sym(s: String, state: &mut JState) -> JValRef {
-        state.make_sym(s)
-    }
-    pub fn _str(s: String) -> JValRef {
-        JVal::String(s).into_ref()
-    }
-    pub fn str(s: String, state: &mut JState) -> JValRef {
-        state.make_str(s)
-    }
-    pub fn err(etype: &str, emsg: &str) -> JValRef {
-        JVal::Error(JError::new(etype, emsg)).into_ref()
-    }
-    pub fn lambda(clos: JEnvRef, params: Vec<String>, code: JValRef) -> JValRef {
-        JVal::Lambda(Box::new(JLambda {
-            closure: clos,
-            params,
-            code,
-        }))
-        .into_ref()
-    }
-    pub fn lmacro(clos: JEnvRef, params: Vec<String>, code: JValRef) -> JValRef {
-        JVal::Macro(Box::new(JLambda {
-            closure: clos,
-            params,
-            code,
-        }))
-        .into_ref()
     }
 }

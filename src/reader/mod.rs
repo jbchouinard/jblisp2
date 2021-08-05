@@ -30,7 +30,10 @@ impl fmt::Display for ReaderError {
 
 impl From<ReaderError> for JError {
     fn from(re: ReaderError) -> Self {
-        Self::new("SyntaxError", &format!("{} at {}", re.reason, re.pos))
+        Self::SyntaxError {
+            position: re.pos,
+            reason: re.reason,
+        }
     }
 }
 

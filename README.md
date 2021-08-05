@@ -43,15 +43,17 @@ make install
 See [MANUAL.md](MANUAL.md).
 
 ## Todo?
-- More builtin functions
-- More tests
-- More standard library
-- Numeric data types: float, complex 
+- Comments
+- Tracebacks
 - Variadic lambdas
+- More builtin functions
+- Tail call optimization
+- More tests
 - First class envs
 - Imports, namespaces
 - Mutable data structures: mutpair, vector, table
-- Tracebacks
-- Memory leak check
-- Tail call optimization
+- Debugger
 - Continuations
+- Memory leak check, cycle detection
+- Numeric data types: float, complex 
+- Standard library

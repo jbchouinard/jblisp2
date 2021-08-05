@@ -1,6 +1,7 @@
 use super::tokenizer::{Token, TokenValue, Tokenizer};
 use super::Result;
 
+use crate::reader::ReaderError;
 use crate::*;
 
 pub struct Parser<'a, 'b> {
@@ -64,9 +65,9 @@ impl<'a, 'b> Parser<'a, 'b> {
     fn atom(&mut self) -> Result<JValRef> {
         let next = self.next()?;
         match next.value {
-            TokenValue::Int(n) => Ok(JVal::int(n, self.state)),
-            TokenValue::Ident(s) => Ok(JVal::sym(s, self.state)),
-            TokenValue::String(s) => Ok(JVal::str(s, self.state)),
+            TokenValue::Int(n) => Ok(self.state.int(n)),
+            TokenValue::Ident(s) => Ok(self.state.sym(s)),
+            TokenValue::String(s) => Ok(self.state.str(s)),
             _ => Err(ReaderError::new(
                 &format!("unexpected token {:?}", next.value),
                 next.pos,
@@ -83,7 +84,7 @@ impl<'a, 'b> Parser<'a, 'b> {
             self.eat(TokenValue::Whitespace)?;
         }
         self.expect(TokenValue::RParen)?;
-        Ok(JVal::list(list))
+        Ok(self.state.list(list))
     }
 
     pub fn parse_form(&mut self) -> Result<Option<JValRef>> {
@@ -110,65 +111,54 @@ impl<'a, 'b> Parser<'a, 'b> {
 mod tests {
     use super::*;
 
-    fn test_parser(input: &str, expected: JValRef) {
-        let mut state = JState::default();
-        let mut parser = Parser::new(input, &mut state);
+    fn test_parser(state: &mut JState, input: &str, expected: JValRef) {
+        let mut parser = Parser::new(input, state);
         let val = parser.expr().unwrap();
         assert_eq!(expected, val);
     }
 
     #[test]
     fn test_parser_1() {
-        test_parser(
-            "(+ 12 -15)",
-            JVal::list(vec![
-                JVal::_sym("+".to_string()),
-                JVal::_int(12),
-                JVal::_int(-15),
-            ]),
-        );
+        let mut state = JState::default();
+        let lst = vec![state.sym("+".to_string()), state.int(12), state.int(-15)];
+        let expected = state.list(lst);
+        test_parser(&mut state, "(+ 12 -15)", expected);
     }
 
     #[test]
     fn test_parser_2() {
-        test_parser(
-            "(* (+ 12 -33) 42)",
-            JVal::list(vec![
-                JVal::_sym("*".to_string()),
-                JVal::list(vec![
-                    JVal::_sym("+".to_string()),
-                    JVal::_int(12),
-                    JVal::_int(-33),
-                ]),
-                JVal::_int(42),
-            ]),
-        )
+        let mut state = JState::default();
+        let inner_lst = vec![state.sym("+".to_string()), state.int(12), state.int(-33)];
+        let lst = vec![
+            state.sym("*".to_string()),
+            state.list(inner_lst),
+            state.int(42),
+        ];
+        let expected = state.list(lst);
+        test_parser(&mut state, "(* (+ 12 -33) 42)", expected)
     }
 
     #[test]
     fn test_parser_3() {
-        test_parser(
-            "(concat \"foo\" \"bar\")",
-            JVal::list(vec![
-                JVal::_sym("concat".to_string()),
-                JVal::_str("foo".to_string()),
-                JVal::_str("bar".to_string()),
-            ]),
-        )
+        let mut state = JState::default();
+        let lst = vec![
+            state.sym("concat".to_string()),
+            state.str("foo".to_string()),
+            state.str("bar".to_string()),
+        ];
+        let expected = state.list(lst);
+        test_parser(&mut state, "(concat \"foo\" \"bar\")", expected)
     }
 
     #[test]
     fn test_parser_4() {
-        test_parser(
-            "(quote '(1 2 3))",
-            JVal::list(vec![
-                JVal::_sym("quote".to_string()),
-                JVal::quote(JVal::list(vec![
-                    JVal::_int(1),
-                    JVal::_int(2),
-                    JVal::_int(3),
-                ])),
-            ]),
-        )
+        let mut state = JState::default();
+        let inner_lst = vec![state.int(1), state.int(2), state.int(3)];
+        let lst = vec![
+            state.sym("quote".to_string()),
+            state.quote(state.list(inner_lst)),
+        ];
+        let expected = state.list(lst);
+        test_parser(&mut state, "(quote '(1 2 3))", expected)
     }
 }
