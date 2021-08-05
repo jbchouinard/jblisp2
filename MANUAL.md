@@ -8,10 +8,10 @@
 - bool
 - lambda
 - macro
-- quoted
+- quote
 - error
-- builtin
-- specialform
+- builtin function
+- builtin specialform
 
 ## Forms
 
@@ -354,3 +354,29 @@ or contains non-UTF8 characters.
 (exit <code:integer>)
 ```
 Exit program with a status code.
+
+### Debug
+
+#### dd
+```
+(dd <expr>)
+```
+Print Rust struct debug.
+
+#### ddp
+```
+(ddp <expr>)
+```
+Pretty print Rust struct debug.
+
+#### dda
+```
+(dda <expr>)
+```
+Print pointer address.
+
+#### ddc
+```
+(ddc <lambda|macro>)
+```
+Print code of (non-builtin) lambda or macro. 

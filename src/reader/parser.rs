@@ -77,14 +77,14 @@ impl<'a, 'b> Parser<'a, 'b> {
         self.whitespace()?;
         match self.peek.value {
             TokenValue::LParen => self.sexpr(),
-            TokenValue::Quote => self.quoted(),
+            TokenValue::Quote => self.quote(),
             _ => self.atom(),
         }
     }
 
-    fn quoted(&mut self) -> Result<JValRef, ParserError> {
+    fn quote(&mut self) -> Result<JValRef, ParserError> {
         self.expect(TokenValue::Quote)?;
-        Ok(JVal::Quoted(self.expr()?).into_ref())
+        Ok(JVal::Quote(self.expr()?).into_ref())
     }
 
     fn atom(&mut self) -> Result<JValRef, ParserError> {

@@ -53,6 +53,39 @@ fn jbuiltin_repr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     Ok(state.str(repr(&x)))
 }
 
+fn jbuiltin_display_debug(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [val] = get_n_args(args)?;
+    println!("{:?}", val);
+    Ok(state.nil())
+}
+
+fn jbuiltin_display_debug_pretty(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [val] = get_n_args(args)?;
+    println!("{:#?}", val);
+    Ok(state.nil())
+}
+
+fn jbuiltin_display_ptr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [val] = get_n_args(args)?;
+    println!("{:p}", val);
+    Ok(state.nil())
+}
+
+fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [val] = get_n_args(args)?;
+    let (t, params, code) = match &*val {
+        JVal::Lambda(jl) => ("fn".to_string(), &jl.params, &jl.code),
+        JVal::Macro(jl) => ("fn".to_string(), &jl.params, &jl.code),
+        _ => {
+            return Err(JError::TypeError(
+                "expected non-builtin lambda or macro".to_string(),
+            ))
+        }
+    };
+    println!("({} ({}) {})", t, params.join(" "), code);
+    Ok(state.nil())
+}
+
 fn jspecial_def(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let [jsym, jval] = get_n_args(args)?;
     let sym = match &*jsym {
@@ -119,7 +152,7 @@ fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
         match *val {
             JVal::Nil => "nil",
             JVal::Pair(_) => "pair",
-            JVal::Quoted(_) => "quoted",
+            JVal::Quote(_) => "quote",
             JVal::Int(_) => "integer",
             JVal::Bool(_) => "bool",
             JVal::Symbol(_) => "symbol",
@@ -190,6 +223,10 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("repr", jbuiltin_repr, env, state);
     add_builtin("print", jbuiltin_print, env, state);
     add_builtin("type", jbuiltin_type, env, state);
+    add_builtin("dd", jbuiltin_display_debug, env, state);
+    add_builtin("ddp", jbuiltin_display_debug_pretty, env, state);
+    add_builtin("dda", jbuiltin_display_ptr, env, state);
+    add_builtin("ddc", jbuiltin_display_code, env, state);
 
     // Arithmetic operators
     add_builtin("+", jbuiltin_add, env, state);

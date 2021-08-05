@@ -8,12 +8,12 @@ pub fn repr(expr: &JVal) -> String {
         JVal::Symbol(s) => s.to_string(),
         JVal::String(s) => format!("\"{}\"", s),
         JVal::Error(e) => format!("#[error {}]", e),
-        JVal::Builtin(b) => format!("#[builtin {:?}]", b),
-        JVal::SpecialForm(b) => format!("#[specialform {:?}]", b),
-        JVal::Lambda(l) => format!("#[lambda {} {:p}]", l.params.len(), l),
-        JVal::Macro(l) => format!("#[macro {} {:p}]", l.params.len(), l),
+        JVal::Builtin(b) => format!("#[function {}]", b),
+        JVal::SpecialForm(b) => format!("#[specialform {}]", b),
+        JVal::Lambda(l) => format!("#[lambda {}]", l.params.len()),
+        JVal::Macro(l) => format!("#[macro {}]", l.params.len()),
         JVal::Pair(c) => repr_cell(c),
-        JVal::Quoted(val) => format!("'{}", repr(&*val)),
+        JVal::Quote(val) => format!("'{}", repr(&*val)),
     }
 }
 

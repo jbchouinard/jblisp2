@@ -6,7 +6,7 @@ pub fn eval(expr: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     match &*expr {
         JVal::Pair(list) => apply(list, env, state),
         JVal::Symbol(sym) => env.try_lookup(sym),
-        JVal::Quoted(val) => Ok(Rc::clone(val)),
+        JVal::Quote(val) => Ok(Rc::clone(val)),
         _ => Ok(expr),
     }
 }

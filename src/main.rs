@@ -1,13 +1,18 @@
 use std::path::PathBuf;
+use std::thread;
 
 use rustyline::Editor;
 use structopt::StructOpt;
 
 use jbscheme::Interpreter;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
-
 const HISTORY_FILE: &str = ".jbscheme_history";
+
+// No tail call optimization yet, so just using a big stack size for now to make
+// recursive functions a bit less bad
+const STACK_SIZE: usize = 128 * 1024 * 1024;
+
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(StructOpt, Debug)]
 struct Opt {
@@ -17,7 +22,7 @@ struct Opt {
     interactive: bool,
 }
 
-fn main() {
+fn run() {
     let opt = Opt::from_args();
     let mut interpreter = Interpreter::default();
 
@@ -46,4 +51,15 @@ fn repl(mut interpreter: Interpreter) {
         }
     }
     rl.save_history(HISTORY_FILE).unwrap();
+}
+
+fn main() {
+    // Spawn thread with explicit stack size
+    let child = thread::Builder::new()
+        .stack_size(STACK_SIZE)
+        .spawn(run)
+        .unwrap();
+
+    // Wait for thread to join
+    child.join().unwrap();
 }

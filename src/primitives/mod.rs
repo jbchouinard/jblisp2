@@ -64,9 +64,18 @@ pub struct JBuiltin {
     pub f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,
 }
 
+impl fmt::Display for JBuiltin {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "builtin {}", &self.name)
+    }
+}
+
 impl fmt::Debug for JBuiltin {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{}", self.name)
+        f.debug_struct("JBuiltin")
+            .field("name", &self.name)
+            .field("f", &format_args!("<Fn {:p}>", Rc::as_ptr(&self.f)))
+            .finish()
     }
 }
 
@@ -76,11 +85,23 @@ impl PartialEq for JBuiltin {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 pub struct JLambda {
     pub closure: JEnvRef,
     pub params: Vec<String>,
     pub code: JValRef,
+}
+
+// Implement manually because of cyclical references from the closure's parent Envs
+// back to the JVal
+impl fmt::Debug for JLambda {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        f.debug_struct("JLambda")
+            .field("closure", &format_args!("<JEnvRef {:p}>", &self.closure))
+            .field("params", &self.params)
+            .field("code", &self.code)
+            .finish()
+    }
 }
 
 // JVal's should only be constructed by JState, which manages interned values
@@ -88,7 +109,7 @@ pub struct JLambda {
 pub enum JVal {
     Nil,
     Pair(JPair),
-    Quoted(JValRef),
+    Quote(JValRef),
     Int(JTInt),
     Bool(bool),
     Symbol(String),

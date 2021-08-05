@@ -2,19 +2,6 @@
 (def true (eq? nil nil))
 (def false (not true))
 
-(def :nil (type ()))
-(def :pair (type (cons nil nil)))
-(def :lambda (type (fn () ())))
-(def :macro (type (macro () ())))
-(def :integer (type 1))
-(def :bool (type true))
-(def :string (type ""))
-(def :symbol (type 'a))
-(def :quoted (type ''a))
-(def :error (type (error "")))
-(def :builtin (type +))
-(def :specialform (type if))
-
 (def defmacro
     (macro (name params code)
         (list def name (list macro params code))))
@@ -24,29 +11,27 @@
 
 (defn type? (val t) (equal? (type val) t))
 
-(defn string? (val) (type? val :string))
-(defn symbol? (val) (type? val :symbol))
-(defn integer? (val) (type? val :integer))
-(defn pair? (val) (type? val :pair))
-(defn error? (val) (type? val :error))
-(defn bool? (val) (type? val :bool))
-(defn lambda? (val) (type? val :lambda))
-(defn macro? (val) (type? val :macro))
-(defn builtin? (val) (type? val :builtin))
-(defn specialform? (val) (type? val :specialform))
-(defn quoted? (val) (type? val :quoted))
-
-(defn nil? (x)
-    (equal? x nil))
+(defn nil? (x) (equal? x nil))
+(defn string? (val) (type? val 'string))
+(defn symbol? (val) (type? val 'symbol))
+(defn integer? (val) (type? val 'integer))
+(defn pair? (val) (type? val 'pair))
+(defn error? (val) (type? val 'error))
+(defn bool? (val) (type? val 'bool))
+(defn lambda? (val) (type? val 'lambda))
+(defn macro? (val) (type? val 'macro))
+(defn builtin? (val) (type? val 'builtin))
+(defn specialform? (val) (type? val 'specialform))
+(defn quote? (val) (type? val 'quote))
 
 (defn display (x)
     (print (repr x)))
 
-(defn assert (pred)
-    (if pred () (raise (error "assertion"))))
-
 (defn assert-msg (pred reason)
     (if pred () (raise (error reason))))
+
+(defn assert (pred)
+    (assert-msg pred "assertion failed"))
 
 (defn apply (op args) (eval (cons op args)))
 

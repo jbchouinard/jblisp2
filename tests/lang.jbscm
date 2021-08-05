@@ -5,7 +5,7 @@
     (assert-equal true (not false)))
 
 (test "string is string" 
-    (assert-type "foo" :string))
+    (assert-type "foo" 'string))
 
 (test "nil is nil"
     (assert-eq () (list)))

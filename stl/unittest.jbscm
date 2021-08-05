@@ -6,17 +6,19 @@
         (equal? "1" (getenv "TEST_VERBOSE"))
         false))
 
-(defn fn-assert-op (op)
-    (fn (x y)
-        (assert (op x y))))
-
-(def assert-eq (fn-assert-op eq?))
-
-(def assert-equal (fn-assert-op equal?))
-
 (defn assert-not (x) (assert (not x)))
 
-(defn assert-type (val t) (assert (type? val t)))
+(defn assert-eq (x y)
+    (assert-msg (eq? x y)
+        (concat (repr x) " is not the same as " (repr y))))
+
+(defn assert-equal (x y)
+    (assert-msg (equal? x y)
+        (concat (repr x) " is not equal to " (repr y))))
+
+(defn assert-type (val t)
+    (assert-msg (type? val t)
+        (concat (repr val) " is not of type " (repr t))))
 
 (defmacro assert-raise (code)
     (let errnoraise (error "did not raise an error")
@@ -38,13 +40,13 @@
             (list print (list concat name ": failed (" (list repr 'err) ")")) ())))
 
 (defn test-start (name) (begin
-    (print (concat "testing " name))
+    (print (concat "Testing " name "..."))
     (set! ok-count 0)
     (set! failed-count 0)))
 
 (defn test-exit () (begin
     (print (concat
-        "test results: "
+        "Test results: "
         (repr ok-count)
         " ok, "
         (repr failed-count)

@@ -21,15 +21,15 @@ pub enum JError {
 impl fmt::Display for JError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match self {
-            Self::Exception(s) => write!(f, "Exception: {}", s),
-            Self::AssertionError(s) => write!(f, "AssertionError: {}", s),
-            Self::TypeError(s) => write!(f, "TypeError: {}", s),
-            Self::EvalError(s) => write!(f, "EvalError: {}", s),
-            Self::ApplyError(s) => write!(f, "ApplyError: {}", s),
-            Self::UndefError(s) => write!(f, "UndefError: var {} is not defined", s),
-            Self::OsError(s) => write!(f, "OsError: {}", s),
+            Self::Exception(s) => write!(f, "Exception \"{}\"", s),
+            Self::AssertionError(s) => write!(f, "AssertionError \"{}\"", s),
+            Self::TypeError(s) => write!(f, "TypeError \"{}\"", s),
+            Self::EvalError(s) => write!(f, "EvalError \"{}\"", s),
+            Self::ApplyError(s) => write!(f, "ApplyError \"{}\"", s),
+            Self::UndefError(s) => write!(f, "UndefError {}", s),
+            Self::OsError(s) => write!(f, "OsError \"{}\"", s),
             Self::SyntaxError { position, reason } => {
-                write!(f, "SyntaxError: {} at {}", reason, position)
+                write!(f, "SyntaxError \"{} at {}\"", reason, position)
             }
         }
     }

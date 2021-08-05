@@ -100,7 +100,7 @@ impl JState {
         }
     }
     pub fn quote(&self, v: JValRef) -> JValRef {
-        JVal::Quoted(v).into_ref()
+        JVal::Quote(v).into_ref()
     }
     pub fn list(&self, mut v: Vec<JValRef>) -> JValRef {
         let mut cur = self.nil();
