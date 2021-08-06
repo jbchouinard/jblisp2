@@ -45,7 +45,7 @@ impl Interpreter {
     /// Execute the `jbscheme` [prelude](PRELUDE), which defines common constants, procedures
     /// and macros.
     pub fn exec_prelude(&mut self) {
-        if let Err(je) = self.eval_str("[prelude](PRELUDE)", PRELUDE) {
+        if let Err(je) = self.eval_str("#PRELUDE", PRELUDE) {
             eprintln!("{}", je);
             std::process::exit(1);
         }

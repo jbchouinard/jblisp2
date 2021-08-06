@@ -41,7 +41,7 @@ fn repl(mut interpreter: Interpreter) {
     let _ = rl.load_history(HISTORY_FILE);
     while let Ok(line) = rl.readline(">>> ") {
         rl.add_history_entry(line.as_str());
-        match interpreter.eval_str("stdin", &line) {
+        match interpreter.eval_str("#STDIN", &line) {
             Ok(Some(val)) => println!("{}", val),
             Ok(None) => (),
             Err(err) => eprintln!("Unhandled {}", err),

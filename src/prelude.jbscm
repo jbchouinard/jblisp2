@@ -62,4 +62,5 @@
         (* -1 x)
         (apply + (cons x (map - xs)))))
 
+; A hack until I make a real import system
 (defmacro import (mod) (list evalfile (concat mod ".jbscm")))
