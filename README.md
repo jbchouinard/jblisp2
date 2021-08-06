@@ -36,9 +36,15 @@ make
 make install
 ```
 
-## Documentation
+## Language Documentation
 
 See [MANUAL.md](MANUAL.md).
+
+## Rust Interop Documentation
+
+```bash
+cargo doc --open
+```
 
 ## Todo?
 - Comments
