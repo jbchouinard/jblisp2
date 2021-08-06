@@ -37,7 +37,7 @@ impl<'a, 'b> Parser<'a, 'b> {
         )
     }
 
-    fn next(&mut self) -> Result<Token, ParserError> {
+    fn _next(&mut self) -> Result<Token, ParserError> {
         let next = match self.tokenizer.next_token() {
             Ok(tok) => tok,
             Err(te) => return Err(self.error(te.pos, &te.reason)),
@@ -46,16 +46,20 @@ impl<'a, 'b> Parser<'a, 'b> {
         Ok(cur)
     }
 
-    fn expect(&mut self, tok: TokenValue) -> Result<Token, ParserError> {
-        let next = self.next()?;
-        if next.value == tok {
-            Ok(next)
-        } else {
-            Err(self.error(
-                next.pos,
-                &format!("expected token {:?}, got {:?}", tok, next.value),
-            ))
+    fn next(&mut self) -> Result<Token, ParserError> {
+        let next = self._next()?;
+        loop {
+            match &self.peek.value {
+                TokenValue::Comment(_) => {
+                    self._next()?;
+                }
+                TokenValue::Whitespace(_) => {
+                    self.whitespace()?;
+                }
+                _ => break,
+            };
         }
+        Ok(next)
     }
 
     fn whitespace(&mut self) -> Result<(), ParserError> {
@@ -73,8 +77,19 @@ impl<'a, 'b> Parser<'a, 'b> {
         Ok(())
     }
 
+    fn expect(&mut self, tok: TokenValue) -> Result<Token, ParserError> {
+        let next = self.next()?;
+        if next.value == tok {
+            Ok(next)
+        } else {
+            Err(self.error(
+                next.pos,
+                &format!("expected token {:?}, got {:?}", tok, next.value),
+            ))
+        }
+    }
+
     fn expr(&mut self) -> Result<JValRef, ParserError> {
-        self.whitespace()?;
         match self.peek.value {
             TokenValue::LParen => self.sexpr(),
             TokenValue::Quote => self.quote(),
@@ -99,18 +114,15 @@ impl<'a, 'b> Parser<'a, 'b> {
 
     fn sexpr(&mut self) -> Result<JValRef, ParserError> {
         self.expect(TokenValue::LParen)?;
-        self.whitespace()?;
         let mut list = vec![];
         while self.peek.value != TokenValue::RParen {
             list.push(self.expr()?);
-            self.whitespace()?;
         }
         self.expect(TokenValue::RParen)?;
         Ok(self.state.list(list))
     }
 
     pub fn parse_form(&mut self) -> Result<Option<JValRef>, ParserError> {
-        self.whitespace()?;
         if self.peek.value == TokenValue::Eof {
             return Ok(None);
         }
@@ -182,5 +194,22 @@ mod tests {
         ];
         let expected = state.list(lst);
         test_parser(&mut state, "(quote '(1 2 3))", expected)
+    }
+
+    #[test]
+    fn test_parser_5() {
+        let mut state = JState::default();
+        let inner_lst = vec![state.int(1), state.int(2), state.int(3)];
+        let lst = vec![
+            state.symbol("quote".to_string()),
+            state.quote(state.list(inner_lst)),
+        ];
+        let expected = state.list(lst);
+        test_parser(
+            &mut state,
+            "(quote ; this is a comment
+            '(1 2 3))",
+            expected,
+        )
     }
 }

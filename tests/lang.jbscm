@@ -1,7 +1,7 @@
 (import "stl/unittest")
 
 (test-suite "lang"
-    (test "asserting false things raises" 
+    (test "asserting false things raises"
         (assert-raise (assert false)))
 
     (test "not true is false"

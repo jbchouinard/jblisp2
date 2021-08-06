@@ -48,7 +48,6 @@ make install
 ```
 
 ## Todo?
-- Comments
 - Tracebacks
 - More builtin functions
 - Tail call optimization

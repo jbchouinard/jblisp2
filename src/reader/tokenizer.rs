@@ -12,6 +12,7 @@ pub enum TokenValue {
     Int(JTInt),
     Ident(String),
     String(String),
+    Comment(String),
     Eof,
 }
 
@@ -35,6 +36,7 @@ lazy_static! {
     static ref RE_IDENT: Regex =
         Regex::new(r"^[a-zA-Z+.*/<>=!?:$%_&~^-][0-9a-zA-Z+.*/<=>!?:$%_&~^-]*").unwrap();
     static ref RE_STRING: Regex = Regex::new(r#"^"([^"]|\\")*""#).unwrap();
+    static ref RE_COMMENT: Regex = Regex::new(r";[^\n]*").unwrap();
 }
 
 type TResult = std::result::Result<TokenValue, String>;
@@ -68,6 +70,10 @@ fn t_string(val: &str) -> TResult {
 
 fn t_ws(s: &str) -> TResult {
     Ok(TokenValue::Whitespace(s.to_string()))
+}
+
+fn t_comment(s: &str) -> TResult {
+    Ok(TokenValue::Comment(s.to_string()))
 }
 
 pub struct Tokenizer<'a> {
@@ -120,6 +126,9 @@ impl<'a> Tokenizer<'a> {
             return Ok(token);
         }
         if let Some(token) = self.try_token(&RE_STRING, t_string)? {
+            return Ok(token);
+        }
+        if let Some(token) = self.try_token(&RE_COMMENT, t_comment)? {
             return Ok(token);
         }
         Err(TokenError::new(
@@ -210,6 +219,26 @@ mod tests {
             vec![
                 TokenValue::LParen,
                 TokenValue::Ident("quote".to_string()),
+                TokenValue::Quote,
+                TokenValue::LParen,
+                TokenValue::Int(1),
+                TokenValue::Int(2),
+                TokenValue::Int(3),
+                TokenValue::RParen,
+                TokenValue::RParen,
+            ],
+        );
+    }
+
+    #[test]
+    fn test_tokenizer_4() {
+        test_tokenizer(
+            "(quote ; this is a comment!
+                '(1 2 3))",
+            vec![
+                TokenValue::LParen,
+                TokenValue::Ident("quote".to_string()),
+                TokenValue::Comment("; this is a comment!".to_string()),
                 TokenValue::Quote,
                 TokenValue::LParen,
                 TokenValue::Int(1),

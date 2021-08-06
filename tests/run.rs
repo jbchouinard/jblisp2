@@ -8,16 +8,16 @@ fn execfile<P: AsRef<Path>>(path: P) {
 }
 
 #[test]
-fn test_suite_lang() {
+fn tests_lang() {
     execfile("tests/lang.jbscm")
 }
 
 #[test]
-fn test_suite_string() {
+fn tests_string() {
     execfile("tests/string.jbscm")
 }
 
 #[test]
-fn test_suite_math() {
+fn tests_math() {
     execfile("tests/math.jbscm")
 }
