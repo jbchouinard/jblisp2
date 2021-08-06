@@ -1,382 +1,462 @@
+-   [JB Scheme Manual](#jb-scheme-manual)
+    -   [Language](#language)
+        -   [Primitive Types](#primitive-types)
+        -   [Composite Types](#composite-types)
+        -   [Special Types](#special-types)
+        -   [Callable Types](#callable-types)
+        -   [Builtin Callable Types](#builtin-callable-types)
+        -   [Binding & Assignment](#binding-assignment)
+        -   [Function Definition](#function-definition)
+        -   [Control Flow](#control-flow)
+        -   [Comparison](#comparison)
+        -   [Logical Operators](#logical-operators)
+        -   [Pair & List Operations](#pair-list-operations)
+        -   [String Operations](#string-operations)
+        -   [Integer Operations](#integer-operations)
+        -   [Printing](#printing)
+        -   [Type Inspection](#type-inspection)
+        -   [Quoting & Evaluation](#quoting-evaluation)
+        -   [Macro Definition](#macro-definition)
+        -   [Exceptions](#exceptions)
+        -   [System Procedures](#system-procedures)
+        -   [Debugging](#debugging)
+    -   [Standard Library](#standard-library)
+        -   [math](#math)
+        -   [unittest](#unittest)
+
 # JB Scheme Manual
 
-## Primitive Types
-- pair
-- string
-- symbol
-- integer
-- bool
-- lambda
-- macro
-- quote
-- error
-- builtin function
-- builtin specialform
+## Language
 
-## Forms
+JB Scheme is a homebrew, non-RnRS compliant dialect of Scheme.
 
-### Lambdas, Bindings & Control Flow
+### Primitive Types
+
+#### string
+
+#### symbol
+
+#### integer
+
+#### bool
+
+### Composite Types
+
+#### pair
+
+#### list
+
+### Special Types
+
+#### quote
+
+#### error
+
+### Callable Types
+
+#### lambda
+
+#### macro
+
+### Builtin Callable Types
+
+#### function
+
+#### specialform
+
+### Binding & Assignment
 
 #### def
-```
-(def <name> <expr>)
-```
+
+    (def name :expr)
 
 Create and assign binding in local scope.
 
 #### set!
-```
-(set! <name> <expr>)
-```
-Change existing binding. Raises error if a binding does not already exists.
 
-#### fn
-```
-(fn <formals> <expr>)
-```
-Create a lambda (function).
+    (set! name :expr)
 
-#### defn
-```
-(defn <name> <formals> <expr> ...)
-```
-Create lambda and bind it to `name` (with implicit `begin`).
-
-```
->>> (defn increment (x) (+ x 1))
->>> (increment 1)
-2
-```
+Change existing binding. Raises error if a binding does not already
+exists.
 
 #### let
-```
-(let <name> <value> <expr> ...)
-```
+
+    (let name value:expr :expr ...)
+
 Create a binding in a new local scope.
 
-```
->>> (let x 12 (display x))
-12
-```
+    >>> (let x 12 (display x))
+    12
+
+#### lets
+
+    (lets ((name value:expr) ...) :expr ...)
+
+Create multiple bindings in a new local scope.
+
+    >>> (lets ((x 5) (y 7))
+    ...    (display x)
+    ...    (display y))
+    5
+    7
+
+### Function Definition
+
+#### defn
+
+    (defn name parameters :expr ...)
+
+Create lambda function and bind it to `name`.
+
+Variadic lambdas can be defined with formal parameters like `(x . xs)` -
+there must be a single parameter after `.`, which will be a list
+containing zero or more arguments depending on the number of arguments
+passed.
+
+    >>> (defn increment (x) (+ x 1))
+    >>> (increment 1)
+    2
+    >>> (defn variadic (x y . rest) rest)
+    >>> (variadic 1)
+    Unhandled ApplyError "expected at least 2 argument(s)"
+    >>> (variadic 1 2)
+    ()
+    >>> (variadic 1 2 3 4)
+    (3 4)
+
+#### fn
+
+    (fn parameters :expr ...)
+
+Create a lambda (function). See [`defn`](#defn);
+
+### Control Flow
 
 #### if
-```
-(if <pred:bool> <then:expr> <else:expr>)
-```
-Evaluates only `then` or `else` conditonally on the value of `pred`.
+
+    (if predicate:bool then:expr else:expr)
+
+Evaluates only `then` or `else` conditonally on the value of
+`predicate`.
 
 #### begin
-```
-(begin <expr> ...)
-```
-Evaluate expressions sequentially and return value of last expression.
 
-#### apply
-```
-(apply <f:callable> <args:list>)
-```
+    (begin :expr ...)
+
+Evaluate expressions sequentially and return value of last expression.
 
 ### Comparison
 
 #### eq?
-```
-(eq? <expr> <expr>)
-```
+
+    (eq? :expr :expr)
+
 Identity comparison. Check if two values are the same object.
 
 #### equal?
-```
-(equal? <expr> <expr>)
-```
+
+    (equal? :expr :expr)
+
 Value comparison. Check if two values are equal.
 
 ### Logical Operators
 
 #### not
-```
-(not <x:bool>)
-```
 
-### Pairs & Lists
+    (not :bool)
+
+### Pair & List Operations
 
 #### cons
-```
-(cons <left:expr> <right:expr>)
-```
+
+    (cons left:expr right:expr)
+
 Construct a pair.
 
 #### car
-```
-(car <pair>)
-```
+
+    (car :pair)
+
+Get first item of a pair (head of list).
 
 #### cdr
-```
-(cdr <pair>)
 
-```
+    (cdr :pair)
+
+Get second item of a pair (rest of list).
 
 #### list
-```
-(list <expr> ...)
-```
+
+    (list :expr ...)
+
+Construct a list, which is a linked list made from pairs and termninated
+by `nil`.
+
+    >>> (equal? (list 1 2 3) (cons 1 (cons 2 (cons 3 nil))))
+    true
+    >>> (equal? (list 1 2 3) (cons 1 (list 2 3)))
 
 #### nil?
-```
-(nil? <expr>)
-```
+
+    (nil? :expr)
+
+Check if value is the empty list (nil).
 
 #### list?
-```
-(list? <expr>)
-```
+
+    (list? :expr)
+
+Check if value is a nil-terminated list of ordered pairs.
 
 #### map
-```
-(map <f> <list>)
-```
-Applies `f` to each value of a list and return results in list.
 
-```
->>> (map (fn (x) (* 2 x)) (list 1 2 3))
-(2 4 6)
-```
+    (map f:procedure vals:list)
+
+Applies `f` to each value in a list and return results in list.
+
+    >>> (map (fn (x) (* 2 x)) (list 1 2 3))
+    (2 4 6)
 
 #### fold
-```
-(fold <f> <init> <list>)
-```
-Applies `f` to each values of a list and accumulate results in `init`.
 
-```
->>> (fold + 0 (list 1 2 3))
-6
->>> (fold cons () (list 1 2 3))
-(3 2 1)
-```
+    (fold f:procedure init:expr vals:list)
 
-### Strings
+Applies `f` to each value in a list and accumulate results in `init`.
+
+    >>> (fold + 0 (list 1 2 3))
+    6
+    >>> (fold cons () (list 1 2 3))
+    (3 2 1)
+
+### String Operations
 
 #### concat
-```
-(concat <string> ...)
-```
+
+    (concat :string ...)
+
 Concatenate multiple strings.
 
-```
-(concat "foo" "bar" "baz")
-"foobarbaz"
-```
+    >>> (concat "foo" "bar" "baz")
+    "foobarbaz"
 
-### Numbers
+### Integer Operations
 
-#### +
-```
-(+ <integer> ...)
-```
+#### add (+)
 
-#### *
-```
-(* <integer> ...)
-```
+    (+ :integer ...)
 
-### Inspection & Display
+#### mul (\*)
+
+    (* :integer ...)
+
+### Printing
 
 #### print
-```
-(print <string>)
-```
+
+    (print :string)
 
 #### repr
-```
-(repr <expr>)
-```
+
+    (repr :expr)
+
 Get string representation of a value.
 
 #### display
-```
-(display <expr>)
-```
+
+    (display :expr)
+
 Print string representation of a value.
 
+### Type Inspection
+
 #### type
-```
-(type <expr>)
-```
+
+    (type :expr)
+
 Inspect type of a value.
 
-```
->>> (type "foo")
-string
-```
+    >>> (type "foo")
+    string
 
 #### type?
-```
-(type? <expr> <type>)
-```
-Test type of a value.
 
-```
->>> (type? "foo" :string)
-true
-```
+    (type? :expr type)
+    (string? :expr)
+    (symbol? :expr)
+    ...
 
-### Evaluation
+Test type of a value. There are also convenience functions for every
+type.
 
-#### eval
-```
-(eval <expr>)
-```
-Evaluate an expression.
+    >>> (type? "foo" string)
+    true
+    >>> (integer? "foo")
+    false
 
-```
->>> (def expr (quote (+ 5 5)))
->>> expr
-(+ 5 5)
->>> (eval expr)
-10
-```
-
-#### evalfile
-```
-(evalfile <filename:string>)
-```
-Evaluate file in the global environment.
+### Quoting & Evaluation
 
 #### quote
-```
-(quote <expr>)
-```
+
+    (quote :expr)
+
 A quoted expression evaluates to the expression.
 
-```
->>> (def a 100)
->>> a
-100
->>> (quote a)
-a
->>> (+ 5 5)
-10
->>> (quote (+ 5 5))
-(+ 5 5)
-```
+    >>> (def a 100)
+    >>> a
+    100
+    >>> (quote a)
+    a
+    >>> (+ 5 5)
+    10
+    >>> (quote (+ 5 5))
+    (+ 5 5)
 
-### Macros
+#### eval
+
+    (eval :expr)
+
+Evaluate an expression.
+
+    >>> (def expr (quote (+ 5 5)))
+    >>> expr
+    (+ 5 5)
+    >>> (eval expr)
+    10
+
+#### apply
+
+    (apply :procedure :list)
+
+Apply a procedure to a list of arguments.
+
+    >>> (apply + (list 1 2 3))
+    6
+
+#### evalfile
+
+    (evalfile filename:string)
+
+Evaluate file in the global environment.
+
+### Macro Definition
 
 #### defmacro
-```
-(defmacro <name> <formals> <expr> ...)
-```
 
-jbscheme macros are "procedural"; they are simply lambdas which return code.
+    (defmacro name formals :expr ...)
 
-The body of the macro is first evaluated in the macro's lexical environment.
-Then the resulting expression is evaluated in the caller's environment.
+jbscheme macros are “procedural”; they are simply lambdas which return
+code.
 
-Beware of capturing variables from the macro's environment, if you want to refer to
-variables in the calling environment, use quotation.
+The body of the macro is first evaluated in the macro’s lexical
+environment. Then the resulting expression is evaluated in the caller’s
+environment.
+
+Beware of capturing variables from the macro’s environment, if you want
+to refer to variables in the calling environment, use quotation.
 
 This `add-x` macro captures the global binding for `x`:
-```
->>> (defmacro add-x (y) (list + x y))
->>> (def x 100)
->>> (add-x 5)
-105
->>> (set! x 200)
->>> (add-x 5)
-205
->>> ((fn (x) (add-x 5)) 1000)
-205
-```
 
-In this version, `x` is not captured, it is looked up in the calling environment:
-```
->>> (defmacro add-x (y) (list + 'x y))
->>> (def x 100)
->>> ((fn (x) (add-x 5)) 1000)
-1005
-```
+    >>> (defmacro add-x (y) (list + x y))
+    >>> (def x 100)
+    >>> (add-x 5)
+    105
+    >>> (set! x 200)
+    >>> (add-x 5)
+    205
+    >>> ((fn (x) (add-x 5)) 1000)
+    205
+
+In this version, `x` is not captured, it is looked up in the calling
+environment:
+
+    >>> (def x 100)
+    >>> (defmacro add-x (y) (list + 'x y))
+    >>> ((fn (x) (add-x 5)) 1000)
+    1005
 
 #### macro
-```
-(macro <formals> <expr>)
-```
 
-Create macro. See [defmacro](#defmacro).
+    (macro formals :expr ...)
+
+Create macro. See [‘defmacro’](#defmacro).
 
 ### Exceptions
 
-jbscheme has exception raising and handling with these forms:
+Errors can be raised to interrupt program flow, and can be caught with
+the `try` form.
 
 #### error
-```
-(error <msg:string>)
-```
+
+    (error :string)
 
 #### raise
-```
-(raise <error>)
-```
+
+    (raise :error)
 
 #### try
-```
-(try <body:expr> <catch:expr>)
-```
-Try evaluating `body`. If an error is raised, evaluate `catch`; the raised error
-is bound to `err`.
 
-```
->>> (defn errored () (begin (raise (error "oh no!")) (print "never evaluated")))
->>> (errored)
-Unhandled Error: oh no!
->>> (try (print "no error") (print (concat "handled " (repr err))))
-no error
->>> (try (errored) (print (concat "handled " (repr err))))
-handled #[error Error "oh no!"]
-```
+    (try body:expr catch:expr)
+
+Try evaluating `body`. If an error is raised, evaluate `catch`; the
+raised error value is bound to `err` when `catch` is evaluated.
+
+    >>> (defn errored () (begin (raise (error "oh no!")) (print "never evaluated")))
+    >>> (errored)
+    Unhandled Error: oh no!
+    >>> (try (print "no error") (print (concat "handled " (repr err))))
+    no error
+    >>> (try (errored) (print (concat "handled " (repr err))))
+    handled #[error Exception "oh no!"]
 
 #### assert
-```
-(assert <pred:bool>)
-```
 
-### System
+    (assert predicate:bool)
+
+Raises an exception if `predicate` is false.
+
+### System Procedures
 
 #### getenv
-```
-(getenv <envvar:string>)
-```
-Get value of environment variable. Raises exception if the variable is not set
-or contains non-UTF8 characters.
+
+    (getenv var:string)
+
+Get value of environment variable. Raises exception if the variable is
+not set or contains non-UTF8 characters.
 
 #### exit
-```
-(exit <code:integer>)
-```
+
+    (exit :integer)
+
 Exit program with a status code.
 
-### Debug
+### Debugging
 
 #### dd
-```
-(dd <expr>)
-```
+
+    (dd :expr)
+
 Print Rust struct debug.
 
 #### ddp
-```
-(ddp <expr>)
-```
+
+    (ddp :expr)
+
 Pretty print Rust struct debug.
 
 #### dda
-```
-(dda <expr>)
-```
+
+    (dda :expr)
+
 Print pointer address.
 
 #### ddc
-```
-(ddc <lambda|macro>)
-```
-Print code of (non-builtin) lambda or macro. 
+
+    (ddc :lambda|:macro)
+
+Print code of (non-builtin) lambda or macro.
+
+## Standard Library
+
+### math
+
+### unittest

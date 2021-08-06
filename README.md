@@ -20,9 +20,15 @@ Features:
 - Exceptions
 - Reference-counted memory management
 
-## Test
+## Documentation
+
+### Language Manual
+
+See [MANUAL.pdf](MANUAL.pdf) or [MANUAL.md](MANUAL.md).
+
+### Rust Interop
 ```bash
-cargo test
+cargo doc --open
 ```
 
 ## Run
@@ -30,20 +36,15 @@ cargo test
 cargo run
 ```
 
+## Test
+```bash
+cargo test
+```
+
 ## Install
 ```bash
 make
 make install
-```
-
-## Documentation
-
-### Language
-See [MANUAL.md](MANUAL.md).
-
-### Rust Interop
-```bash
-cargo doc --open
 ```
 
 ## Todo?

@@ -16,9 +16,9 @@
     (assert-msg (equal? x y)
         (concat (repr x) " is not equal to " (repr y))))
 
-(defn assert-type (val t)
-    (assert-msg (type? val t)
-        (concat (repr val) " is not of type " (repr t))))
+(defmacro assert-type (val t)
+    (list assert-msg (list type? val t)
+        (list concat (list repr val) " is not of type " (repr t))))
 
 (defmacro assert-raise (code)
     (let errnoraise (error "did not raise an error")
@@ -28,10 +28,10 @@
                 (list raise errnoraise))
             (list if (list equal? 'err errnoraise) (list raise errnoraise) ()))))
 
-(defmacro test (name code)
+(defmacro test (name . exprs)
     (list try
         (list begin
-            code
+            (cons begin exprs)
             (list set! 'ok-count (list + ok-count 1))
             (list if test-verbose
                 (list print (list concat name ": ok")) ()))

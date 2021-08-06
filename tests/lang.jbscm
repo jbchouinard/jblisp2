@@ -8,7 +8,7 @@
         (assert-equal true (not false)))
 
     (test "string is string" 
-        (assert-type "foo" 'string))
+        (assert-type "foo" string))
 
     (test "nil is nil"
         (assert-eq () (list)))
@@ -40,9 +40,8 @@
     (test "set! changes local binding"
         (assert-equal 7 (
             let x 0
-            (begin 
                 (set! x 7)
-                x))))
+                x)))
 
     (test "eval a quoted sexpr" 
         (assert (eval (quote (eq? nil nil)))))

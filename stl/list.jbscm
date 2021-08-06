@@ -1,1 +1,0 @@
-(defn reverse (lst) (fold cons () lst))
