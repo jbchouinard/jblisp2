@@ -7,7 +7,7 @@ Inspired by [mit-scheme](https://www.gnu.org/software/mit-scheme/) and
 [Build Your Own Lisp](http://www.buildyourownlisp.com/).
 
 jbscheme does not aim to be a fully-featured Scheme language, it is an exercise
-in language design, implementation, and Rust programming. Eventually I would like to
+in language design and implementation, and Rust programming. Eventually I would like to
 implement enough features to use jbscheme to complete exercises and
 projects from [SICP](https://mitpress.mit.edu/sites/default/files/sicp/index.html).
 However it will not be drop-in replacement for mit-scheme, it is a different dialect,
@@ -22,10 +22,8 @@ Features:
 
 ## Test
 ```bash
-make test
+cargo test
 ```
-
-To print more details, set the environment variable `TEST_VERBOSE=1`.
 
 ## Run
 ```bash
