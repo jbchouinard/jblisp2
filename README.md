@@ -36,12 +36,12 @@ make
 make install
 ```
 
-## Language Documentation
+## Documentation
 
+### Language
 See [MANUAL.md](MANUAL.md).
 
-## Rust Interop Documentation
-
+### Rust Interop
 ```bash
 cargo doc --open
 ```
