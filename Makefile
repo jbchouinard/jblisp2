@@ -5,6 +5,8 @@ endif
 build:
 	cargo build --release
 
+docs: MANUAL.pdf MANUAL.md
+
 install:
 	install -m 755 target/release/jbscheme $(DESTDIR)$(PREFIX)/bin/
 
@@ -13,11 +15,12 @@ test:
 
 clean:
 	cargo clean
+	rm -f MANUAL.pdf MANUAL.md
 
-MANUAL.pdf: pandoc/manual.md
+MANUAL.pdf: MANUAL.pandoc.md
 	pandoc -V geometry:margin="1.5in" -V title="JB Scheme Manual" --toc --toc-depth 4 -o $@ $<
 
-MANUAL.md: pandoc/manual.md
-	pandoc -t gfm --toc --toc-depth 3 -s -o $@ $<
+MANUAL.md: MANUAL.pandoc.md
+	pandoc -t gfm -s -o $@ $<
 
 .PHONY: build install test clean

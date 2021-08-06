@@ -1,5 +1,5 @@
 \newpage
-# JB Scheme Manual
+# JB Scheme
 
 ## Language
 

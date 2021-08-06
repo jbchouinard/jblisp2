@@ -1,30 +1,4 @@
--   [JB Scheme Manual](#jb-scheme-manual)
-    -   [Language](#language)
-        -   [Primitive Types](#primitive-types)
-        -   [Composite Types](#composite-types)
-        -   [Special Types](#special-types)
-        -   [Callable Types](#callable-types)
-        -   [Builtin Callable Types](#builtin-callable-types)
-        -   [Binding & Assignment](#binding-assignment)
-        -   [Function Definition](#function-definition)
-        -   [Control Flow](#control-flow)
-        -   [Comparison](#comparison)
-        -   [Logical Operators](#logical-operators)
-        -   [Pair & List Operations](#pair-list-operations)
-        -   [String Operations](#string-operations)
-        -   [Integer Operations](#integer-operations)
-        -   [Printing](#printing)
-        -   [Type Inspection](#type-inspection)
-        -   [Quoting & Evaluation](#quoting-evaluation)
-        -   [Macro Definition](#macro-definition)
-        -   [Exceptions](#exceptions)
-        -   [System Procedures](#system-procedures)
-        -   [Debugging](#debugging)
-    -   [Standard Library](#standard-library)
-        -   [math](#math)
-        -   [unittest](#unittest)
-
-# JB Scheme Manual
+# JB Scheme
 
 ## Language
 
