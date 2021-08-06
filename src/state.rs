@@ -89,10 +89,10 @@ impl JState {
             self.interned_int.get_or_insert(val)
         }
     }
-    pub fn sym(&mut self, val: String) -> JValRef {
+    pub fn symbol(&mut self, val: String) -> JValRef {
         self.interned_sym.get_or_insert(val)
     }
-    pub fn str(&mut self, val: String) -> JValRef {
+    pub fn string(&mut self, val: String) -> JValRef {
         if val.len() > STR_INTERN_MAX_LEN {
             (self.interned_str.constructor)(val)
         } else {
@@ -113,24 +113,24 @@ impl JState {
     pub fn pair(&self, left: JValRef, right: JValRef) -> JValRef {
         JVal::Pair(JPair::cons(left, right)).into_ref()
     }
-    pub fn err(&self, je: JError) -> JValRef {
+    pub fn error(&self, je: JError) -> JValRef {
         JVal::Error(je).into_ref()
     }
-    pub fn lambda(&self, clos: JEnvRef, params: Vec<String>, code: JValRef) -> JValRef {
-        JVal::Lambda(Box::new(JLambda {
+    pub fn lambda(&self, clos: JEnvRef, params: Vec<String>, code: JValRef) -> JResult {
+        Ok(JVal::Lambda(Box::new(JLambda {
             closure: clos,
-            params,
+            params: JParams::new(params)?,
             code,
         }))
-        .into_ref()
+        .into_ref())
     }
-    pub fn lmacro(&self, clos: JEnvRef, params: Vec<String>, code: JValRef) -> JValRef {
-        JVal::Macro(Box::new(JLambda {
+    pub fn lmacro(&self, clos: JEnvRef, params: Vec<String>, code: JValRef) -> JResult {
+        Ok(JVal::Macro(Box::new(JLambda {
             closure: clos,
-            params,
+            params: JParams::new(params)?,
             code,
         }))
-        .into_ref()
+        .into_ref())
     }
     pub fn builtin(
         &self,

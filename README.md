@@ -45,7 +45,6 @@ See [MANUAL.md](MANUAL.md).
 ## Todo?
 - Comments
 - Tracebacks
-- Variadic lambdas
 - More builtin functions
 - Tail call optimization
 - More tests

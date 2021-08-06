@@ -10,8 +10,8 @@ pub fn repr(expr: &JVal) -> String {
         JVal::Error(e) => format!("#[error {}]", e),
         JVal::Builtin(b) => format!("#[function {}]", b),
         JVal::SpecialForm(b) => format!("#[specialform {}]", b),
-        JVal::Lambda(l) => format!("#[lambda {}]", l.params.len()),
-        JVal::Macro(l) => format!("#[macro {}]", l.params.len()),
+        JVal::Lambda(_) => "#[lambda]".to_string(),
+        JVal::Macro(_) => "#[macro]".to_string(),
         JVal::Pair(c) => repr_cell(c),
         JVal::Quote(val) => format!("'{}", repr(&*val)),
     }

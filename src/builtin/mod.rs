@@ -50,7 +50,7 @@ fn jbuiltin_print(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
 
 fn jbuiltin_repr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x] = get_n_args(args)?;
-    Ok(state.str(repr(&x)))
+    Ok(state.string(repr(&x)))
 }
 
 fn jbuiltin_display_debug(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
@@ -82,7 +82,7 @@ fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -> JR
             ))
         }
     };
-    println!("({} ({}) {})", t, params.join(" "), code);
+    println!("({} {} {})", t, params, code);
     Ok(state.nil())
 }
 
@@ -117,7 +117,7 @@ fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
             _ => return Err(JError::TypeError("expected a list of symbols".to_string())),
         }
     }
-    Ok(state.lambda(env, params, Rc::clone(&code)))
+    state.lambda(env, params, Rc::clone(&code))
 }
 
 fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -129,7 +129,7 @@ fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
             _ => return Err(JError::TypeError("expected a list of symbols".to_string())),
         }
     }
-    Ok(state.lmacro(env, params, Rc::clone(&code)))
+    state.lmacro(env, params, Rc::clone(&code))
 }
 
 fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -148,7 +148,7 @@ fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
 
 fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
-    Ok(state.sym(
+    Ok(state.symbol(
         match *val {
             JVal::Nil => "nil",
             JVal::Pair(_) => "pair",

@@ -3,11 +3,11 @@
 (def false (not true))
 
 (def defmacro
-    (macro (name params code)
-        (list def name (list macro params code))))
+    (macro (name params . exprs)
+        (list def name (list macro params (cons begin exprs)))))
 
-(defmacro defn (name params code)
-    (list def name (list fn params code)))
+(defmacro defn (name params . exprs)
+    (list def name (list fn params (cons begin exprs))))
 
 (defn type? (val t) (equal? (type val) t))
 
@@ -35,8 +35,8 @@
 
 (defn apply (op args) (eval (cons op args)))
 
-(defmacro let (sym val body)
-    (list (list fn (list sym) body) val))
+(defmacro let (sym val . exprs)
+    (list (list fn (list sym) (cons begin exprs)) val))
 
 (defn map (f lst)
     (if (nil? lst)
@@ -50,13 +50,16 @@
         init
         (fold f (f (car lst) init) (cdr lst))))
 
-(defn range (start end) (begin
+(defn range (start end)
     (defn range-rec (n)
         (if (eq? 0 (- n end))
             nil
             (cons n (range-rec (+ n 1)))))
-    (range-rec start)))
+    (range-rec start))
 
-(defn neg (n) (* n -1))
+(defn - (x . xs)
+    (if (nil? xs)
+        (* -1 x)
+        (apply + (cons x (map - xs)))))
 
-(defn - (x y) (+ x (neg y)))
+(defmacro import (mod) (list evalfile (concat mod ".jbscm")))

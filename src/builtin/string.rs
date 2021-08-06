@@ -8,5 +8,5 @@ pub fn jbuiltin_concat(args: JValRef, _env: JEnvRef, state: &mut JState) -> JRes
             _ => return Err(JError::TypeError("expected strings".to_string())),
         }
     }
-    Ok(state.str(strings.join("")))
+    Ok(state.string(strings.join("")))
 }

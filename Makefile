@@ -5,17 +5,13 @@ endif
 build:
 	cargo build --release
 
-target/release/jbscheme:
-	cargo build --release
-
-install: target/release/jbscheme
-	install -m 755 $< $(DESTDIR)$(PREFIX)/bin/
+install:
+	install -m 755 target/release/jbscheme $(DESTDIR)$(PREFIX)/bin/
 
 test:
 	cargo test
-	cargo run -- tests/tests.jbscm
 
 clean:
 	cargo clean
 
-.PHONY: test clean build
+.PHONY: build install test clean

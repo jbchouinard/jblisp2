@@ -91,8 +91,8 @@ impl<'a, 'b> Parser<'a, 'b> {
         let next = self.next()?;
         match next.value {
             TokenValue::Int(n) => Ok(self.state.int(n)),
-            TokenValue::Ident(s) => Ok(self.state.sym(s)),
-            TokenValue::String(s) => Ok(self.state.str(s)),
+            TokenValue::Ident(s) => Ok(self.state.symbol(s)),
+            TokenValue::String(s) => Ok(self.state.string(s)),
             _ => Err(self.error(next.pos, &format!("unexpected token {:?}", next.value))),
         }
     }
@@ -142,7 +142,7 @@ mod tests {
     #[test]
     fn test_parser_1() {
         let mut state = JState::default();
-        let lst = vec![state.sym("+".to_string()), state.int(12), state.int(-15)];
+        let lst = vec![state.symbol("+".to_string()), state.int(12), state.int(-15)];
         let expected = state.list(lst);
         test_parser(&mut state, "(+ 12 -15)", expected);
     }
@@ -150,9 +150,9 @@ mod tests {
     #[test]
     fn test_parser_2() {
         let mut state = JState::default();
-        let inner_lst = vec![state.sym("+".to_string()), state.int(12), state.int(-33)];
+        let inner_lst = vec![state.symbol("+".to_string()), state.int(12), state.int(-33)];
         let lst = vec![
-            state.sym("*".to_string()),
+            state.symbol("*".to_string()),
             state.list(inner_lst),
             state.int(42),
         ];
@@ -164,9 +164,9 @@ mod tests {
     fn test_parser_3() {
         let mut state = JState::default();
         let lst = vec![
-            state.sym("concat".to_string()),
-            state.str("foo".to_string()),
-            state.str("bar".to_string()),
+            state.symbol("concat".to_string()),
+            state.string("foo".to_string()),
+            state.string("bar".to_string()),
         ];
         let expected = state.list(lst);
         test_parser(&mut state, "(concat \"foo\" \"bar\")", expected)
@@ -177,7 +177,7 @@ mod tests {
         let mut state = JState::default();
         let inner_lst = vec![state.int(1), state.int(2), state.int(3)];
         let lst = vec![
-            state.sym("quote".to_string()),
+            state.symbol("quote".to_string()),
             state.quote(state.list(inner_lst)),
         ];
         let expected = state.list(lst);

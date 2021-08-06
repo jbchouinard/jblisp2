@@ -58,10 +58,12 @@ impl Iterator for JListIterator<'_> {
     }
 }
 
+pub type JBuiltinFn = Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>;
+
 #[derive(Clone)]
 pub struct JBuiltin {
     pub name: String,
-    pub f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,
+    pub f: JBuiltinFn,
 }
 
 impl fmt::Display for JBuiltin {
@@ -79,16 +81,92 @@ impl fmt::Debug for JBuiltin {
     }
 }
 
+#[allow(clippy::ptr_eq)]
 impl PartialEq for JBuiltin {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
+            && &*self.f as *const dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult as *const u8
+                == &*other.f as *const dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult as *const u8
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum JParams {
+    Fixed(Vec<String>),
+    Variadic(Vec<String>, String),
+}
+
+impl fmt::Display for JParams {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Fixed(params) => format!("({})", params.join(" ")),
+                Self::Variadic(params, rest) => format!("({} . {})", params.join(" "), rest),
+            }
+        )
+    }
+}
+
+impl JParams {
+    pub fn new(mut names: Vec<String>) -> Result<Self, JError> {
+        let np = names.len();
+        let rest = if np > 1 && names[np - 2] == "." {
+            let end = names.split_off(np - 2);
+            Some(end[1].to_string())
+        } else {
+            None
+        };
+        for p in &names {
+            if p == "." {
+                return Err(JError::EvalError("ill-formed params".to_string()));
+            }
+        }
+        Ok(match rest {
+            Some(rname) => Self::Variadic(names, rname),
+            None => Self::Fixed(names),
+        })
+    }
+    fn nargs(&self) -> String {
+        match self {
+            Self::Variadic(params, _) => format!("at least {}", params.len()),
+            Self::Fixed(params) => format!("{}", params.len()),
+        }
+    }
+    pub fn bind(&self, args: JValRef, env: JEnvRef) -> Result<(), JError> {
+        let params = match self {
+            Self::Fixed(params) => params,
+            Self::Variadic(params, _) => params,
+        };
+        let mut head = args;
+        for p in params.iter() {
+            let pair: &JPair = head.to_pair().map_err(|_| {
+                JError::ApplyError(format!("expected {} argument(s)", self.nargs()))
+            })?;
+            env.define(p, pair.car());
+            head = pair.cdr();
+        }
+        match self {
+            Self::Variadic(_, p) => env.define(p, head),
+            Self::Fixed(_) => match &*head {
+                JVal::Nil => (),
+                _ => {
+                    return Err(JError::ApplyError(format!(
+                        "expected {} argument(s)",
+                        self.nargs()
+                    )))
+                }
+            },
+        }
+        Ok(())
     }
 }
 
 #[derive(PartialEq, Clone)]
 pub struct JLambda {
     pub closure: JEnvRef,
-    pub params: Vec<String>,
+    pub params: JParams,
     pub code: JValRef,
 }
 
@@ -137,6 +215,12 @@ impl JVal {
         match self {
             Self::Int(n) => Ok(*n),
             _ => Err(JError::TypeError("expected an int".to_string())),
+        }
+    }
+    pub fn to_pair(&self) -> Result<&JPair, JError> {
+        match self {
+            Self::Pair(p) => Ok(p),
+            _ => Err(JError::TypeError("expected a pair".to_string())),
         }
     }
     pub fn is_list(&self) -> bool {

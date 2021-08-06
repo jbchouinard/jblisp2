@@ -6,12 +6,6 @@ use structopt::StructOpt;
 
 use jbscheme::Interpreter;
 
-const HISTORY_FILE: &str = ".jbscheme_history";
-
-// No tail call optimization yet, so just using a big stack size for now to make
-// recursive functions a bit less bad
-const STACK_SIZE: usize = 128 * 1024 * 1024;
-
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(StructOpt, Debug)]
@@ -22,21 +16,24 @@ struct Opt {
     interactive: bool,
 }
 
-fn run() {
-    let opt = Opt::from_args();
+fn _main() {
+    let Opt { files, interactive } = Opt::from_args();
+
     let mut interpreter = Interpreter::default();
 
-    for file in &opt.files {
+    for file in &files {
         if let Err(e) = interpreter.eval_file(&file) {
             eprintln!("{}", e);
             std::process::exit(1);
         }
     }
 
-    if opt.interactive || opt.files.is_empty() {
+    if interactive || files.is_empty() {
         repl(interpreter);
     }
 }
+
+const HISTORY_FILE: &str = ".jbscheme_history";
 
 fn repl(mut interpreter: Interpreter) {
     println!("jbscheme v{}", VERSION);
@@ -53,13 +50,15 @@ fn repl(mut interpreter: Interpreter) {
     rl.save_history(HISTORY_FILE).unwrap();
 }
 
-fn main() {
-    // Spawn thread with explicit stack size
-    let child = thread::Builder::new()
-        .stack_size(STACK_SIZE)
-        .spawn(run)
-        .unwrap();
+// HACK: No tail call optimization yet, so just using a big stack size for now to make
+// recursive functions a bit less bad
+const STACK_SIZE: usize = 64 * 1024 * 1024;
 
-    // Wait for thread to join
-    child.join().unwrap();
+fn main() {
+    thread::Builder::new()
+        .stack_size(STACK_SIZE)
+        .spawn(_main)
+        .unwrap()
+        .join()
+        .unwrap();
 }

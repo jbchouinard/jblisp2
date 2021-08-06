@@ -131,6 +131,7 @@ impl<'a> Tokenizer<'a> {
         ))
     }
 
+    #[cfg(test)]
     pub fn tokenize(&mut self) -> Result<Vec<Token>, TokenError> {
         let mut tokens = vec![];
         loop {

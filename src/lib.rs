@@ -1,17 +1,50 @@
-pub mod builtin;
-pub mod env;
-pub mod error;
-pub mod eval;
-pub mod interpreter;
-pub mod primitives;
-pub mod reader;
-pub mod repr;
-pub mod state;
+//! # jbscheme Rust Interop
+//!
+//! ## Memory
+//! All `jbscheme` values are reference-counted with [`Rc`](std::rc::Rc). There is no
+//! explicit garbage collection or cycle detection.
+//!
+//! Each `jbscheme` [`Interpreter`] has its own state and global environment. Multiple
+//! interpreters can run in parallel, but `jbscheme` values cannot be shared
+//! between threads.
+//!
+//! `jbscheme` values must be constructed with the methods on [`Interpreter`] or [`JState`].
+//! Passing in references to [`JVal`]'s created outside the interpreter, or from
+//! a different interpreter running in the same thread, may break language semantics,
+//! since some types are interned separately by each interpreter, and correct behavior
+//! of `eq?` relies on interning.
+//!
+//! Sharing `lambda` or `macro` objects will also produce strange results since they carry
+//! closures referring to the globals of the interpreter in which they were defined.
+//!
+//! `int` and `string` values may also be interned but there is no guarantee that
+//! `(eq? "somestring" "somestring")` or `(eq? 100 100)` is ever true so sharing them
+//! between interpreters should be fine.
+//!
+//! ## Error Handling
+//! [`JError`] represents exceptions in the `jbscheme` language. They can arise
+//! from a call to `raise` in `jbscheme` code, or from parsing or evaluation errors.
+//!
+//! [`JError`] may be found both in an error value ([`JVal::Error`]), representing
+//! an `error` created in `jbscheme` but not raised, and in [`Err`]`(`[`JError`]`)`
+//! when it is raised.
+mod builtin;
+mod env;
+mod error;
+mod eval;
+mod interpreter;
+mod primitives;
+mod reader;
+mod repr;
+mod state;
 
+use eval::eval;
+use primitives::*;
+use repr::repr;
+
+// Exports
 pub use env::{JEnv, JEnvRef};
 pub use error::{JError, JResult};
-pub use eval::eval;
-pub use interpreter::Interpreter;
-pub use primitives::*;
-pub use repr::repr;
+pub use interpreter::{Interpreter, PRELUDE};
+pub use primitives::{JPair, JVal, JValRef};
 pub use state::JState;

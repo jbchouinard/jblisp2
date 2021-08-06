@@ -1,2 +1,5 @@
-(test "string concat"
-	(assert-equal "foobar" (concat "foo" "bar")))
+(import "stl/unittest")
+
+(test-suite "string"
+	(test "string concat"
+		(assert-equal "foobar" (concat "foo" "bar"))))

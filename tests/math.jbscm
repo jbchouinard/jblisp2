@@ -1,5 +1,8 @@
-(test "int-int addition"
-	(assert-equal 100 (+ 50 50)))
+(import "stl/unittest")
 
-(test "int-int multiplication"
-	(assert-equal 670 (* 10 67)))
+(test-suite "math"
+    (test "int-int addition"
+        (assert-equal 100 (+ 50 50)))
+
+    (test "int-int multiplication"
+        (assert-equal 670 (* 10 67))))

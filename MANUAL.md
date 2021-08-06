@@ -32,15 +32,15 @@ Change existing binding. Raises error if a binding does not already exists.
 
 #### fn
 ```
-(fn <formals> <body>)
+(fn <formals> <expr>)
 ```
 Create a lambda (function).
 
 #### defn
 ```
-(defn <name> <formals> <body>)
+(defn <name> <formals> <expr> ...)
 ```
-Create lambda and bind it to `name`.
+Create lambda and bind it to `name` (with implicit `begin`).
 
 ```
 >>> (defn increment (x) (+ x 1))
@@ -50,7 +50,7 @@ Create lambda and bind it to `name`.
 
 #### let
 ```
-(let <name> <value> <body>)
+(let <name> <value> <expr> ...)
 ```
 Create a binding in a new local scope.
 
@@ -265,7 +265,7 @@ a
 
 #### defmacro
 ```
-(defmacro <name> <formals> <body>)
+(defmacro <name> <formals> <expr> ...)
 ```
 
 jbscheme macros are "procedural"; they are simply lambdas which return code.
@@ -299,7 +299,7 @@ In this version, `x` is not captured, it is looked up in the calling environment
 
 #### macro
 ```
-(macro <formals> <body>)
+(macro <formals> <expr>)
 ```
 
 Create macro. See [defmacro](#defmacro).

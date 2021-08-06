@@ -39,16 +39,22 @@
             (list set! 'failed-count (list + failed-count 1))
             (list print (list concat name ": failed (" (list repr 'err) ")")) ())))
 
-(defn test-start (name) (begin
+(defn test-start (name)
     (print (concat "Testing " name "..."))
     (set! ok-count 0)
-    (set! failed-count 0)))
+    (set! failed-count 0))
 
-(defn test-exit () (begin
+(defn test-exit ()
     (print (concat
         "Test results: "
         (repr ok-count)
         " ok, "
         (repr failed-count)
         " failed"))
-    (exit (if (equal? failed-count 0) 0 1))))
+    (if (equal? failed-count 0) () (raise (error "Some tests failed."))))
+
+(defmacro test-suite (name . tests)
+    (list begin
+        (list test-start name)
+        (cons begin tests)
+        (list test-exit)))
