@@ -1,9 +1,10 @@
+use crate::eval::eval;
+use crate::primitives::intern::Interned;
 use std::path::Path;
 use std::rc::Rc;
 
-use crate::eval::eval;
-use crate::primitives::intern::Interned;
 use crate::reader::parser::Parser;
+use crate::reader::tokenizer::Tokenizer;
 use crate::*;
 
 const STR_INTERN_MAX_LEN: usize = 1024;
@@ -51,7 +52,12 @@ impl JState {
         program: &str,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, JError> {
-        let forms = Parser::new(filename, program, self).parse_forms()?;
+        let forms = Parser::new(
+            filename,
+            Box::new(Tokenizer::new(program.to_string())),
+            self,
+        )
+        .parse_forms()?;
         let mut last_eval = None;
         for form in forms {
             last_eval = Some(eval(form, Rc::clone(&env), self)?);

@@ -76,13 +76,17 @@ fn t_comment(s: &str) -> TResult {
     Ok(TokenValue::Comment(s.to_string()))
 }
 
-pub struct Tokenizer<'a> {
-    input: &'a str,
+pub trait TokenIter {
+    fn next_token(&mut self) -> Result<Token, TokenError>;
+}
+
+pub struct Tokenizer {
+    input: String,
     pos: usize,
 }
 
-impl<'a> Tokenizer<'a> {
-    pub fn new(input: &'a str) -> Self {
+impl Tokenizer {
+    pub fn new(input: String) -> Self {
         Self { input, pos: 0 }
     }
 
@@ -103,7 +107,21 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    pub fn next_token(&mut self) -> Result<Token, TokenError> {
+    pub fn tokenize(&mut self) -> Result<Vec<Token>, TokenError> {
+        let mut tokens = vec![];
+        loop {
+            let next = self.next_token()?;
+            if next.value == TokenValue::Eof {
+                break;
+            }
+            tokens.push(next)
+        }
+        Ok(tokens)
+    }
+}
+
+impl TokenIter for Tokenizer {
+    fn next_token(&mut self) -> Result<Token, TokenError> {
         if self.pos >= self.input.len() {
             return Ok(Token::new(TokenValue::Eof, self.pos));
         }
@@ -139,21 +157,14 @@ impl<'a> Tokenizer<'a> {
             self.pos,
         ))
     }
+}
 
-    #[cfg(test)]
-    pub fn tokenize(&mut self) -> Result<Vec<Token>, TokenError> {
-        let mut tokens = vec![];
-        loop {
-            let next = self.next_token()?;
-            if next.value == TokenValue::Eof {
-                break;
-            }
-            if let TokenValue::Whitespace(_) = next.value {
-                continue;
-            }
-            tokens.push(next)
+impl TokenIter for Vec<Token> {
+    fn next_token(&mut self) -> Result<Token, TokenError> {
+        match self.pop() {
+            Some(tok) => Ok(tok),
+            None => Ok(Token::new(TokenValue::Eof, 0)),
         }
-        Ok(tokens)
     }
 }
 
@@ -177,9 +188,17 @@ mod tests {
     use super::*;
 
     fn test_tokenizer(input: &str, expected: Vec<TokenValue>) {
-        let mut tokenizer = Tokenizer::new(input);
+        let mut tokenizer = Tokenizer::new(input.to_string());
         let tokens = tokenizer.tokenize().unwrap();
-        let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
+        let tokvalues: Vec<TokenValue> = tokens
+            .into_iter()
+            .map(|t| t.value)
+            // Ignore whitespace
+            .filter(|t| match t {
+                TokenValue::Whitespace(_) => false,
+                _ => true,
+            })
+            .collect();
 
         assert_eq!(expected, tokvalues);
     }

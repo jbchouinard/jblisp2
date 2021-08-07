@@ -1,25 +1,25 @@
-use super::tokenizer::{Token, TokenValue, Tokenizer};
+use super::tokenizer::{Token, TokenValue};
+use crate::reader::tokenizer::TokenIter;
 
 use super::ParserError;
 use crate::*;
 
-pub struct Parser<'a, 'b> {
+pub struct Parser<'a> {
     filename: String,
     lineno: usize,
     last_newline_pos: usize,
-    tokenizer: Tokenizer<'a>,
+    tokeniter: Box<dyn TokenIter>,
     peek: Token,
-    state: &'b mut JState,
+    state: &'a mut JState,
 }
 
-impl<'a, 'b> Parser<'a, 'b> {
-    pub fn new(filename: &str, input: &'a str, state: &'b mut JState) -> Self {
-        let tokenizer = Tokenizer::new(input);
+impl<'a> Parser<'a> {
+    pub fn new(filename: &str, tokeniter: Box<dyn TokenIter>, state: &'a mut JState) -> Self {
         let mut this = Self {
             filename: filename.to_string(),
             lineno: 1,
             last_newline_pos: 0,
-            tokenizer,
+            tokeniter,
             // Dummy value until we read the first real token
             peek: Token::new(TokenValue::Whitespace("".to_string()), 0),
             state,
@@ -38,7 +38,7 @@ impl<'a, 'b> Parser<'a, 'b> {
     }
 
     fn _next(&mut self) -> Result<Token, ParserError> {
-        let next = match self.tokenizer.next_token() {
+        let next = match self.tokeniter.next_token() {
             Ok(tok) => tok,
             Err(te) => return Err(self.error(te.pos, &te.reason)),
         };
@@ -144,9 +144,10 @@ impl<'a, 'b> Parser<'a, 'b> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::reader::tokenizer::Tokenizer;
 
     fn test_parser(state: &mut JState, input: &str, expected: JValRef) {
-        let mut parser = Parser::new("test", input, state);
+        let mut parser = Parser::new("test", Box::new(Tokenizer::new(input.to_string())), state);
         let val = parser.expr().unwrap();
         assert_eq!(expected, val);
     }
