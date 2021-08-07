@@ -12,6 +12,10 @@ use jbscheme::{Token, TokenError, TokenValidator};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+// HACK: No tail call optimization yet, so just using a big stack size for now to make
+// recursive functions a bit less bad
+const STACK_SIZE: usize = 64 * 1024 * 1024;
+
 lazy_static! {
     static ref HISTORY_FILE: PathBuf = match home_dir() {
         Some(mut p) => {
@@ -94,10 +98,6 @@ fn get_tokens(rl: &mut Editor<()>) -> Result<Vec<Token>, TokenError> {
         input = readline(rl, "... ");
     }
 }
-
-// HACK: No tail call optimization yet, so just using a big stack size for now to make
-// recursive functions a bit less bad
-const STACK_SIZE: usize = 64 * 1024 * 1024;
 
 fn main() {
     thread::Builder::new()
