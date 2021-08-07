@@ -1,9 +1,11 @@
 [package]
 name = "jbscheme"
 description = "A tiny embedabble interpreted Scheme dialect."
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Jérome Boisvert-Chouinard"]
 repository = "https://github.com/jbchouinard/jbscheme"
+homepage = "https://jbchouinard.github.io/jbscheme"
+documentation = "https://jbchouinard.github.io/jbscheme/crate/jbscheme"
 license = "MIT"
 readme = "README.md"
 edition = "2018"

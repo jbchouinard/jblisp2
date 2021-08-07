@@ -1,4 +1,5 @@
 # JB Scheme
+**version 0.0.7**
 
 A homebrew interpreted, non-RnRS compliant dialect of Scheme.
 
@@ -212,7 +213,7 @@ Change existing binding. Raises error if a binding does not already exists.
 ```
 Create a binding in a new local scope.
 
-```
+```scheme
 ; Example
 >>> (let x 12 (display x))
 12
@@ -226,7 +227,7 @@ Create a binding in a new local scope.
 ```
 Create multiple bindings in a new local scope.
 
-```
+```scheme
 ; Example
 >>> (lets ((x 5) (y 7))
 ...    (display x)
@@ -250,7 +251,7 @@ Variadic lambdas can be defined with formal parameters like `(x . xs)` - there m
 be a single parameter after `.`, which will be a list containing zero or more
 arguments depending on the number of arguments passed.
 
-```
+```scheme
 ; Example
 >>> (defn increment (x) (+ x 1))
 >>> (increment 1)
@@ -356,7 +357,7 @@ Get second item of a pair (rest of list).
 ```
 Construct a list, which is a linked list made from pairs and termninated by `nil`.
 
-```
+```scheme
 ; Example
 >>> (equal? (list 1 2 3) (cons 1 (cons 2 (cons 3 nil))))
 true
@@ -387,7 +388,7 @@ Check if value is a nil-terminated list of ordered pairs.
 ```
 Applies `f` to each value in a list and return results in list.
 
-```
+```scheme
 ; Example
 >>> (map (fn (x) (* 2 x)) (list 1 2 3))
 (2 4 6)
@@ -401,7 +402,7 @@ Applies `f` to each value in a list and return results in list.
 ```
 Applies `f` to each value in a list and accumulate results in `init`.
 
-```
+```scheme
 ; Example
 >>> (fold + 0 (list 1 2 3))
 6
@@ -420,7 +421,7 @@ Applies `f` to each value in a list and accumulate results in `init`.
 ```
 Concatenate multiple strings.
 
-```
+```scheme
 ; Example
 >>> (concat "foo" "bar" "baz")
 "foobarbaz"
@@ -478,7 +479,7 @@ Print string representation of a value.
 ```
 Inspect type of a value.
 
-```
+```scheme
 ; Example
 >>> (type "foo")
 string
@@ -495,7 +496,7 @@ string
 ```
 Test type of a value. There are also convenience functions for every type.
 
-```
+```scheme
 ; Example
 >>> (type? "foo" string)
 true
@@ -514,7 +515,7 @@ false
 ```
 A quoted expression evaluates to the expression.
 
-```
+```scheme
 ; Example
 >>> (def a 100)
 >>> a
@@ -535,7 +536,7 @@ a
 ```
 Evaluate an expression.
 
-```
+```scheme
 ; Example
 >>> (def expr (quote (+ 5 5)))
 >>> expr
@@ -552,7 +553,7 @@ Evaluate an expression.
 ```
 Apply a procedure to a list of arguments.
 
-```
+```scheme
 ; Example
 >>> (apply + (list 1 2 3))
 6
@@ -638,7 +639,7 @@ Errors can be raised to interrupt program flow, and can be caught with the `try`
 Try evaluating `body`. If an error is raised, evaluate `catch`; the raised error value
 is bound to `err` when `catch` is evaluated.
 
-```
+```scheme
 ; Example
 >>> (defn errored ()
 ...		(raise (error "oh no!"))

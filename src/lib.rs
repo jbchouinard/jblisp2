@@ -1,4 +1,6 @@
-//! # jbscheme Rust Interop
+//! [JB Scheme Language Documentation](https://jbchouinard.github.io/jbscheme/)
+//!
+//! # JB Scheme Rust Interop
 //!
 //! ## Memory
 //! All `jbscheme` values are reference-counted with [`Rc`](std::rc::Rc). There is no

@@ -2,18 +2,13 @@ ifeq ($(PREFIX),)
 	PREFIX := /usr/local
 endif
 
-PDF_MANUAL = docs/JB\ Scheme\ Manual.pdf
-MD_MANUAL = MANUAL.md
-HTML_MANUAL = docs/jbscheme.manual.html
-MANUALS = $(MD_MANUAL) $(HTML_MANUAL) $(PDF_MANUAL)
+all: build mkdocs/site MANUAL.md
 
 build:
 	cargo build --release
 
-docs: $(MANUALS)
+doc:
 	cargo doc --no-deps
-	cp -r target/doc/* docs/
-	cp docs.index.html docs/index.html
 
 install:
 	install -m 755 target/release/jbscheme $(DESTDIR)$(PREFIX)/bin/
@@ -23,13 +18,24 @@ test:
 
 clean:
 	cargo clean
-	rm -rf docs
+	rm -rf mkdocs/site $(MD_MANUAL) $(PDF_MANUAL)
+
+PDF_MANUAL = JB\ Scheme\ Manual.pdf
+MD_MANUAL = mkdocs/docs/index.md
 
 $(PDF_MANUAL): PANDOC_OPTS = -V documentclass=scrreprt
 $(MD_MANUAL): PANDOC_OPTS = -s -t gfm
-$(HTML_MANUAL): PANDOC_OPTS = -s --metadata title="JB Scheme Manual" --toc --toc-depth 4
-$(MANUALS): MANUAL.pandoc.md
-	mkdir -p docs
+$(PDF_MANUAL) $(MD_MANUAL): mkdocs/manual.pandoc.md
+	mkdir -p mkdocs/docs
 	pandoc $(PANDOC_OPTS) -o "$@" "$<"
 
-.PHONY: build install test clean docs
+mkdocs/site: doc $(PDF_MANUAL) $(MD_MANUAL)
+	cd mkdocs && mkdocs build
+	mkdir -p mkdocs/site/crate mkdocs/site
+	cp -r target/doc/* mkdocs/site/crate
+	cp $(PDF_MANUAL) mkdocs/site
+
+MANUAL.md: $(MD_MANUAL)
+	cp "$<" "$@"
+
+.PHONY: default build doc install test clean

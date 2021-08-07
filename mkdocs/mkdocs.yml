@@ -1,0 +1,7 @@
+site_name: JB Scheme
+site_url: https://jbchouinard.github.io/jbscheme
+theme: readthedocs
+nav:
+  - Lanuage Reference: index.md
+  - PDF Manual: /jbscheme/JB Scheme Manual.pdf
+  - Crate Documentation: /jbscheme/crate/jbscheme/index.html

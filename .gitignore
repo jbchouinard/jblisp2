@@ -1,3 +1,4 @@
-/docs
+/mkdocs/site
 /target
 .jbscheme_history
+*.pdf

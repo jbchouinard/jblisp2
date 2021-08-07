@@ -19,8 +19,8 @@ Features:
 - Automatic reference counting
 
 ## Documentation
-- [Crate docs](https://jbchouinard.github.io/jbscheme/jbscheme/index.html)
-- [Language Reference](https://jbchouinard.github.io/jbscheme/jbscheme.manual.html)
+- [Crate Docs](https://jbchouinard.github.io/jbscheme/crate/jbscheme/index.html)
+- [Language Reference](https://jbchouinard.github.io/jbscheme/index.html)
   ([PDF](https://jbchouinard.github.io/jbscheme/JB%20Scheme%20Manual.pdf))
 
 ## Run
