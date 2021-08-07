@@ -442,7 +442,7 @@ exists.</p>
 <pre><code class="language-nohighlight">(let name value:expr :expr ...)
 </code></pre>
 <p>Create a binding in a new local scope.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (let x 12 (display x))
 12
 </code></pre>
@@ -451,7 +451,7 @@ exists.</p>
 <pre><code class="language-nohighlight">(lets ((name value:expr) ...) :expr ...)
 </code></pre>
 <p>Create multiple bindings in a new local scope.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (lets ((x 5) (y 7))
 ...    (display x)
 ...    (display y))
@@ -468,7 +468,7 @@ exists.</p>
 there must be a single parameter after <code>.</code>, which will be a list
 containing zero or more arguments depending on the number of arguments
 passed.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (defn increment (x) (+ x 1))
 &gt;&gt;&gt; (increment 1)
 2
@@ -535,7 +535,7 @@ Unhandled ApplyError &quot;expected at least 2 argument(s)&quot;
 </code></pre>
 <p>Construct a list, which is a linked list made from pairs and termninated
 by <code>nil</code>.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (equal? (list 1 2 3) (cons 1 (cons 2 (cons 3 nil))))
 true
 &gt;&gt;&gt; (equal? (list 1 2 3) (cons 1 (list 2 3)))
@@ -555,7 +555,7 @@ true
 <pre><code class="language-nohighlight">(map f:procedure vals:list)
 </code></pre>
 <p>Applies <code>f</code> to each value in a list and return results in list.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (map (fn (x) (* 2 x)) (list 1 2 3))
 (2 4 6)
 </code></pre>
@@ -564,7 +564,7 @@ true
 <pre><code class="language-nohighlight">(fold f:procedure init:expr vals:list)
 </code></pre>
 <p>Applies <code>f</code> to each value in a list and accumulate results in <code>init</code>.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (fold + 0 (list 1 2 3))
 6
 &gt;&gt;&gt; (fold cons () (list 1 2 3))
@@ -576,7 +576,7 @@ true
 <pre><code class="language-nohighlight">(concat :string ...)
 </code></pre>
 <p>Concatenate multiple strings.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (concat &quot;foo&quot; &quot;bar&quot; &quot;baz&quot;)
 &quot;foobarbaz&quot;
 </code></pre>
@@ -586,7 +586,7 @@ true
 <pre><code class="language-nohighlight">(+ :integer ...)
 </code></pre>
 <h4 id="mul">mul (*)</h4>
-<pre><code>(* :integer ...)
+<pre><code class="language-nohighlight">(* :integer ...)
 </code></pre>
 <hr />
 <h3 id="printing">Printing</h3>
@@ -609,7 +609,7 @@ true
 <pre><code class="language-nohighlight">(type :expr)
 </code></pre>
 <p>Inspect type of a value.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (type &quot;foo&quot;)
 string
 </code></pre>
@@ -622,7 +622,7 @@ string
 </code></pre>
 <p>Test type of a value. There are also convenience functions for every
 type.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (type? &quot;foo&quot; string)
 true
 &gt;&gt;&gt; (integer? &quot;foo&quot;)
@@ -634,7 +634,7 @@ false
 <pre><code class="language-nohighlight">(quote :expr)
 </code></pre>
 <p>A quoted expression evaluates to the expression.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (def a 100)
 &gt;&gt;&gt; a
 100
@@ -650,7 +650,7 @@ a
 <pre><code class="language-nohighlight">(eval :expr)
 </code></pre>
 <p>Evaluate an expression.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (def expr (quote (+ 5 5)))
 &gt;&gt;&gt; expr
 (+ 5 5)
@@ -662,7 +662,7 @@ a
 <pre><code class="language-nohighlight">(apply :procedure :list)
 </code></pre>
 <p>Apply a procedure to a list of arguments.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (apply + (list 1 2 3))
 6
 </code></pre>
@@ -684,7 +684,7 @@ environment.</p>
 <p>Beware of capturing variables from the macro’s environment; if you want
 to refer to variables in the invocation environment, use quotation.</p>
 <p>This <code>add-x</code> macro captures the global binding for <code>x</code>:</p>
-<pre><code class="language-scheme">&gt;&gt;&gt; (defmacro add-x (y) (list + x y))
+<pre><code class="language-nohighlight">&gt;&gt;&gt; (defmacro add-x (y) (list + x y))
 &gt;&gt;&gt; (def x 100)
 &gt;&gt;&gt; (add-x 5)
 105
@@ -696,7 +696,7 @@ to refer to variables in the invocation environment, use quotation.</p>
 </code></pre>
 <p>In this version, <code>x</code> is not captured; the value of <code>x</code> is taken from the
 local scope where the macro is called:</p>
-<pre><code class="language-scheme">&gt;&gt;&gt; (def x 100)
+<pre><code class="language-nohighlight">&gt;&gt;&gt; (def x 100)
 &gt;&gt;&gt; (defmacro add-x (y) (list + 'x y))
 &gt;&gt;&gt; ((fn (x) (add-x 5)) 1000)
 1005
@@ -721,7 +721,7 @@ the <code>try</code> form.</p>
 </code></pre>
 <p>Try evaluating <code>body</code>. If an error is raised, evaluate <code>catch</code>; the
 raised error value is bound to <code>err</code> when <code>catch</code> is evaluated.</p>
-<pre><code class="language-scheme">; Example
+<pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (defn errored ()
 ...     (raise (error &quot;oh no!&quot;))
 ...     (print &quot;never evaluated&quot;))
@@ -819,5 +819,5 @@ not set or contains non-UTF8 characters.</p>
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-08-07 21:35:39.785526+00:00
+Build Date UTC : 2021-08-07 21:39:33.033193+00:00
 -->
