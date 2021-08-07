@@ -10,7 +10,9 @@ A homebrew interpreted, non-RnRS compliant dialect of Scheme.
 
 #### string
 
-    "some-string"
+``` nohighlight
+"some-string"
+```
 
 String are immutable.
 
@@ -20,7 +22,9 @@ String are immutable.
 
 #### symbol
 
-    some-symbol
+``` nohighlight
+some-symbol
+```
 
 All `symbol` values are interned, therefore
 `(eq? 'some-symbol 'some-symbol)` is true.
@@ -34,7 +38,9 @@ not bound in any enclosing scope.
 
 #### integer
 
-    100
+``` nohighlight
+100
+```
 
 The underlying type for `integer` is `i128`. Integer overflow terminates
 the program.
@@ -45,8 +51,10 @@ the program.
 
 #### bool
 
-    true
-    false
+``` nohighlight
+true
+false
+```
 
 Only `bool` have truth values, therefore they are the only type that can
 be used as predicates, e.g. for `if`.
@@ -57,7 +65,9 @@ be used as predicates, e.g. for `if`.
 
 #### nil
 
-    nil
+``` nohighlight
+nil
+```
 
 In JB Scheme, `nil` and all empty lists `()` are the same object,
 therefore `(eq? () ())` is true.
@@ -70,7 +80,9 @@ therefore `(eq? () ())` is true.
 
 #### pair
 
-    (cons :expr :expr)
+``` nohighlight
+(cons :expr :expr)
+```
 
 The `pair`, also known as cons cell, is the basic Scheme compound data
 type. It is simply a grouping of two values of any types (2-tuple); the
@@ -85,12 +97,14 @@ evaluating a non-list `pair` raises an error.
 
 #### list
 
-    ; code
-    (:callable :expr ...)
-    ; data
-    ()
-    (cons :expr (cons ()))
-    (list :expr ...)
+``` nohighlight
+; code
+(:callable :expr ...)
+; data
+()
+(cons :expr (cons ()))
+(list :expr ...)
+```
 
 A `list` value is either the empty list `()`, or ordered `pair`’s
 terminated by `()`, where the `car` of the `pair` is an element of the
@@ -113,8 +127,10 @@ Definition](#function-definition).
 
 #### quote
 
-    (quote :expr)
-    'expr
+``` nohighlight
+(quote :expr)
+'expr
+```
 
 Any expression can be quoted, using either the `quote` form or a
 starting apostrophe `'`.
@@ -127,7 +143,9 @@ is useful to prevent `symbol` binding and procedure application. See
 
 #### error
 
-    (error "some-message")
+``` nohighlight
+(error "some-message")
+```
 
 Error values do no inherently do anything, until they are
 [`raise`](#raise)’d as exceptions. See [Exceptions](#exceptions).
@@ -140,7 +158,9 @@ Error values do no inherently do anything, until they are
 
 #### lambda
 
-    (fn params :expr ...)
+``` nohighlight
+(fn params :expr ...)
+```
 
 See [Function Definition](#function-definition).
 
@@ -151,7 +171,9 @@ when it is the first element of a `list`.
 
 #### macro
 
-    (macro params :expr ...)
+``` nohighlight
+(macro params :expr ...)
+```
 
 See [Macro Definition](#macro-definition).
 
@@ -164,7 +186,9 @@ when it is the first element of a `list`.
 
 #### function
 
-    ; not constructable
+``` nohighlight
+; not constructable
+```
 
 Opaque type containing a builtin function.
 
@@ -175,7 +199,9 @@ when it is the first element of a `list`.
 
 #### specialform
 
-    ; not constructable
+``` nohighlight
+; not constructable
+```
 
 Opaque type containing a builtin macro.
 
@@ -190,7 +216,9 @@ applied when it is the first element of a `list`.
 
 #### def
 
-    (def name :expr)
+``` nohighlight
+(def name :expr)
+```
 
 Create and assign binding in local scope.
 
@@ -198,7 +226,9 @@ Create and assign binding in local scope.
 
 #### set!
 
-    (set! name :expr)
+``` nohighlight
+(set! name :expr)
+```
 
 Change existing binding. Raises error if a binding does not already
 exists.
@@ -207,11 +237,13 @@ exists.
 
 #### let
 
-    (let name value:expr :expr ...)
+``` nohighlight
+(let name value:expr :expr ...)
+```
 
 Create a binding in a new local scope.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (let x 12 (display x))
 12
@@ -221,11 +253,13 @@ Create a binding in a new local scope.
 
 #### lets
 
-    (lets ((name value:expr) ...) :expr ...)
+``` nohighlight
+(lets ((name value:expr) ...) :expr ...)
+```
 
 Create multiple bindings in a new local scope.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (lets ((x 5) (y 7))
 ...    (display x)
@@ -240,7 +274,9 @@ Create multiple bindings in a new local scope.
 
 #### defn
 
-    (defn name parameters :expr ...)
+``` nohighlight
+(defn name parameters :expr ...)
+```
 
 Create lambda function and bind it to `name`.
 
@@ -249,7 +285,7 @@ there must be a single parameter after `.`, which will be a list
 containing zero or more arguments depending on the number of arguments
 passed.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (defn increment (x) (+ x 1))
 >>> (increment 1)
@@ -267,7 +303,9 @@ Unhandled ApplyError "expected at least 2 argument(s)"
 
 #### fn
 
-    (fn parameters :expr ...)
+``` nohighlight
+(fn parameters :expr ...)
+```
 
 Create a lambda (function). See [`defn`](#defn).
 
@@ -277,7 +315,9 @@ Create a lambda (function). See [`defn`](#defn).
 
 #### if
 
-    (if predicate:bool then:expr else:expr)
+``` nohighlight
+(if predicate:bool then:expr else:expr)
+```
 
 Evaluates only `then` or `else` conditonally on the value of
 `predicate`.
@@ -286,7 +326,9 @@ Evaluates only `then` or `else` conditonally on the value of
 
 #### begin
 
-    (begin :expr ...)
+``` nohighlight
+(begin :expr ...)
+```
 
 Evaluate expressions sequentially and return value of last expression.
 
@@ -296,7 +338,9 @@ Evaluate expressions sequentially and return value of last expression.
 
 #### eq?
 
-    (eq? :expr :expr)
+``` nohighlight
+(eq? :expr :expr)
+```
 
 Identity comparison. Check if two values are the same object.
 
@@ -304,7 +348,9 @@ Identity comparison. Check if two values are the same object.
 
 #### equal?
 
-    (equal? :expr :expr)
+``` nohighlight
+(equal? :expr :expr)
+```
 
 Value comparison. Check if two values are equal.
 
@@ -314,7 +360,9 @@ Value comparison. Check if two values are equal.
 
 #### not
 
-    (not :bool)
+``` nohighlight
+(not :bool)
+```
 
 ------------------------------------------------------------------------
 
@@ -322,7 +370,9 @@ Value comparison. Check if two values are equal.
 
 #### cons
 
-    (cons left:expr right:expr)
+``` nohighlight
+(cons left:expr right:expr)
+```
 
 Construct a pair.
 
@@ -330,7 +380,9 @@ Construct a pair.
 
 #### car
 
-    (car :pair)
+``` nohighlight
+(car :pair)
+```
 
 Get first item of a pair (head of list).
 
@@ -338,7 +390,9 @@ Get first item of a pair (head of list).
 
 #### cdr
 
-    (cdr :pair)
+``` nohighlight
+(cdr :pair)
+```
 
 Get second item of a pair (rest of list).
 
@@ -346,12 +400,14 @@ Get second item of a pair (rest of list).
 
 #### list
 
-    (list :expr ...)
+``` nohighlight
+(list :expr ...)
+```
 
 Construct a list, which is a linked list made from pairs and termninated
 by `nil`.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (equal? (list 1 2 3) (cons 1 (cons 2 (cons 3 nil))))
 true
@@ -362,7 +418,9 @@ true
 
 #### nil?
 
-    (nil? :expr)
+``` nohighlight
+(nil? :expr)
+```
 
 Check if value is the empty list (nil).
 
@@ -370,7 +428,9 @@ Check if value is the empty list (nil).
 
 #### list?
 
-    (list? :expr)
+``` nohighlight
+(list? :expr)
+```
 
 Check if value is a nil-terminated list of ordered pairs.
 
@@ -378,11 +438,13 @@ Check if value is a nil-terminated list of ordered pairs.
 
 #### map
 
-    (map f:procedure vals:list)
+``` nohighlight
+(map f:procedure vals:list)
+```
 
 Applies `f` to each value in a list and return results in list.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (map (fn (x) (* 2 x)) (list 1 2 3))
 (2 4 6)
@@ -392,11 +454,13 @@ Applies `f` to each value in a list and return results in list.
 
 #### fold
 
-    (fold f:procedure init:expr vals:list)
+``` nohighlight
+(fold f:procedure init:expr vals:list)
+```
 
 Applies `f` to each value in a list and accumulate results in `init`.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (fold + 0 (list 1 2 3))
 6
@@ -410,11 +474,13 @@ Applies `f` to each value in a list and accumulate results in `init`.
 
 #### concat
 
-    (concat :string ...)
+``` nohighlight
+(concat :string ...)
+```
 
 Concatenate multiple strings.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (concat "foo" "bar" "baz")
 "foobarbaz"
@@ -426,11 +492,15 @@ Concatenate multiple strings.
 
 #### add (+)
 
-    (+ :integer ...)
+``` nohighlight
+(+ :integer ...)
+```
 
 #### mul (\*)
 
-    (* :integer ...)
+``` nohighlight
+(* :integer ...)
+```
 
 ------------------------------------------------------------------------
 
@@ -438,13 +508,17 @@ Concatenate multiple strings.
 
 #### print
 
-    (print :string)
+``` nohighlight
+(print :string)
+```
 
 ------------------------------------------------------------------------
 
 #### repr
 
-    (repr :expr)
+``` nohighlight
+(repr :expr)
+```
 
 Get string representation of a value.
 
@@ -452,7 +526,9 @@ Get string representation of a value.
 
 #### display
 
-    (display :expr)
+``` nohighlight
+(display :expr)
+```
 
 Print string representation of a value.
 
@@ -462,11 +538,13 @@ Print string representation of a value.
 
 #### type
 
-    (type :expr)
+``` nohighlight
+(type :expr)
+```
 
 Inspect type of a value.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (type "foo")
 string
@@ -476,15 +554,17 @@ string
 
 #### type?
 
-    (type? :expr type)
-    (string? :expr)
-    (symbol? :expr)
-    ...
+``` nohighlight
+(type? :expr type)
+(string? :expr)
+(symbol? :expr)
+...
+```
 
 Test type of a value. There are also convenience functions for every
 type.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (type? "foo" string)
 true
@@ -498,11 +578,13 @@ false
 
 #### quote
 
-    (quote :expr)
+``` nohighlight
+(quote :expr)
+```
 
 A quoted expression evaluates to the expression.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (def a 100)
 >>> a
@@ -519,11 +601,13 @@ a
 
 #### eval
 
-    (eval :expr)
+``` nohighlight
+(eval :expr)
+```
 
 Evaluate an expression.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (def expr (quote (+ 5 5)))
 >>> expr
@@ -536,11 +620,13 @@ Evaluate an expression.
 
 #### apply
 
-    (apply :procedure :list)
+``` nohighlight
+(apply :procedure :list)
+```
 
 Apply a procedure to a list of arguments.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (apply + (list 1 2 3))
 6
@@ -550,7 +636,9 @@ Apply a procedure to a list of arguments.
 
 #### evalfile
 
-    (evalfile filename:string)
+``` nohighlight
+(evalfile filename:string)
+```
 
 Evaluate file in the global environment.
 
@@ -560,7 +648,9 @@ Evaluate file in the global environment.
 
 #### defmacro
 
-    (defmacro name formals :expr ...)
+``` nohighlight
+(defmacro name formals :expr ...)
+```
 
 jbscheme macros are “procedural”; they are simply lambdas which return
 code.
@@ -574,29 +664,35 @@ to refer to variables in the invocation environment, use quotation.
 
 This `add-x` macro captures the global binding for `x`:
 
-    >>> (defmacro add-x (y) (list + x y))
-    >>> (def x 100)
-    >>> (add-x 5)
-    105
-    >>> (set! x 200)
-    >>> (add-x 5)
-    205
-    >>> ((fn (x) (add-x 5)) 1000)
-    205
+``` nohighlight
+>>> (defmacro add-x (y) (list + x y))
+>>> (def x 100)
+>>> (add-x 5)
+105
+>>> (set! x 200)
+>>> (add-x 5)
+205
+>>> ((fn (x) (add-x 5)) 1000)
+205
+```
 
 In this version, `x` is not captured; the value of `x` is taken from the
 local scope where the macro is called:
 
-    >>> (def x 100)
-    >>> (defmacro add-x (y) (list + 'x y))
-    >>> ((fn (x) (add-x 5)) 1000)
-    1005
+``` nohighlight
+>>> (def x 100)
+>>> (defmacro add-x (y) (list + 'x y))
+>>> ((fn (x) (add-x 5)) 1000)
+1005
+```
 
 ------------------------------------------------------------------------
 
 #### macro
 
-    (macro formals :expr ...)
+``` nohighlight
+(macro formals :expr ...)
+```
 
 Create macro. See [‘defmacro’](#defmacro).
 
@@ -609,20 +705,26 @@ the `try` form.
 
 #### error
 
-    (error :string)
+``` nohighlight
+(error :string)
+```
 
 #### raise
 
-    (raise :error)
+``` nohighlight
+(raise :error)
+```
 
 #### try
 
-    (try body:expr catch:expr)
+``` nohighlight
+(try body:expr catch:expr)
+```
 
 Try evaluating `body`. If an error is raised, evaluate `catch`; the
 raised error value is bound to `err` when `catch` is evaluated.
 
-``` scheme
+``` nohighlight
 ; Example
 >>> (defn errored ()
 ...     (raise (error "oh no!"))
@@ -639,7 +741,9 @@ handled #[error Exception "oh no!"]
 
 #### assert
 
-    (assert predicate:bool)
+``` nohighlight
+(assert predicate:bool)
+```
 
 Raises an exception if `predicate` is false.
 
@@ -649,7 +753,9 @@ Raises an exception if `predicate` is false.
 
 #### getenv
 
-    (getenv var:string)
+``` nohighlight
+(getenv var:string)
+```
 
 Get value of environment variable. Raises exception if the variable is
 not set or contains non-UTF8 characters.
@@ -658,7 +764,9 @@ not set or contains non-UTF8 characters.
 
 #### exit
 
-    (exit :integer)
+``` nohighlight
+(exit :integer)
+```
 
 Exit program with a status code.
 
@@ -668,7 +776,9 @@ Exit program with a status code.
 
 #### dd
 
-    (dd :expr)
+``` nohighlight
+(dd :expr)
+```
 
 Print Rust struct debug.
 
@@ -676,7 +786,9 @@ Print Rust struct debug.
 
 #### ddp
 
-    (ddp :expr)
+``` nohighlight
+(ddp :expr)
+```
 
 Pretty print Rust struct debug.
 
@@ -684,7 +796,9 @@ Pretty print Rust struct debug.
 
 #### dda
 
-    (dda :expr)
+``` nohighlight
+(dda :expr)
+```
 
 Print pointer address.
 
@@ -692,7 +806,9 @@ Print pointer address.
 
 #### ddc
 
-    (ddc :lambda|:macro)
+``` nohighlight
+(ddc :lambda|:macro)
+```
 
 Print code of (non-builtin) lambda or macro.
 
