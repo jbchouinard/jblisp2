@@ -19,15 +19,8 @@ Features:
 - Automatic reference counting
 
 ## Documentation
-
-### Language Manual
-
-See [MANUAL.pdf](MANUAL.pdf) or [MANUAL.md](MANUAL.md).
-
-### Rust Docs
-```bash
-cargo doc --open
-```
+- [Crate docs]()
+- [Language Reference]() ([PDF]())
 
 ## Run
 ```bash

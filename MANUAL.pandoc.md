@@ -1,6 +1,6 @@
-# JB Scheme Manual
+# JB Scheme
 
-JB Scheme is a homebrew interpreted, non-RnRS compliant dialect of Scheme.
+A homebrew interpreted, non-RnRS compliant dialect of Scheme.
 
 \newpage
 ## Types
