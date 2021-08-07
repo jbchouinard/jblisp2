@@ -50,6 +50,15 @@ impl Interpreter {
             std::process::exit(1);
         }
     }
+    pub fn eval_tokens(
+        &mut self,
+        name: &str,
+        tokens: Box<dyn TokenIter>,
+    ) -> Result<Option<JValRef>, JError> {
+        self.state
+            .eval_tokens(name, tokens, Rc::clone(&self.globals))
+    }
+
     /// Evaluate a `jbscheme` script, and return the value of its last expression
     /// (or None if the program contains no expressions).
     ///

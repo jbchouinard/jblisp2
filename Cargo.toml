@@ -17,6 +17,7 @@ name = "jbscheme"
 path = "src/main.rs"
 
 [dependencies]
+home = "0.5.3"
 lazy_static = "1.4"
 regex = "1"
 rustyline = "8.2"

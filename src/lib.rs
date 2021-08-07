@@ -47,4 +47,6 @@ pub use env::{JEnv, JEnvRef};
 pub use error::{JError, JResult};
 pub use interpreter::{Interpreter, PRELUDE};
 pub use primitives::{JPair, JVal, JValRef};
+pub use reader::parser::Parser;
+pub use reader::tokenizer::{Token, TokenError, TokenIter, TokenValidator, TokenValue, Tokenizer};
 pub use state::JState;

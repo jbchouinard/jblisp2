@@ -152,9 +152,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "home"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2456aef2e6b6a9784192ae780c0f15bc57df0e918585282325e8c8ac27737654"
+dependencies = [
+ "winapi",
+]
+
+[[package]]
 name = "jbscheme"
 version = "0.0.5"
 dependencies = [
+ "home",
  "lazy_static",
  "regex",
  "rustyline",

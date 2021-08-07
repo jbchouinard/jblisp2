@@ -1,9 +1,10 @@
-use crate::eval::eval;
-use crate::primitives::intern::Interned;
 use std::path::Path;
 use std::rc::Rc;
 
+use crate::eval::eval;
+use crate::primitives::intern::Interned;
 use crate::reader::parser::Parser;
+use crate::reader::tokenizer::TokenIter;
 use crate::reader::tokenizer::Tokenizer;
 use crate::*;
 
@@ -46,23 +47,27 @@ impl JState {
             interned_str: Interned::new(Box::new(make_str)),
         }
     }
-    pub fn eval_str(
+    pub fn eval_tokens(
         &mut self,
-        filename: &str,
-        program: &str,
+        name: &str,
+        tokeniter: Box<dyn TokenIter>,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, JError> {
-        let forms = Parser::new(
-            filename,
-            Box::new(Tokenizer::new(program.to_string())),
-            self,
-        )
-        .parse_forms()?;
+        let forms = Parser::new(name, tokeniter, self).parse_forms()?;
         let mut last_eval = None;
         for form in forms {
             last_eval = Some(eval(form, Rc::clone(&env), self)?);
         }
         Ok(last_eval)
+    }
+    pub fn eval_str(
+        &mut self,
+        name: &str,
+        program: &str,
+        env: JEnvRef,
+    ) -> Result<Option<JValRef>, JError> {
+        let tokeniter = Box::new(Tokenizer::new(program.to_string()));
+        self.eval_tokens(name, tokeniter, env)
     }
     pub fn eval_file<P: AsRef<Path>>(
         &mut self,

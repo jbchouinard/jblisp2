@@ -1,9 +1,11 @@
+use std::fmt;
+
 use lazy_static::lazy_static;
 use regex::Regex;
 
 use crate::primitives::JTInt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenValue {
     Whitespace(String),
     LParen,
@@ -16,6 +18,7 @@ pub enum TokenValue {
     Eof,
 }
 
+#[derive(Debug)]
 pub struct Token {
     pub value: TokenValue,
     pub pos: usize,
@@ -159,12 +162,49 @@ impl TokenIter for Tokenizer {
     }
 }
 
-impl TokenIter for Vec<Token> {
+impl TokenIter for std::vec::IntoIter<Token> {
     fn next_token(&mut self) -> Result<Token, TokenError> {
-        match self.pop() {
+        match self.next() {
             Some(tok) => Ok(tok),
             None => Ok(Token::new(TokenValue::Eof, 0)),
         }
+    }
+}
+
+#[derive(Default)]
+pub struct TokenValidator {
+    balance: Vec<TokenValue>,
+    tokens: Vec<Token>,
+}
+
+/// Balanced parens validation for multi-line input.
+impl TokenValidator {
+    pub fn new() -> Self {
+        Self {
+            balance: vec![],
+            tokens: vec![],
+        }
+    }
+    /// Returns None when more input is expected based on counting parens.
+    /// Returns tokens when it looks like it may form a complete expression.
+    pub fn input(&mut self, s: String) -> Result<Option<Vec<Token>>, TokenError> {
+        let new_toks = Tokenizer::new(s).tokenize()?;
+        for tok in new_toks.into_iter() {
+            match tok.value {
+                TokenValue::LParen => self.balance.push(TokenValue::LParen),
+                TokenValue::RParen => match self.balance.pop() {
+                    Some(TokenValue::LParen) => (),
+                    _ => return Err(TokenError::new("unexpected closing parens", tok.pos)),
+                },
+                _ => (),
+            }
+            self.tokens.push(tok);
+        }
+        Ok(if self.balance.is_empty() {
+            Some(std::mem::take(&mut self.tokens))
+        } else {
+            None
+        })
     }
 }
 
@@ -172,6 +212,12 @@ impl TokenIter for Vec<Token> {
 pub struct TokenError {
     pub pos: usize,
     pub reason: String,
+}
+
+impl fmt::Display for TokenError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "Syntax error: {} at character {}", self.reason, self.pos,)
+    }
 }
 
 impl TokenError {
