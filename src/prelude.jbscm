@@ -4,10 +4,10 @@
 
 (def defmacro
     (macro (name params . exprs)
-        (list def name (list macro params (cons begin exprs)))))
+        (list def name (cons macro (cons params exprs)))))
 
 (defmacro defn (name params . exprs)
-    (list def name (list fn params (cons begin exprs))))
+    (list def name (cons fn (cons params exprs))))
 
 (defmacro type? (val t) (list equal? (list type val) (list quote t)))
 

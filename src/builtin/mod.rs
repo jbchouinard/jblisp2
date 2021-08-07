@@ -82,7 +82,15 @@ fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -> JR
             ))
         }
     };
-    println!("({} {} {})", t, params, code);
+    println!(
+        "({} {} {})",
+        t,
+        params,
+        code.iter()
+            .map(|v| repr(v))
+            .collect::<Vec<String>>()
+            .join(" ")
+    );
     Ok(state.nil())
 }
 
@@ -109,7 +117,7 @@ fn jspecial_set(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
 }
 
 fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
-    let [pvals, code] = get_n_args(args)?;
+    let ([pvals], exprs) = get_n_plus_args(args)?;
     let mut params = vec![];
     for val in pvals.iter_list()? {
         match &*val {
@@ -117,11 +125,11 @@ fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
             _ => return Err(JError::TypeError("expected a list of symbols".to_string())),
         }
     }
-    state.lambda(env, params, Rc::clone(&code))
+    state.lambda(env, params, exprs)
 }
 
 fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
-    let [pvals, code] = get_n_args(args)?;
+    let ([pvals], exprs) = get_n_plus_args(args)?;
     let mut params = vec![];
     for val in pvals.iter_list()? {
         match &*val {
@@ -129,7 +137,7 @@ fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
             _ => return Err(JError::TypeError("expected a list of symbols".to_string())),
         }
     }
-    state.lmacro(env, params, Rc::clone(&code))
+    state.lmacro(env, params, exprs)
 }
 
 fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {

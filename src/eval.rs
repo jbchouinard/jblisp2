@@ -37,14 +37,21 @@ fn apply_lambda(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JStat
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
     let args = eval_args(args, env, state)?;
     lambda.params.bind(args, Rc::clone(&invoke_env))?;
-    eval(Rc::clone(&lambda.code), invoke_env, state)
+    let mut last_res = state.nil();
+    for expr in &lambda.code {
+        last_res = eval(Rc::clone(expr), Rc::clone(&invoke_env), state)?;
+    }
+    Ok(last_res)
 }
 
 fn apply_macro(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
     lambda.params.bind(args, Rc::clone(&invoke_env))?;
-    let code = eval(Rc::clone(&lambda.code), invoke_env, state)?;
-    eval(code, env, state)
+    let mut last_res = state.nil();
+    for expr in &lambda.code {
+        last_res = eval(Rc::clone(expr), Rc::clone(&invoke_env), state)?;
+    }
+    eval(last_res, env, state)
 }
 
 fn eval_args(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {

@@ -167,7 +167,7 @@ impl JParams {
 pub struct JLambda {
     pub closure: JEnvRef,
     pub params: JParams,
-    pub code: JValRef,
+    pub code: Vec<JValRef>,
 }
 
 // Implement manually because of cyclical references from the closure's parent Envs

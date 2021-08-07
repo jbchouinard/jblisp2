@@ -127,7 +127,7 @@ impl JState {
     pub fn error(&self, je: JError) -> JValRef {
         JVal::Error(je).into_ref()
     }
-    pub fn lambda(&self, clos: JEnvRef, params: Vec<String>, code: JValRef) -> JResult {
+    pub fn lambda(&self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
         Ok(JVal::Lambda(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
@@ -135,7 +135,7 @@ impl JState {
         }))
         .into_ref())
     }
-    pub fn lmacro(&self, clos: JEnvRef, params: Vec<String>, code: JValRef) -> JResult {
+    pub fn lmacro(&self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
         Ok(JVal::Macro(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,

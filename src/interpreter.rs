@@ -148,11 +148,11 @@ impl Interpreter {
         self.state.error(err)
     }
     /// Construct a `jbscheme` `lambda`.
-    pub fn jlambda(&mut self, params: Vec<String>, body: JValRef) -> JResult {
+    pub fn jlambda(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
         self.state.lambda(Rc::clone(&self.globals), params, body)
     }
     /// Construct a `jbscheme` `macro`.
-    pub fn jmacro(&mut self, params: Vec<String>, body: JValRef) -> JResult {
+    pub fn jmacro(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
         self.state.lmacro(Rc::clone(&self.globals), params, body)
     }
     /// Define a `jbscheme` builtin procedure.
