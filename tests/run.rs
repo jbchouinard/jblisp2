@@ -21,15 +21,3 @@ fn tests_string() {
 fn tests_math() {
     execfile("tests/math.jbscm")
 }
-
-fn hello() {
-    // Create an interpreter pre-loaded with definitions for builtins, and constants,
-    // lambdas and macros defined by the prelude.
-    // (Interpreter::new() creates a bare interpreter, with empty globals.)
-    let mut interpreter = Interpreter::default();
-    match interpreter.eval_str("main.rs", r#"(print "Hello World!)"#) {
-        Ok(Some(jval)) => println!("{}", jval),
-        Ok(None) => (),
-        Err(je) => eprintln!("{}", je),
-    };
-}
