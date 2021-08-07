@@ -105,9 +105,9 @@ impl<'a> Parser<'a> {
     fn atom(&mut self) -> Result<JValRef, ParserError> {
         let next = self.next()?;
         match next.value {
-            TokenValue::Int(n) => Ok(self.state.int(n)),
-            TokenValue::Ident(s) => Ok(self.state.symbol(s)),
-            TokenValue::String(s) => Ok(self.state.string(s)),
+            TokenValue::Int(n) => Ok(self.state.jint(n)),
+            TokenValue::Ident(s) => Ok(self.state.jsymbol(s)),
+            TokenValue::String(s) => Ok(self.state.jstring(s)),
             _ => Err(self.error(next.pos, &format!("unexpected token {:?}", next.value))),
         }
     }
@@ -119,7 +119,7 @@ impl<'a> Parser<'a> {
             list.push(self.expr()?);
         }
         self.expect(TokenValue::RParen)?;
-        Ok(self.state.list(list))
+        Ok(self.state.jlist(list))
     }
 
     pub fn parse_form(&mut self) -> Result<Option<JValRef>, ParserError> {
@@ -155,21 +155,29 @@ mod tests {
     #[test]
     fn test_parser_1() {
         let mut state = JState::default();
-        let lst = vec![state.symbol("+".to_string()), state.int(12), state.int(-15)];
-        let expected = state.list(lst);
+        let lst = vec![
+            state.jsymbol("+".to_string()),
+            state.jint(12),
+            state.jint(-15),
+        ];
+        let expected = state.jlist(lst);
         test_parser(&mut state, "(+ 12 -15)", expected);
     }
 
     #[test]
     fn test_parser_2() {
         let mut state = JState::default();
-        let inner_lst = vec![state.symbol("+".to_string()), state.int(12), state.int(-33)];
-        let lst = vec![
-            state.symbol("*".to_string()),
-            state.list(inner_lst),
-            state.int(42),
+        let inner_lst = vec![
+            state.jsymbol("+".to_string()),
+            state.jint(12),
+            state.jint(-33),
         ];
-        let expected = state.list(lst);
+        let lst = vec![
+            state.jsymbol("*".to_string()),
+            state.jlist(inner_lst),
+            state.jint(42),
+        ];
+        let expected = state.jlist(lst);
         test_parser(&mut state, "(* (+ 12 -33) 42)", expected)
     }
 
@@ -177,35 +185,35 @@ mod tests {
     fn test_parser_3() {
         let mut state = JState::default();
         let lst = vec![
-            state.symbol("concat".to_string()),
-            state.string("foo".to_string()),
-            state.string("bar".to_string()),
+            state.jsymbol("concat".to_string()),
+            state.jstring("foo".to_string()),
+            state.jstring("bar".to_string()),
         ];
-        let expected = state.list(lst);
+        let expected = state.jlist(lst);
         test_parser(&mut state, "(concat \"foo\" \"bar\")", expected)
     }
 
     #[test]
     fn test_parser_4() {
         let mut state = JState::default();
-        let inner_lst = vec![state.int(1), state.int(2), state.int(3)];
+        let inner_lst = vec![state.jint(1), state.jint(2), state.jint(3)];
         let lst = vec![
-            state.symbol("quote".to_string()),
-            state.quote(state.list(inner_lst)),
+            state.jsymbol("quote".to_string()),
+            state.jquote(state.jlist(inner_lst)),
         ];
-        let expected = state.list(lst);
+        let expected = state.jlist(lst);
         test_parser(&mut state, "(quote '(1 2 3))", expected)
     }
 
     #[test]
     fn test_parser_5() {
         let mut state = JState::default();
-        let inner_lst = vec![state.int(1), state.int(2), state.int(3)];
+        let inner_lst = vec![state.jint(1), state.jint(2), state.jint(3)];
         let lst = vec![
-            state.symbol("quote".to_string()),
-            state.quote(state.list(inner_lst)),
+            state.jsymbol("quote".to_string()),
+            state.jquote(state.jlist(inner_lst)),
         ];
-        let expected = state.list(lst);
+        let expected = state.jlist(lst);
         test_parser(
             &mut state,
             "(quote ; this is a comment

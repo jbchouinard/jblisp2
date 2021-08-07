@@ -33,7 +33,7 @@ impl JEnv {
 
     pub fn try_lookup(&self, v: &str) -> JResult {
         self.lookup(v)
-            .ok_or_else(|| JError::UndefError(v.to_string()))
+            .ok_or_else(|| JError::NotDefined(v.to_string()))
     }
 
     /// Create a new binding.
@@ -49,7 +49,7 @@ impl JEnv {
         } else {
             match &self.parent {
                 Some(penv) => penv.set(v, val),
-                None => Err(JError::UndefError(v.to_string())),
+                None => Err(JError::NotDefined(v.to_string())),
             }
         }
     }

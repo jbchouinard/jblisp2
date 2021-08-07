@@ -3,7 +3,7 @@ use crate::builtin::*;
 pub fn jbuiltin_error(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [emsg] = get_n_args(args)?;
     match &*emsg {
-        JVal::String(s) => Ok(state.error(JError::Exception(s.to_string()))),
+        JVal::String(s) => Ok(state.jerrorval(JError::Exception(s.to_string()))),
         _ => Err(JError::TypeError("expected a string".to_string())),
     }
 }
@@ -27,7 +27,7 @@ pub fn jspecial_try(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult 
         Ok(val) => Ok(val),
         Err(je) => {
             let errenv = JEnv::new(Some(env));
-            errenv.define("err", state.error(je));
+            errenv.define("err", state.jerrorval(je));
             eval(except, errenv.into_ref(), state)
         }
     }

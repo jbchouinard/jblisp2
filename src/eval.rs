@@ -37,7 +37,7 @@ fn apply_lambda(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JStat
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
     let args = eval_args(args, env, state)?;
     lambda.params.bind(args, Rc::clone(&invoke_env))?;
-    let mut last_res = state.nil();
+    let mut last_res = state.jnil();
     for expr in &lambda.code {
         last_res = eval(Rc::clone(expr), Rc::clone(&invoke_env), state)?;
     }
@@ -47,7 +47,7 @@ fn apply_lambda(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JStat
 fn apply_macro(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
     lambda.params.bind(args, Rc::clone(&invoke_env))?;
-    let mut last_res = state.nil();
+    let mut last_res = state.jnil();
     for expr in &lambda.code {
         last_res = eval(Rc::clone(expr), Rc::clone(&invoke_env), state)?;
     }
@@ -60,5 +60,5 @@ fn eval_args(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
         .map(|v| eval(v, Rc::clone(&env), state))
         .collect::<Result<Vec<JValRef>, JError>>()?;
 
-    Ok(state.list(evaluated))
+    Ok(state.jlist(evaluated))
 }

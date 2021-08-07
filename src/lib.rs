@@ -15,7 +15,7 @@
 //! of `eq?` relies on interning.
 //!
 //! Sharing `lambda` or `macro` objects will also produce strange results since they carry
-//! closures referring to the globals of the interpreter in which they were defined.
+//! closures pointing to environments in the interpreter in which they were defined.
 //!
 //! `int` and `string` values may also be interned but there is no guarantee that
 //! `(eq? "somestring" "somestring")` or `(eq? 100 100)` is ever true so sharing them
@@ -28,6 +28,24 @@
 //! [`JError`] may be found both in an error value ([`JVal::Error`]), representing
 //! an `error` created in `jbscheme` but not raised, and in [`Err`]`(`[`JError`]`)`
 //! when it is raised.
+//!
+//! ## Example
+//! ```
+//! // hello.rs
+//! use jbscheme::Interpreter;
+//!
+//! fn main() {
+//!     // Create an interpreter pre-loaded with definitions for builtins; and constants,
+//!     // lambdas and macros defined by the prelude.
+//!     // (Interpreter::new() instead creates a bare interpreter, with empty globals.)
+//!     let mut interpreter = Interpreter::default();
+//!     match interpreter.eval_str("hello.rs", r#"(print "Hello World!")"#) {
+//!         Ok(Some(jval)) => println!("{}", jval),
+//!         Ok(None) => (),
+//!         Err(je) => eprintln!("{}", je),
+//!     };
+//! }
+//! ```
 mod builtin;
 mod env;
 mod error;

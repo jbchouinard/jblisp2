@@ -6,19 +6,17 @@ A tiny interpreted dialect of Scheme, implemented in Rust, for educational purpo
 Inspired by [mit-scheme](https://www.gnu.org/software/mit-scheme/) and
 [Build Your Own Lisp](http://www.buildyourownlisp.com/).
 
-jbscheme does not aim to be a fully-featured Scheme language, it is an exercise
-in language design and implementation, and Rust programming. Eventually I would like to
-implement enough features to use jbscheme to complete exercises and
-projects from [SICP](https://mitpress.mit.edu/sites/default/files/sicp/index.html).
-However it will not be drop-in replacement for mit-scheme, it is a different dialect,
-I do not aim to implement RnRS.
+jbscheme does not aim to be a fully-featured standard (RnRS) Scheme language,
+it is an exercise in language design and implementation, and Rust programming.
+Eventually I would like to implement enough features to use jbscheme to complete
+exercises and projects from [SICP](https://mitpress.mit.edu/sites/default/files/sicp/index.html).
 
 Features:
 - First class functions
-- "Procedural" macros
 - Lexical scoping and closures
-- Exceptions
-- Reference-counted memory management
+- Procedural macros
+- Exception handling (raise, try)
+- Automatic reference counting
 
 ## Documentation
 
@@ -26,7 +24,7 @@ Features:
 
 See [MANUAL.pdf](MANUAL.pdf) or [MANUAL.md](MANUAL.md).
 
-### Rust Interop
+### Rust Docs
 ```bash
 cargo doc --open
 ```
@@ -47,16 +45,18 @@ make
 make install
 ```
 
-## Todo?
+## Roadmap
 - Tracebacks
 - More builtin functions
 - Tail call optimization
 - More tests
 - First class envs
 - Imports, namespaces
+- Numeric data types: float, complex 
 - Mutable data structures: mutpair, vector, table
 - Debugger
 - Continuations
-- Memory leak check, cycle detection
-- Numeric data types: float, complex 
+- Reference cycle detection
 - Standard library
+
+Copyright 2021 Jérome Boisvert-Chouinard

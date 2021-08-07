@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>JB Scheme Manual</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">JB Scheme Manual</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#jb-scheme-manual">JB Scheme Manual</a>
+<ul>
+<li><a href="#types">Types</a>
+<ul>
+<li><a href="#primitive-types">Primitive Types</a>
+<ul>
+<li><a href="#string">string</a></li>
+<li><a href="#symbol">symbol</a></li>
+<li><a href="#integer">integer</a></li>
+<li><a href="#bool">bool</a></li>
+<li><a href="#nil">nil</a></li>
+</ul></li>
+<li><a href="#composite-types">Composite Types</a>
+<ul>
+<li><a href="#pair">pair</a></li>
+<li><a href="#list">list</a></li>
+</ul></li>
+<li><a href="#special-types">Special Types</a>
+<ul>
+<li><a href="#quote">quote</a></li>
+<li><a href="#error">error</a></li>
+</ul></li>
+<li><a href="#callable-types">Callable Types</a>
+<ul>
+<li><a href="#lambda">lambda</a></li>
+<li><a href="#macro">macro</a></li>
+</ul></li>
+<li><a href="#builtin-callable-types">Builtin Callable Types</a>
+<ul>
+<li><a href="#function">function</a></li>
+<li><a href="#specialform">specialform</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#forms">Forms</a>
+<ul>
+<li><a href="#binding-and-assignment">Binding and Assignment</a>
+<ul>
+<li><a href="#def">def</a></li>
+<li><a href="#set">set!</a></li>
+<li><a href="#let">let</a></li>
+<li><a href="#lets">lets</a></li>
+</ul></li>
+<li><a href="#function-definition">Function Definition</a>
+<ul>
+<li><a href="#defn">defn</a></li>
+<li><a href="#fn">fn</a></li>
+</ul></li>
+<li><a href="#control-flow">Control Flow</a>
+<ul>
+<li><a href="#if">if</a></li>
+<li><a href="#begin">begin</a></li>
+</ul></li>
+<li><a href="#comparison">Comparison</a>
+<ul>
+<li><a href="#eq">eq?</a></li>
+<li><a href="#equal">equal?</a></li>
+</ul></li>
+<li><a href="#logical-operators">Logical Operators</a>
+<ul>
+<li><a href="#not">not</a></li>
+</ul></li>
+<li><a href="#pair-and-list-operations">Pair and List Operations</a>
+<ul>
+<li><a href="#cons">cons</a></li>
+<li><a href="#car">car</a></li>
+<li><a href="#cdr">cdr</a></li>
+<li><a href="#list-1">list</a></li>
+<li><a href="#nil-1">nil?</a></li>
+<li><a href="#list-2">list?</a></li>
+<li><a href="#map">map</a></li>
+<li><a href="#fold">fold</a></li>
+</ul></li>
+<li><a href="#string-operations">String Operations</a>
+<ul>
+<li><a href="#concat">concat</a></li>
+</ul></li>
+<li><a href="#integer-operations">Integer Operations</a>
+<ul>
+<li><a href="#add">add (+)</a></li>
+<li><a href="#mul">mul (*)</a></li>
+</ul></li>
+<li><a href="#printing">Printing</a>
+<ul>
+<li><a href="#print">print</a></li>
+<li><a href="#repr">repr</a></li>
+<li><a href="#display">display</a></li>
+</ul></li>
+<li><a href="#type-inspection">Type Inspection</a>
+<ul>
+<li><a href="#type">type</a></li>
+<li><a href="#type-1">type?</a></li>
+</ul></li>
+<li><a href="#quoting-and-evaluation">Quoting and Evaluation</a>
+<ul>
+<li><a href="#quote-1">quote</a></li>
+<li><a href="#eval">eval</a></li>
+<li><a href="#apply">apply</a></li>
+<li><a href="#evalfile">evalfile</a></li>
+</ul></li>
+<li><a href="#macro-definition">Macro Definition</a>
+<ul>
+<li><a href="#defmacro">defmacro</a></li>
+<li><a href="#macro-1">macro</a></li>
+</ul></li>
+<li><a href="#exceptions">Exceptions</a>
+<ul>
+<li><a href="#error-1">error</a></li>
+<li><a href="#raise">raise</a></li>
+<li><a href="#try">try</a></li>
+<li><a href="#assert">assert</a></li>
+</ul></li>
+<li><a href="#system-procedures">System Procedures</a>
+<ul>
+<li><a href="#getenv">getenv</a></li>
+<li><a href="#exit">exit</a></li>
+</ul></li>
+<li><a href="#debugging">Debugging</a>
+<ul>
+<li><a href="#dd">dd</a></li>
+<li><a href="#ddp">ddp</a></li>
+<li><a href="#dda">dda</a></li>
+<li><a href="#ddc">ddc</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#standard-libraries">Standard Libraries</a>
+<ul>
+<li><a href="#math">math</a></li>
+<li><a href="#unittest">unittest</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="jb-scheme-manual">JB Scheme Manual</h1>
+<p>JB Scheme is a homebrew interpreted, non-RnRS compliant dialect of Scheme.</p>
+<h2 id="types">Types</h2>
+<h3 id="primitive-types">Primitive Types</h3>
+<h4 id="string">string</h4>
+<pre><code>&quot;some-string&quot;</code></pre>
+<p>String are immutable.</p>
+<p><em>Evaluation Rule:</em> A <code>string</code> value evaluates to itself.</p>
+<hr />
+<h4 id="symbol">symbol</h4>
+<pre><code>some-symbol</code></pre>
+<p>All <code>symbol</code> values are interned, therefore <code>(eq? 'some-symbol 'some-symbol)</code> is true.</p>
+<p><em>Evaluation Rule:</em> <code>symbol</code> values are variable names. When evaluated, a <code>symbol</code> is replaced by the value of its binding in the nearest enclosing scope where it is defined. An error is raised if <code>symbol</code> is not bound in any enclosing scope.</p>
+<hr />
+<h4 id="integer">integer</h4>
+<pre><code>100</code></pre>
+<p>The underlying type for <code>integer</code> is <code>i128</code>. Integer overflow terminates the program.</p>
+<p><em>Evaluation Rule:</em> An <code>integer</code> value evaluates to itself.</p>
+<hr />
+<h4 id="bool">bool</h4>
+<pre><code>true
+false</code></pre>
+<p>Only <code>bool</code> have truth values, therefore they are the only type that can be used as predicates, e.g. for <code>if</code>.</p>
+<p><em>Evaluation Rule:</em> A <code>bool</code> value evaluates to itself.</p>
+<hr />
+<h4 id="nil">nil</h4>
+<pre><code>nil</code></pre>
+<p>In JB Scheme, <code>nil</code> and all empty lists <code>()</code> are the same object, therefore <code>(eq? () ())</code> is true.</p>
+<p><em>Evaluation Rule:</em> <code>nil</code> evaluates to itself.</p>
+<hr />
+<h3 id="composite-types">Composite Types</h3>
+<h4 id="pair">pair</h4>
+<pre><code>(cons :expr :expr)</code></pre>
+<p>The <code>pair</code>, also known as cons cell, is the basic Scheme compound data type. It is simply a grouping of two values of any types (2-tuple); the first and second values are sometimes referred to respectively as the <code>car</code> and <code>cdr</code>.</p>
+<p><em>Evaluation Rule:</em> <code>pair</code> values are evaluated by procedure application, however, only <code>pair</code> values which are <code>lists</code>’s can be properly applied; evaluating a non-list <code>pair</code> raises an error.</p>
+<hr />
+<h4 id="list">list</h4>
+<pre><code>; code
+(:callable :expr ...)
+; data
+()
+(cons :expr (cons ()))
+(list :expr ...)</code></pre>
+<p>A <code>list</code> value is either the empty list <code>()</code>, or ordered <code>pair</code>’s terminated by <code>()</code>, where the <code>car</code> of the <code>pair</code> is an element of the list, and the <code>cdr</code> is the rest of the list.</p>
+<p>Scheme data and code are both represented as lists, which makes meta-programming easy and fun. See <a href="#quoting-and-evaluation">Quoting and Evaluation</a> and <a href="#macro-definition">Macro Definition</a>.</p>
+<p><em>Evaluation Rule:</em> The first value of the list is applied (called) with the rest of the list as arguments. If the first value of the list is not <a href="#callable-types"><code>callable</code></a>, an error is raised. Exception: the empty list <code>()</code> is not applied, it evaluates to itself. See <a href="#function-definition">Function Definition</a>.</p>
+<hr />
+<h3 id="special-types">Special Types</h3>
+<h4 id="quote">quote</h4>
+<pre><code>(quote :expr)
+&#39;expr</code></pre>
+<p>Any expression can be quoted, using either the <code>quote</code> form or a starting apostrophe <code>'</code>.</p>
+<p><em>Evaluation Rule:</em> A quoted expression evaluates to the expression. This is useful to prevent <code>symbol</code> binding and procedure application. See <a href="#quoting-and-evaluation">Quoting and Evaluation</a>.</p>
+<hr />
+<h4 id="error">error</h4>
+<pre><code>(error &quot;some-message&quot;)</code></pre>
+<p>Error values do no inherently do anything, until they are <a href="#raise"><code>raise</code></a>’d as exceptions. See <a href="#exceptions">Exceptions</a>.</p>
+<p><em>Evaluation Rule:</em> An <code>error</code> value evaluates to itself.</p>
+<hr />
+<h3 id="callable-types">Callable Types</h3>
+<h4 id="lambda">lambda</h4>
+<pre><code>(fn params :expr ...)</code></pre>
+<p>See <a href="#function-definition">Function Definition</a>.</p>
+<p><em>Evaluation Rule:</em> A <code>lambda</code> value evaluates to itself. It is applied when it is the first element of a <code>list</code>.</p>
+<hr />
+<h4 id="macro">macro</h4>
+<pre><code>(macro params :expr ...)</code></pre>
+<p>See <a href="#macro-definition">Macro Definition</a>.</p>
+<p><em>Evaluation Rule:</em> A <code>macro</code> value evaluates to itself. It is applied when it is the first element of a <code>list</code>.</p>
+<hr />
+<h3 id="builtin-callable-types">Builtin Callable Types</h3>
+<h4 id="function">function</h4>
+<pre><code>; not constructable</code></pre>
+<p>Opaque type containing a builtin function.</p>
+<p><em>Evaluation Rule:</em> A <code>function</code> value evaluates to itself. It is applied when it is the first element of a <code>list</code>.</p>
+<hr />
+<h4 id="specialform">specialform</h4>
+<pre><code>; not constructable</code></pre>
+<p>Opaque type containing a builtin macro.</p>
+<p><em>Evaluation Rule:</em> A <code>specialform</code> value evaluates to itself. It is applied when it is the first element of a <code>list</code>.</p>
+<hr />
+<h2 id="forms">Forms</h2>
+<h3 id="binding-and-assignment">Binding and Assignment</h3>
+<h4 id="def">def</h4>
+<pre><code>(def name :expr)</code></pre>
+<p>Create and assign binding in local scope.</p>
+<hr />
+<h4 id="set">set!</h4>
+<pre><code>(set! name :expr)</code></pre>
+<p>Change existing binding. Raises error if a binding does not already exists.</p>
+<hr />
+<h4 id="let">let</h4>
+<pre><code>(let name value:expr :expr ...)</code></pre>
+<p>Create a binding in a new local scope.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (let x 12 (display x))
+12</code></pre>
+<hr />
+<h4 id="lets">lets</h4>
+<pre><code>(lets ((name value:expr) ...) :expr ...)</code></pre>
+<p>Create multiple bindings in a new local scope.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (lets ((x 5) (y 7))
+...    (display x)
+...    (display y))
+5
+7</code></pre>
+<hr />
+<h3 id="function-definition">Function Definition</h3>
+<h4 id="defn">defn</h4>
+<pre><code>(defn name parameters :expr ...)</code></pre>
+<p>Create lambda function and bind it to <code>name</code>.</p>
+<p>Variadic lambdas can be defined with formal parameters like <code>(x . xs)</code> - there must be a single parameter after <code>.</code>, which will be a list containing zero or more arguments depending on the number of arguments passed.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (defn increment (x) (+ x 1))
+&gt;&gt;&gt; (increment 1)
+2
+&gt;&gt;&gt; (defn variadic (x y . rest) rest)
+&gt;&gt;&gt; (variadic 1)
+Unhandled ApplyError &quot;expected at least 2 argument(s)&quot;
+&gt;&gt;&gt; (variadic 1 2)
+()
+&gt;&gt;&gt; (variadic 1 2 3 4)
+(3 4)</code></pre>
+<hr />
+<h4 id="fn">fn</h4>
+<pre><code>(fn parameters :expr ...)</code></pre>
+<p>Create a lambda (function). See <a href="#defn"><code>defn</code></a>.</p>
+<hr />
+<h3 id="control-flow">Control Flow</h3>
+<h4 id="if">if</h4>
+<pre><code>(if predicate:bool then:expr else:expr)</code></pre>
+<p>Evaluates only <code>then</code> or <code>else</code> conditonally on the value of <code>predicate</code>.</p>
+<hr />
+<h4 id="begin">begin</h4>
+<pre><code>(begin :expr ...)</code></pre>
+<p>Evaluate expressions sequentially and return value of last expression.</p>
+<hr />
+<h3 id="comparison">Comparison</h3>
+<h4 id="eq">eq?</h4>
+<pre><code>(eq? :expr :expr)</code></pre>
+<p>Identity comparison. Check if two values are the same object.</p>
+<hr />
+<h4 id="equal">equal?</h4>
+<pre><code>(equal? :expr :expr)</code></pre>
+<p>Value comparison. Check if two values are equal.</p>
+<hr />
+<h3 id="logical-operators">Logical Operators</h3>
+<h4 id="not">not</h4>
+<pre><code>(not :bool)</code></pre>
+<hr />
+<h3 id="pair-and-list-operations">Pair and List Operations</h3>
+<h4 id="cons">cons</h4>
+<pre><code>(cons left:expr right:expr)</code></pre>
+<p>Construct a pair.</p>
+<hr />
+<h4 id="car">car</h4>
+<pre><code>(car :pair)</code></pre>
+<p>Get first item of a pair (head of list).</p>
+<hr />
+<h4 id="cdr">cdr</h4>
+<pre><code>(cdr :pair)
+</code></pre>
+<p>Get second item of a pair (rest of list).</p>
+<hr />
+<h4 id="list-1">list</h4>
+<pre><code>(list :expr ...)</code></pre>
+<p>Construct a list, which is a linked list made from pairs and termninated by <code>nil</code>.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (equal? (list 1 2 3) (cons 1 (cons 2 (cons 3 nil))))
+true
+&gt;&gt;&gt; (equal? (list 1 2 3) (cons 1 (list 2 3)))</code></pre>
+<hr />
+<h4 id="nil-1">nil?</h4>
+<pre><code>(nil? :expr)</code></pre>
+<p>Check if value is the empty list (nil).</p>
+<hr />
+<h4 id="list-2">list?</h4>
+<pre><code>(list? :expr)</code></pre>
+<p>Check if value is a nil-terminated list of ordered pairs.</p>
+<hr />
+<h4 id="map">map</h4>
+<pre><code>(map f:procedure vals:list)</code></pre>
+<p>Applies <code>f</code> to each value in a list and return results in list.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (map (fn (x) (* 2 x)) (list 1 2 3))
+(2 4 6)</code></pre>
+<hr />
+<h4 id="fold">fold</h4>
+<pre><code>(fold f:procedure init:expr vals:list)</code></pre>
+<p>Applies <code>f</code> to each value in a list and accumulate results in <code>init</code>.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (fold + 0 (list 1 2 3))
+6
+&gt;&gt;&gt; (fold cons () (list 1 2 3))
+(3 2 1)</code></pre>
+<hr />
+<h3 id="string-operations">String Operations</h3>
+<h4 id="concat">concat</h4>
+<pre><code>(concat :string ...)</code></pre>
+<p>Concatenate multiple strings.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (concat &quot;foo&quot; &quot;bar&quot; &quot;baz&quot;)
+&quot;foobarbaz&quot;</code></pre>
+<hr />
+<h3 id="integer-operations">Integer Operations</h3>
+<h4 id="add">add (+)</h4>
+<pre><code>(+ :integer ...)</code></pre>
+<h4 id="mul">mul (*)</h4>
+<pre><code>(* :integer ...)</code></pre>
+<hr />
+<h3 id="printing">Printing</h3>
+<h4 id="print">print</h4>
+<pre><code>(print :string)</code></pre>
+<hr />
+<h4 id="repr">repr</h4>
+<pre><code>(repr :expr)</code></pre>
+<p>Get string representation of a value.</p>
+<hr />
+<h4 id="display">display</h4>
+<pre><code>(display :expr)</code></pre>
+<p>Print string representation of a value.</p>
+<hr />
+<h3 id="type-inspection">Type Inspection</h3>
+<h4 id="type">type</h4>
+<pre><code>(type :expr)</code></pre>
+<p>Inspect type of a value.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (type &quot;foo&quot;)
+string</code></pre>
+<hr />
+<h4 id="type-1">type?</h4>
+<pre><code>(type? :expr type)
+(string? :expr)
+(symbol? :expr)
+...</code></pre>
+<p>Test type of a value. There are also convenience functions for every type.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (type? &quot;foo&quot; string)
+true
+&gt;&gt;&gt; (integer? &quot;foo&quot;)
+false</code></pre>
+<hr />
+<h3 id="quoting-and-evaluation">Quoting and Evaluation</h3>
+<h4 id="quote-1">quote</h4>
+<pre><code>(quote :expr)</code></pre>
+<p>A quoted expression evaluates to the expression.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (def a 100)
+&gt;&gt;&gt; a
+100
+&gt;&gt;&gt; (quote a)
+a
+&gt;&gt;&gt; (+ 5 5)
+10
+&gt;&gt;&gt; (quote (+ 5 5))
+(+ 5 5)</code></pre>
+<hr />
+<h4 id="eval">eval</h4>
+<pre><code>(eval :expr)</code></pre>
+<p>Evaluate an expression.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (def expr (quote (+ 5 5)))
+&gt;&gt;&gt; expr
+(+ 5 5)
+&gt;&gt;&gt; (eval expr)
+10</code></pre>
+<hr />
+<h4 id="apply">apply</h4>
+<pre><code>(apply :procedure :list)</code></pre>
+<p>Apply a procedure to a list of arguments.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (apply + (list 1 2 3))
+6</code></pre>
+<hr />
+<h4 id="evalfile">evalfile</h4>
+<pre><code>(evalfile filename:string)</code></pre>
+<p>Evaluate file in the global environment.</p>
+<hr />
+<h3 id="macro-definition">Macro Definition</h3>
+<h4 id="defmacro">defmacro</h4>
+<pre><code>(defmacro name formals :expr ...)</code></pre>
+<p>jbscheme macros are “procedural”; they are simply lambdas which return code.</p>
+<p>The body of the macro is first evaluated in the macro’s lexical environment. Then the resulting expression is evaluated in the caller’s environment.</p>
+<p>Beware of capturing variables from the macro’s environment; if you want to refer to variables in the invocation environment, use quotation.</p>
+<p>This <code>add-x</code> macro captures the global binding for <code>x</code>:</p>
+<pre><code>&gt;&gt;&gt; (defmacro add-x (y) (list + x y))
+&gt;&gt;&gt; (def x 100)
+&gt;&gt;&gt; (add-x 5)
+105
+&gt;&gt;&gt; (set! x 200)
+&gt;&gt;&gt; (add-x 5)
+205
+&gt;&gt;&gt; ((fn (x) (add-x 5)) 1000)
+205</code></pre>
+<p>In this version, <code>x</code> is not captured; the value of <code>x</code> is taken from the local scope where the macro is called:</p>
+<pre><code>&gt;&gt;&gt; (def x 100)
+&gt;&gt;&gt; (defmacro add-x (y) (list + &#39;x y))
+&gt;&gt;&gt; ((fn (x) (add-x 5)) 1000)
+1005</code></pre>
+<hr />
+<h4 id="macro-1">macro</h4>
+<pre><code>(macro formals :expr ...)</code></pre>
+<p>Create macro. See <a href="#defmacro">‘defmacro’</a>.</p>
+<hr />
+<h3 id="exceptions">Exceptions</h3>
+<p>Errors can be raised to interrupt program flow, and can be caught with the <code>try</code> form.</p>
+<h4 id="error-1">error</h4>
+<pre><code>(error :string)</code></pre>
+<h4 id="raise">raise</h4>
+<pre><code>(raise :error)</code></pre>
+<h4 id="try">try</h4>
+<pre><code>(try body:expr catch:expr)</code></pre>
+<p>Try evaluating <code>body</code>. If an error is raised, evaluate <code>catch</code>; the raised error value is bound to <code>err</code> when <code>catch</code> is evaluated.</p>
+<pre><code>; Example
+&gt;&gt;&gt; (defn errored ()
+...     (raise (error &quot;oh no!&quot;))
+...     (print &quot;never evaluated&quot;))
+&gt;&gt;&gt; (errored)
+Unhandled Error: oh no!
+&gt;&gt;&gt; (try (print &quot;no error&quot;) (print (concat &quot;handled &quot; (repr err))))
+no error
+&gt;&gt;&gt; (try (errored) (print (concat &quot;handled &quot; (repr err))))
+handled #[error Exception &quot;oh no!&quot;]</code></pre>
+<hr />
+<h4 id="assert">assert</h4>
+<pre><code>(assert predicate:bool)</code></pre>
+<p>Raises an exception if <code>predicate</code> is false.</p>
+<hr />
+<h3 id="system-procedures">System Procedures</h3>
+<h4 id="getenv">getenv</h4>
+<pre><code>(getenv var:string)</code></pre>
+<p>Get value of environment variable. Raises exception if the variable is not set or contains non-UTF8 characters.</p>
+<hr />
+<h4 id="exit">exit</h4>
+<pre><code>(exit :integer)</code></pre>
+<p>Exit program with a status code.</p>
+<hr />
+<h3 id="debugging">Debugging</h3>
+<h4 id="dd">dd</h4>
+<pre><code>(dd :expr)</code></pre>
+<p>Print Rust struct debug.</p>
+<hr />
+<h4 id="ddp">ddp</h4>
+<pre><code>(ddp :expr)</code></pre>
+<p>Pretty print Rust struct debug.</p>
+<hr />
+<h4 id="dda">dda</h4>
+<pre><code>(dda :expr)</code></pre>
+<p>Print pointer address.</p>
+<hr />
+<h4 id="ddc">ddc</h4>
+<pre><code>(ddc :lambda|:macro)</code></pre>
+<p>Print code of (non-builtin) lambda or macro.</p>
+<hr />
+<h2 id="standard-libraries">Standard Libraries</h2>
+<h3 id="math">math</h3>
+
+<h3 id="unittest">unittest</h3>
+</body>
+</html>

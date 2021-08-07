@@ -21,18 +21,18 @@ mod sys;
 
 fn jbuiltin_equal(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
-    Ok(state.bool(x == y))
+    Ok(state.jbool(x == y))
 }
 
 fn jbuiltin_eq(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
-    Ok(state.bool(Rc::ptr_eq(&x, &y)))
+    Ok(state.jbool(Rc::ptr_eq(&x, &y)))
 }
 
 fn jbuiltin_not(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x] = get_n_args(args)?;
     match &*x {
-        JVal::Bool(b) => Ok(state.bool(!b)),
+        JVal::Bool(b) => Ok(state.jbool(!b)),
         _ => Err(JError::TypeError("expected a bool".to_string())),
     }
 }
@@ -42,7 +42,7 @@ fn jbuiltin_print(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     match &*s {
         JVal::String(s) => {
             println!("{}", s);
-            Ok(state.nil())
+            Ok(state.jnil())
         }
         _ => Err(JError::TypeError("expected string".to_string())),
     }
@@ -50,25 +50,25 @@ fn jbuiltin_print(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
 
 fn jbuiltin_repr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x] = get_n_args(args)?;
-    Ok(state.string(repr(&x)))
+    Ok(state.jstring(repr(&x)))
 }
 
 fn jbuiltin_display_debug(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
     println!("{:?}", val);
-    Ok(state.nil())
+    Ok(state.jnil())
 }
 
 fn jbuiltin_display_debug_pretty(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
     println!("{:#?}", val);
-    Ok(state.nil())
+    Ok(state.jnil())
 }
 
 fn jbuiltin_display_ptr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
     println!("{:p}", val);
-    Ok(state.nil())
+    Ok(state.jnil())
 }
 
 fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
@@ -91,7 +91,7 @@ fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -> JR
             .collect::<Vec<String>>()
             .join(" ")
     );
-    Ok(state.nil())
+    Ok(state.jnil())
 }
 
 fn jspecial_def(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -102,7 +102,7 @@ fn jspecial_def(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     };
     let jval = eval(jval, Rc::clone(&env), state)?;
     env.define(sym, jval);
-    Ok(state.nil())
+    Ok(state.jnil())
 }
 
 fn jspecial_set(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -113,7 +113,7 @@ fn jspecial_set(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     };
     let jval = eval(jval, Rc::clone(&env), state)?;
     env.set(sym, jval)?;
-    Ok(state.nil())
+    Ok(state.jnil())
 }
 
 fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -125,7 +125,7 @@ fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
             _ => return Err(JError::TypeError("expected a list of symbols".to_string())),
         }
     }
-    state.lambda(env, params, exprs)
+    state.jlambda(env, params, exprs)
 }
 
 fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -137,7 +137,7 @@ fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
             _ => return Err(JError::TypeError("expected a list of symbols".to_string())),
         }
     }
-    state.lmacro(env, params, exprs)
+    state.jmacro(env, params, exprs)
 }
 
 fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -156,7 +156,7 @@ fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
 
 fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
-    Ok(state.symbol(
+    Ok(state.jsymbol(
         match *val {
             JVal::Nil => "nil",
             JVal::Pair(_) => "pair",
@@ -185,7 +185,7 @@ fn jbuiltin_evalfile(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult
     match &*file {
         JVal::String(s) => match state.eval_file(s, env)? {
             Some(val) => Ok(val),
-            None => Ok(state.nil()),
+            None => Ok(state.jnil()),
         },
         _ => Err(JError::TypeError("expected string".to_string())),
     }
@@ -207,14 +207,14 @@ fn add_builtin<T>(name: &str, f: T, env: &JEnv, state: &mut JState)
 where
     T: 'static + Fn(JValRef, JEnvRef, &mut JState) -> JResult,
 {
-    env.define(name, state.builtin(name.to_string(), Rc::new(f)));
+    env.define(name, state.jbuiltin(name.to_string(), Rc::new(f)));
 }
 
 fn add_special_form<T>(name: &str, f: T, env: &JEnv, state: &mut JState)
 where
     T: 'static + Fn(JValRef, JEnvRef, &mut JState) -> JResult,
 {
-    env.define(name, state.specialform(name.to_string(), Rc::new(f)));
+    env.define(name, state.jspecialform(name.to_string(), Rc::new(f)));
 }
 
 pub fn add_builtins(env: &JEnv, state: &mut JState) {

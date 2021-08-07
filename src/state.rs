@@ -83,51 +83,51 @@ impl JState {
     }
 
     // Constructors
-    pub fn nil(&self) -> JValRef {
+    pub fn jnil(&self) -> JValRef {
         Rc::clone(&self.const_nil)
     }
-    pub fn bool(&self, val: bool) -> JValRef {
+    pub fn jbool(&self, val: bool) -> JValRef {
         if val {
             Rc::clone(&self.const_true)
         } else {
             Rc::clone(&self.const_false)
         }
     }
-    pub fn int(&mut self, val: JTInt) -> JValRef {
+    pub fn jint(&mut self, val: JTInt) -> JValRef {
         if val > INT_INTERN_MAX_VAL {
             (self.interned_int.constructor)(val)
         } else {
             self.interned_int.get_or_insert(val)
         }
     }
-    pub fn symbol(&mut self, val: String) -> JValRef {
+    pub fn jsymbol(&mut self, val: String) -> JValRef {
         self.interned_sym.get_or_insert(val)
     }
-    pub fn string(&mut self, val: String) -> JValRef {
+    pub fn jstring(&mut self, val: String) -> JValRef {
         if val.len() > STR_INTERN_MAX_LEN {
             (self.interned_str.constructor)(val)
         } else {
             self.interned_str.get_or_insert(val)
         }
     }
-    pub fn quote(&self, v: JValRef) -> JValRef {
+    pub fn jquote(&self, v: JValRef) -> JValRef {
         JVal::Quote(v).into_ref()
     }
-    pub fn list(&self, mut v: Vec<JValRef>) -> JValRef {
-        let mut cur = self.nil();
+    pub fn jlist(&self, mut v: Vec<JValRef>) -> JValRef {
+        let mut cur = self.jnil();
         v.reverse();
         for val in v {
-            cur = self.pair(val, cur);
+            cur = self.jpair(val, cur);
         }
         cur
     }
-    pub fn pair(&self, left: JValRef, right: JValRef) -> JValRef {
+    pub fn jpair(&self, left: JValRef, right: JValRef) -> JValRef {
         JVal::Pair(JPair::cons(left, right)).into_ref()
     }
-    pub fn error(&self, je: JError) -> JValRef {
+    pub fn jerrorval(&self, je: JError) -> JValRef {
         JVal::Error(je).into_ref()
     }
-    pub fn lambda(&self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
+    pub fn jlambda(&self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
         Ok(JVal::Lambda(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
@@ -135,7 +135,7 @@ impl JState {
         }))
         .into_ref())
     }
-    pub fn lmacro(&self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
+    pub fn jmacro(&self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
         Ok(JVal::Macro(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
@@ -143,14 +143,14 @@ impl JState {
         }))
         .into_ref())
     }
-    pub fn builtin(
+    pub fn jbuiltin(
         &self,
         name: String,
         f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,
     ) -> JValRef {
         JVal::Builtin(JBuiltin { name, f }).into_ref()
     }
-    pub fn specialform(
+    pub fn jspecialform(
         &self,
         name: String,
         f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,

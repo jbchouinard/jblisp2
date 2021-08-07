@@ -2,7 +2,7 @@ use crate::builtin::*;
 
 pub fn jbuiltin_cons(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
-    Ok(state.pair(Rc::clone(&x), Rc::clone(&y)))
+    Ok(state.jpair(Rc::clone(&x), Rc::clone(&y)))
 }
 
 pub fn jbuiltin_car(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
@@ -27,7 +27,7 @@ pub fn jbuiltin_list(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResu
 
 pub fn jbuiltin_is_list(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
-    Ok(state.bool(match &*val {
+    Ok(state.jbool(match &*val {
         JVal::Pair(c) => c.is_list(),
         _ => false,
     }))

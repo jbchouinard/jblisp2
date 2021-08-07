@@ -10,7 +10,7 @@ pub enum JError {
     TypeError(String),
     EvalError(String),
     ApplyError(String),
-    UndefError(String),
+    NotDefined(String),
     OsError(String),
     SyntaxError {
         position: PositionTag,
@@ -26,7 +26,7 @@ impl fmt::Display for JError {
             Self::TypeError(s) => write!(f, "TypeError \"{}\"", s),
             Self::EvalError(s) => write!(f, "EvalError \"{}\"", s),
             Self::ApplyError(s) => write!(f, "ApplyError \"{}\"", s),
-            Self::UndefError(s) => write!(f, "UndefError {}", s),
+            Self::NotDefined(s) => write!(f, "NotDefined {}", s),
             Self::OsError(s) => write!(f, "OsError \"{}\"", s),
             Self::SyntaxError { position, reason } => {
                 write!(f, "SyntaxError \"{} at {}\"", reason, position)

@@ -74,7 +74,6 @@ impl Interpreter {
     pub fn eval_file<P: AsRef<Path>>(&mut self, path: P) -> Result<Option<JValRef>, JError> {
         self.state.eval_file(path, Rc::clone(&self.globals))
     }
-
     /// Evaluate a `jbscheme` expression.
     /// (All values are expressions, primitive types evaluates to themselves.)
     pub fn eval(&mut self, expr: JValRef) -> JResult {
@@ -88,7 +87,7 @@ impl Interpreter {
         let proc = self.globals.try_lookup(name)?;
         let mut sexpr = vec![proc];
         sexpr.extend(args);
-        let sexpr = self.state.list(sexpr);
+        let sexpr = self.state.jlist(sexpr);
         eval(sexpr, Rc::clone(&self.globals), &mut self.state)
     }
     /// Create a global binding (variable definition).
@@ -108,36 +107,35 @@ impl Interpreter {
     }
     /// Construct a `jbscheme` `nil` (always interned).
     pub fn jnil(&mut self) -> JValRef {
-        self.state.nil()
+        self.state.jnil()
     }
     /// Construct a `jbscheme` `bool` (always interned).
     pub fn jbool(&mut self, b: bool) -> JValRef {
-        self.state.bool(b)
+        self.state.jbool(b)
     }
-    /// Construct a `jbscheme` `int` (may be interned).
     pub fn jint(&mut self, n: JTInt) -> JValRef {
-        self.state.int(n)
+        self.state.jint(n)
     }
     /// Construct a `jbscheme` `symbol` (always interned).
     pub fn jsymbol(&mut self, s: String) -> JValRef {
-        self.state.symbol(s)
+        self.state.jsymbol(s)
     }
     /// Construct a `jbscheme` `string` (may be interned).
     pub fn jstring(&mut self, s: String) -> JValRef {
-        self.state.string(s)
+        self.state.jstring(s)
     }
     /// Construct a `jbscheme` `quote`.
     pub fn jquote(&mut self, v: JValRef) -> JValRef {
-        self.state.quote(v)
+        self.state.jquote(v)
     }
     /// Construct a `jbscheme` list (linked list made from `pair` and terminated
     /// by `nil`).
     pub fn jlist(&mut self, v: Vec<JValRef>) -> JValRef {
-        self.state.list(v)
+        self.state.jlist(v)
     }
     /// Construct a `jbscheme` `pair` (cons cell).
     pub fn jpair(&mut self, left: JValRef, right: JValRef) -> JValRef {
-        self.state.pair(left, right)
+        self.state.jpair(left, right)
     }
     /// Construct a `jbscheme` `error` value.
     ///
@@ -145,22 +143,22 @@ impl Interpreter {
     /// that can be passed around in `jbscheme`, and in [`Err`]`(`[`JError`]`)` when it is
     /// `raise`'d by `jbscheme` code, or due to parsing or evaluation errors.
     pub fn jerrorval(&mut self, err: JError) -> JValRef {
-        self.state.error(err)
+        self.state.jerrorval(err)
     }
     /// Construct a `jbscheme` `lambda`.
     pub fn jlambda(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
-        self.state.lambda(Rc::clone(&self.globals), params, body)
+        self.state.jlambda(Rc::clone(&self.globals), params, body)
     }
     /// Construct a `jbscheme` `macro`.
     pub fn jmacro(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
-        self.state.lmacro(Rc::clone(&self.globals), params, body)
+        self.state.jmacro(Rc::clone(&self.globals), params, body)
     }
     /// Define a `jbscheme` builtin procedure.
     pub fn jbuiltin<F>(&mut self, name: String, f: F) -> JValRef
     where
         F: 'static + Fn(JValRef, JEnvRef, &mut JState) -> JResult,
     {
-        let v = self.state.builtin(name.clone(), Rc::new(f));
+        let v = self.state.jbuiltin(name.clone(), Rc::new(f));
         self.def(&name, Rc::clone(&v));
         v
     }
@@ -169,7 +167,7 @@ impl Interpreter {
     where
         F: 'static + Fn(JValRef, JEnvRef, &mut JState) -> JResult,
     {
-        let v = self.state.builtin(name.clone(), Rc::new(f));
+        let v = self.state.jbuiltin(name.clone(), Rc::new(f));
         self.def(&name, Rc::clone(&v));
         v
     }

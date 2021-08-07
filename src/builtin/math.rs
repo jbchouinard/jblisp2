@@ -5,7 +5,7 @@ pub fn jbuiltin_add(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult
     for arg in args.iter_list()? {
         acc += arg.to_int()?;
     }
-    Ok(state.int(acc))
+    Ok(state.jint(acc))
 }
 
 // pub fn jbuiltin_sub(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
@@ -22,5 +22,5 @@ pub fn jbuiltin_mul(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult
     for arg in args.iter_list()? {
         acc *= arg.to_int()?;
     }
-    Ok(state.int(acc))
+    Ok(state.jint(acc))
 }
