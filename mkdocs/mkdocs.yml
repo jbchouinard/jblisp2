@@ -3,5 +3,7 @@ site_url: https://jbchouinard.github.io/jbscheme
 theme: readthedocs
 nav:
   - Lanuage Reference: index.md
-  - PDF Manual: /jbscheme/JB Scheme Manual.pdf
+  - Dowload PDF: /jbscheme/JB Scheme Manual.pdf
   - Crate Documentation: /jbscheme/crate/jbscheme/index.html
+  - GitHub Repo: https://github.com/jbchouinard/jbscheme
+
