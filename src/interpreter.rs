@@ -45,8 +45,8 @@ impl Interpreter {
     /// Execute the `jbscheme` [prelude](PRELUDE), which defines common constants, procedures
     /// and macros.
     pub fn exec_prelude(&mut self) {
-        if let Err(je) = self.eval_str("#PRELUDE", PRELUDE) {
-            eprintln!("{}", je);
+        if let Err((pos, je)) = self.eval_str("#PRELUDE", PRELUDE) {
+            eprintln!("{}: {}", pos, je);
             std::process::exit(1);
         }
     }
@@ -54,7 +54,7 @@ impl Interpreter {
         &mut self,
         name: &str,
         tokens: Box<dyn TokenIter>,
-    ) -> Result<Option<JValRef>, JError> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
         self.state
             .eval_tokens(name, tokens, Rc::clone(&self.globals))
     }
@@ -64,14 +64,21 @@ impl Interpreter {
     ///
     /// * `name`: Name used to report errors in the program (e.g. filename, "stdin").
     /// * `program`: One or more `jbscheme` expressions.
-    pub fn eval_str(&mut self, name: &str, program: &str) -> Result<Option<JValRef>, JError> {
+    pub fn eval_str(
+        &mut self,
+        name: &str,
+        program: &str,
+    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
         self.state.eval_str(name, program, Rc::clone(&self.globals))
     }
     /// Evaluate a `jbscheme` script file, and return the value of the last expression
     /// or None if the file contains no expressions).
     //
     /// * `path`: Path to script file.
-    pub fn eval_file<P: AsRef<Path>>(&mut self, path: P) -> Result<Option<JValRef>, JError> {
+    pub fn eval_file<P: AsRef<Path>>(
+        &mut self,
+        path: P,
+    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
         self.state.eval_file(path, Rc::clone(&self.globals))
     }
     /// Evaluate a `jbscheme` expression.
@@ -142,8 +149,8 @@ impl Interpreter {
     /// Note that [`JError`] can be found both in [`Ok`]`(`[`JValRef`]`)`, as first class values
     /// that can be passed around in `jbscheme`, and in [`Err`]`(`[`JError`]`)` when it is
     /// `raise`'d by `jbscheme` code, or due to parsing or evaluation errors.
-    pub fn jerrorval(&mut self, err: JError) -> JValRef {
-        self.state.jerrorval(err)
+    pub fn jerrorval(&mut self, kind: JErrorKind, reason: &str) -> JValRef {
+        self.state.jerrorval(kind, reason)
     }
     /// Construct a `jbscheme` `lambda`.
     pub fn jlambda(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {

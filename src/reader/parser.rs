@@ -1,12 +1,14 @@
 use super::tokenizer::{Token, TokenValue};
-use crate::reader::tokenizer::TokenIter;
-
 use super::ParserError;
+use crate::reader::tokenizer::TokenIter;
+use crate::reader::PositionTag;
 use crate::*;
 
 pub struct Parser<'a> {
     filename: String,
+    prev_lineno: usize,
     lineno: usize,
+    prev_last_newline_pos: usize,
     last_newline_pos: usize,
     tokeniter: Box<dyn TokenIter>,
     peek: Token,
@@ -17,7 +19,9 @@ impl<'a> Parser<'a> {
     pub fn new(filename: &str, tokeniter: Box<dyn TokenIter>, state: &'a mut JState) -> Self {
         let mut this = Self {
             filename: filename.to_string(),
+            prev_lineno: 0,
             lineno: 1,
+            prev_last_newline_pos: 0,
             last_newline_pos: 0,
             tokeniter,
             // Dummy value until we read the first real token
@@ -28,13 +32,21 @@ impl<'a> Parser<'a> {
         this
     }
 
+    fn ptag(&self, pos: usize) -> PositionTag {
+        let (col, lineno) = if pos >= self.last_newline_pos {
+            (pos - self.last_newline_pos, self.lineno)
+        } else {
+            (pos - self.prev_last_newline_pos, self.prev_lineno)
+        };
+        PositionTag {
+            filename: self.filename.clone(),
+            lineno,
+            col,
+        }
+    }
+
     fn error(&self, pos: usize, reason: &str) -> ParserError {
-        ParserError::new(
-            &self.filename,
-            self.lineno,
-            pos - self.last_newline_pos,
-            reason,
-        )
+        ParserError::new(self.ptag(pos), reason)
     }
 
     fn _next(&mut self) -> Result<Token, ParserError> {
@@ -63,6 +75,10 @@ impl<'a> Parser<'a> {
     }
 
     fn whitespace(&mut self) -> Result<(), ParserError> {
+        if let TokenValue::Whitespace(_) = &self.peek.value {
+            self.prev_lineno = self.lineno;
+            self.prev_last_newline_pos = self.last_newline_pos;
+        }
         while let TokenValue::Whitespace(ws) = &self.peek.value {
             let mut newline_count = 0;
             for (p, c) in ws.chars().enumerate() {
@@ -122,17 +138,18 @@ impl<'a> Parser<'a> {
         Ok(self.state.jlist(list))
     }
 
-    pub fn parse_form(&mut self) -> Result<Option<JValRef>, ParserError> {
+    pub fn parse_form(&mut self) -> Result<Option<(PositionTag, JValRef)>, ParserError> {
         if self.peek.value == TokenValue::Eof {
             return Ok(None);
         }
+        let ptag = self.ptag(self.peek.pos);
         match self.expr() {
-            Ok(val) => Ok(Some(val)),
+            Ok(val) => Ok(Some((ptag, val))),
             Err(e) => Err(e),
         }
     }
 
-    pub fn parse_forms(&mut self) -> Result<Vec<JValRef>, ParserError> {
+    pub fn parse_forms(&mut self) -> Result<Vec<(PositionTag, JValRef)>, ParserError> {
         let mut forms = vec![];
         while let Some(form) = self.parse_form()? {
             forms.push(form)

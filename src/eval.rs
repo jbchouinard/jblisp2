@@ -19,7 +19,7 @@ fn apply(list: &JPair, env: JEnvRef, state: &mut JState) -> JResult {
         JVal::SpecialForm(b) => apply_special_form(b, args, env, state),
         JVal::Lambda(l) => apply_lambda(l, args, env, state),
         JVal::Macro(l) => apply_macro(l, args, env, state),
-        _ => Err(JError::TypeError("expected a callable".to_string())),
+        _ => Err(JError::new(TypeError, "expected a callable")),
     }
 }
 

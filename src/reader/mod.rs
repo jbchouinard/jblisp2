@@ -1,14 +1,25 @@
-use crate::JError;
 use std::fmt;
+
+use crate::{JError, SyntaxError};
 
 pub mod parser;
 pub mod tokenizer;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct PositionTag {
-    filename: String,
-    lineno: usize,
-    col: usize,
+    pub filename: String,
+    pub lineno: usize,
+    pub col: usize,
+}
+
+impl PositionTag {
+    pub fn new(filename: &str, lineno: usize, col: usize) -> Self {
+        Self {
+            filename: filename.to_string(),
+            lineno,
+            col,
+        }
+    }
 }
 
 impl fmt::Display for PositionTag {
@@ -19,18 +30,14 @@ impl fmt::Display for PositionTag {
 
 #[derive(Debug)]
 pub struct ParserError {
-    pub position: PositionTag,
+    pub pos: PositionTag,
     pub reason: String,
 }
 
 impl ParserError {
-    pub fn new(filename: &str, lineno: usize, col: usize, reason: &str) -> Self {
+    pub fn new(pt: PositionTag, reason: &str) -> Self {
         Self {
-            position: PositionTag {
-                filename: filename.to_string(),
-                lineno,
-                col,
-            },
+            pos: pt,
             reason: reason.to_string(),
         }
     }
@@ -38,15 +45,15 @@ impl ParserError {
 
 impl fmt::Display for ParserError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::result::Result<(), fmt::Error> {
-        write!(f, "Error parsing {} {}", self.position, self.reason)
+        write!(f, "Error parsing {} {}", self.pos, self.reason)
     }
 }
 
 impl From<ParserError> for JError {
     fn from(pe: ParserError) -> Self {
-        Self::SyntaxError {
-            position: pe.position.clone(),
-            reason: pe.reason,
+        Self {
+            kind: SyntaxError,
+            reason: format!("{} at {}", pe.reason, pe.pos),
         }
     }
 }

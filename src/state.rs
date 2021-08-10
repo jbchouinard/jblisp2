@@ -1,11 +1,12 @@
 use std::path::Path;
 use std::rc::Rc;
 
-use crate::eval::eval;
+use crate::error::JErrorKind;
 use crate::primitives::intern::Interned;
 use crate::reader::parser::Parser;
 use crate::reader::tokenizer::TokenIter;
 use crate::reader::tokenizer::Tokenizer;
+use crate::reader::PositionTag;
 use crate::*;
 
 const STR_INTERN_MAX_LEN: usize = 1024;
@@ -34,6 +35,8 @@ pub struct JState {
     interned_int: Interned<JTInt>,
     interned_sym: Interned<String>,
     interned_str: Interned<String>,
+    pos: PositionTag,
+    traceback: Vec<PositionTag>,
 }
 
 impl JState {
@@ -45,18 +48,46 @@ impl JState {
             interned_int: Interned::new(Box::new(make_int)),
             interned_sym: Interned::new(Box::new(make_sym)),
             interned_str: Interned::new(Box::new(make_str)),
+            pos: PositionTag {
+                filename: "".to_string(),
+                lineno: 0,
+                col: 0,
+            },
+            traceback: vec![],
         }
     }
+    pub fn update_pos(&mut self, pt: Option<&PositionTag>) {
+        if let Some(pos) = pt {
+            self.pos = pos.clone();
+        }
+    }
+    pub fn traceback_push(&mut self, pt: &PositionTag) {
+        self.traceback.push(pt.clone())
+    }
+    pub fn traceback_take(&mut self) -> Vec<PositionTag> {
+        std::mem::take(&mut self.traceback)
+    }
+    pub fn traceback(&self) -> &[PositionTag] {
+        &self.traceback
+    }
+
     pub fn eval_tokens(
         &mut self,
         name: &str,
         tokeniter: Box<dyn TokenIter>,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, JError> {
-        let forms = Parser::new(name, tokeniter, self).parse_forms()?;
+    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
+        let forms = match Parser::new(name, tokeniter, self).parse_forms() {
+            Ok(forms) => forms,
+            Err(pe) => return Err((pe.pos.clone(), pe.into())),
+        };
         let mut last_eval = None;
-        for form in forms {
-            last_eval = Some(eval(form, Rc::clone(&env), self)?);
+        for (pos, expr) in forms {
+            self.update_pos(Some(&pos));
+            last_eval = match eval(expr, Rc::clone(&env), self) {
+                Ok(val) => Some(val),
+                Err(je) => return Err((self.pos.clone(), je)),
+            }
         }
         Ok(last_eval)
     }
@@ -65,7 +96,7 @@ impl JState {
         name: &str,
         program: &str,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, JError> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
         let tokeniter = Box::new(Tokenizer::new(program.to_string()));
         self.eval_tokens(name, tokeniter, env)
     }
@@ -73,11 +104,16 @@ impl JState {
         &mut self,
         path: P,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, JError> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
         let path = path.as_ref();
         let text = match std::fs::read_to_string(path) {
             Ok(text) => text,
-            Err(e) => return Err(JError::OsError(format!("{}", e))),
+            Err(e) => {
+                return Err((
+                    PositionTag::new("", 0, 0),
+                    JError::new(JErrorKind::OsError, &format!("{}", e)),
+                ))
+            }
         };
         self.eval_str(&path.to_string_lossy(), &text, env)
     }
@@ -124,10 +160,10 @@ impl JState {
     pub fn jpair(&self, left: JValRef, right: JValRef) -> JValRef {
         JVal::Pair(JPair::cons(left, right)).into_ref()
     }
-    pub fn jerrorval(&self, je: JError) -> JValRef {
-        JVal::Error(je).into_ref()
+    pub fn jerrorval(&self, kind: JErrorKind, reason: &str) -> JValRef {
+        JVal::Error(JError::new(kind, reason)).into_ref()
     }
-    pub fn jlambda(&self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
+    pub fn jlambda(&mut self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
         Ok(JVal::Lambda(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
@@ -135,7 +171,7 @@ impl JState {
         }))
         .into_ref())
     }
-    pub fn jmacro(&self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
+    pub fn jmacro(&mut self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
         Ok(JVal::Macro(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,

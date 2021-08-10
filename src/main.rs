@@ -1,20 +1,14 @@
 use std::path::PathBuf;
 use std::str::FromStr;
-use std::thread;
 
 use home::home_dir;
 use lazy_static::lazy_static;
 use rustyline::Editor;
 use structopt::StructOpt;
 
-use jbscheme::Interpreter;
-use jbscheme::{Token, TokenError, TokenValidator};
+use jbscheme::{Interpreter, Token, TokenError, TokenValidator};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-
-// HACK: No tail call optimization yet, so just using a big stack size for now to make
-// recursive functions a bit less bad
-const STACK_SIZE: usize = 64 * 1024 * 1024;
 
 lazy_static! {
     static ref HISTORY_FILE: PathBuf = match home_dir() {
@@ -35,16 +29,38 @@ struct Opt {
     files: Vec<PathBuf>,
     #[structopt(short, long)]
     interactive: bool,
+    #[structopt(long)]
+    stack_size_mb: Option<usize>,
 }
 
-fn _main() {
-    let Opt { files, interactive } = Opt::from_args();
+fn main() {
+    let Opt {
+        files,
+        interactive,
+        stack_size_mb,
+    } = Opt::from_args();
 
+    match stack_size_mb {
+        // HACK: start new thread with the configured stack size
+        // TODO: is there a way to modify stack size of current thread?
+        Some(stack_size_mb) => {
+            std::thread::Builder::new()
+                .stack_size(stack_size_mb * 1024 * 1024)
+                .spawn(move || run(files, interactive))
+                .unwrap()
+                .join()
+                .unwrap();
+        }
+        None => run(files, interactive),
+    }
+}
+
+fn run(files: Vec<PathBuf>, interactive: bool) {
     let mut interpreter = Interpreter::default();
 
     for file in &files {
-        if let Err(e) = interpreter.eval_file(&file) {
-            eprintln!("{}", e);
+        if let Err((pos, e)) = interpreter.eval_file(&file) {
+            eprintln!("{}: {}", pos, e);
             std::process::exit(1);
         }
     }
@@ -64,24 +80,11 @@ fn repl(mut interpreter: Interpreter) {
             Ok(tokens) => match interpreter.eval_tokens("#STDIN", Box::new(tokens.into_iter())) {
                 Ok(Some(val)) => println!("{}", val),
                 Ok(None) => (),
-                Err(err) => eprintln!("Unhandled {}", err),
+                Err((pos, err)) => eprintln!("{}: Unhandled {}", pos, err),
             },
             Err(e) => eprintln!("{}", e),
         }
     }
-}
-
-fn readline(rl: &mut Editor<()>, prompt: &str) -> String {
-    let input = match rl.readline(prompt) {
-        Ok(input) => input,
-        Err(e) => {
-            eprintln!("{}", e);
-            std::process::exit(1);
-        }
-    };
-    rl.add_history_entry(&input);
-    let _ = rl.save_history(&*HISTORY_FILE);
-    input
 }
 
 /// Get tokens that looks like they form a complete expression (balanced parens)
@@ -99,11 +102,17 @@ fn get_tokens(rl: &mut Editor<()>) -> Result<Vec<Token>, TokenError> {
     }
 }
 
-fn main() {
-    thread::Builder::new()
-        .stack_size(STACK_SIZE)
-        .spawn(_main)
-        .unwrap()
-        .join()
-        .unwrap();
+fn readline(rl: &mut Editor<()>, prompt: &str) -> String {
+    let input = match rl.readline(prompt) {
+        Ok(input) => input,
+        Err(e) => {
+            eprintln!("{}", e);
+            std::process::exit(1);
+        }
+    };
+    rl.add_history_entry(&input);
+    if let Err(e) = rl.save_history(&*HISTORY_FILE) {
+        eprintln!("Error saving history file: {}", e)
+    }
+    input
 }

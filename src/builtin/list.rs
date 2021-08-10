@@ -9,7 +9,7 @@ pub fn jbuiltin_car(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResul
     let [list] = get_n_args(args)?;
     match &*list {
         JVal::Pair(c) => Ok(c.car()),
-        _ => Err(JError::TypeError("expected a pair".to_string())),
+        _ => Err(JError::new(TypeError, "expected a pair")),
     }
 }
 
@@ -17,7 +17,7 @@ pub fn jbuiltin_cdr(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResul
     let [list] = get_n_args(args)?;
     match &*list {
         JVal::Pair(c) => Ok(c.cdr()),
-        _ => Err(JError::TypeError("expected pair".to_string())),
+        _ => Err(JError::new(TypeError, "expected a pair")),
     }
 }
 

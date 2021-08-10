@@ -6,8 +6,8 @@ pub fn jbuiltin_getenv(args: JValRef, _env: JEnvRef, state: &mut JState) -> JRes
     match &*var {
         JVal::String(s) => match std::env::var(s) {
             Ok(val) => Ok(state.jstring(val)),
-            Err(e) => Err(JError::OsError(format!("{}", e))),
+            Err(e) => Err(JError::new(OsError, &format!("{}", e))),
         },
-        _ => Err(JError::TypeError("expected string".to_string())),
+        _ => Err(JError::new(TypeError, "expected string")),
     }
 }

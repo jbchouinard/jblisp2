@@ -32,8 +32,7 @@ impl JEnv {
     }
 
     pub fn try_lookup(&self, v: &str) -> JResult {
-        self.lookup(v)
-            .ok_or_else(|| JError::NotDefined(v.to_string()))
+        self.lookup(v).ok_or_else(|| JError::new(NotDefined, v))
     }
 
     /// Create a new binding.
@@ -42,14 +41,14 @@ impl JEnv {
     }
 
     /// Change existing binding.
-    pub fn set(&self, v: &str, val: JValRef) -> Result<(), JError> {
+    pub fn set(&self, v: &str, val: JValRef, state: &mut JState) -> Result<(), JError> {
         if self.vars.borrow().contains_key(v) {
             self.vars.borrow_mut().insert(v.to_string(), val);
             Ok(())
         } else {
             match &self.parent {
-                Some(penv) => penv.set(v, val),
-                None => Err(JError::NotDefined(v.to_string())),
+                Some(penv) => penv.set(v, val, state),
+                None => Err(JError::new(NotDefined, v)),
             }
         }
     }

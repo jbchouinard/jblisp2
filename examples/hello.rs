@@ -8,6 +8,6 @@ fn main() {
     match interpreter.eval_str("hello.rs", r#"(print "Hello World!")"#) {
         Ok(Some(jval)) => println!("{}", jval),
         Ok(None) => (),
-        Err(je) => eprintln!("{}", je),
+        Err((pos, err)) => eprintln!("{}: {}", pos, err),
     };
 }

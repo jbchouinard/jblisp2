@@ -32,7 +32,7 @@ impl JPair {
     }
     pub fn iter(&self) -> Result<JListIterator, JError> {
         if !self.is_list() {
-            return Err(JError::TypeError("can only iter lists".to_string()));
+            return Err(JError::new(TypeError, "can only iter lists"));
         }
         Ok(JListIterator { head: Some(self) })
     }
@@ -120,7 +120,7 @@ impl JParams {
         };
         for p in &names {
             if p == "." {
-                return Err(JError::EvalError("ill-formed params".to_string()));
+                return Err(JError::new(EvalError, "ill-formed params"));
             }
         }
         Ok(match rest {
@@ -142,7 +142,10 @@ impl JParams {
         let mut head = args;
         for p in params.iter() {
             let pair: &JPair = head.to_pair().map_err(|_| {
-                JError::ApplyError(format!("expected {} argument(s)", self.nargs()))
+                JError::new(
+                    ApplyError,
+                    &format!("expected {} argument(s)", self.nargs()),
+                )
             })?;
             env.define(p, pair.car());
             head = pair.cdr();
@@ -152,10 +155,10 @@ impl JParams {
             Self::Fixed(_) => match &*head {
                 JVal::Nil => (),
                 _ => {
-                    return Err(JError::ApplyError(format!(
-                        "expected {} argument(s)",
-                        self.nargs()
-                    )))
+                    return Err(JError::new(
+                        ApplyError,
+                        &format!("expected {} argument(s)", self.nargs()),
+                    ))
                 }
             },
         }
@@ -214,13 +217,13 @@ impl JVal {
     pub fn to_int(&self) -> Result<JTInt, JError> {
         match self {
             Self::Int(n) => Ok(*n),
-            _ => Err(JError::TypeError("expected an int".to_string())),
+            _ => Err(JError::new(TypeError, "expected an int")),
         }
     }
     pub fn to_pair(&self) -> Result<&JPair, JError> {
         match self {
             Self::Pair(p) => Ok(p),
-            _ => Err(JError::TypeError("expected a pair".to_string())),
+            _ => Err(JError::new(TypeError, "expected a pair")),
         }
     }
     pub fn is_list(&self) -> bool {
@@ -234,7 +237,7 @@ impl JVal {
         match self {
             JVal::Nil => Ok(JListIterator { head: None }),
             JVal::Pair(p) => p.iter(),
-            _ => Err(JError::TypeError("can only iter lists".to_string())),
+            _ => Err(JError::new(TypeError, "can only iter lists")),
         }
     }
 }
