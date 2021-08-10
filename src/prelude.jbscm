@@ -62,5 +62,14 @@
         (* -1 x)
         (apply + (cons x (map - xs)))))
 
-; A hack until I make a real import system
-(defmacro import (mod) (list evalfile (concat mod ".jbscm")))
+(defn env-globals ()
+    (defn globals-rec (e)
+        (let pe (env-parent e)
+            (if (nil? pe) e (globals-rec pe))))
+    (globals-rec (env)))
+
+(defmacro setglobal! (name expr)
+    (list env-set! (list env-globals) (list quote name) expr))
+
+(defmacro defglobal (name expr)
+    (list env-def (list env-globals) (list quote name) expr))

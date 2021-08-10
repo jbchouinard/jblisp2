@@ -1,4 +1,4 @@
-(import "stl/unittest")
+(evalfile "stl/unittest.jbscm")
 
 (test-suite "string"
     (test "string concat"

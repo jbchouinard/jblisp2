@@ -1,13 +1,18 @@
+use std::convert::TryInto;
+
 use crate::builtin::get_n_args;
 use crate::*;
 
-pub fn jbuiltin_getenv(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+pub fn jbuiltin_get_env_var(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [var] = get_n_args(args)?;
-    match &*var {
-        JVal::String(s) => match std::env::var(s) {
-            Ok(val) => Ok(state.jstring(val)),
-            Err(e) => Err(JError::new(OsError, &format!("{}", e))),
-        },
-        _ => Err(JError::new(TypeError, "expected string")),
+    let var = var.to_str()?;
+    match std::env::var(var) {
+        Ok(val) => Ok(state.jstring(val)),
+        Err(e) => Err(JError::new(OsError, &format!("{}", e))),
     }
+}
+
+pub fn jbuiltin_exit(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
+    let [exitcode] = get_n_args(args)?;
+    std::process::exit(exitcode.to_int()?.try_into().unwrap());
 }

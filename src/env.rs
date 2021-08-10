@@ -1,12 +1,13 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fmt;
 use std::rc::Rc;
 
 use crate::*;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct JEnv {
-    parent: Option<JEnvRef>,
+    pub parent: Option<JEnvRef>,
     vars: RefCell<HashMap<String, JValRef>>,
 }
 
@@ -20,7 +21,6 @@ impl JEnv {
         }
     }
 
-    /// Look for value of binding.
     pub fn lookup(&self, v: &str) -> Option<JValRef> {
         match self.vars.borrow().get(v) {
             Some(val) => Some(Rc::clone(val)),
@@ -55,6 +55,17 @@ impl JEnv {
 
     pub fn into_ref(self) -> JEnvRef {
         Rc::new(self)
+    }
+}
+
+impl fmt::Display for JEnv {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        let mut parts = vec!["{".to_string()];
+        for (k, v) in self.vars.borrow().iter() {
+            parts.push(format!("    {}: {}", k, v))
+        }
+        parts.push("}".to_string());
+        write!(f, "{}", parts.join("\n"))
     }
 }
 

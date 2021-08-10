@@ -1,23 +1,25 @@
-use std::convert::TryInto;
 use std::rc::Rc;
 
-use crate::builtin::args::*;
-use crate::builtin::error::*;
-use crate::builtin::list::*;
-use crate::builtin::math::*;
-use crate::builtin::string::*;
-use crate::builtin::sys::*;
 use crate::*;
+use args::*;
+use debug::*;
+use env::*;
+use error::*;
+use list::*;
+use math::*;
+use string::*;
+use sys::*;
 
 mod args;
+mod debug;
+mod env;
 mod error;
 mod list;
 mod math;
 mod string;
 mod sys;
 
-// TODO: loop, map
-// TODO: CONDITIONALS: and or cond
+// TODO: loop, and, or, cond
 
 fn jbuiltin_equal(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
@@ -31,21 +33,15 @@ fn jbuiltin_eq(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
 
 fn jbuiltin_not(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x] = get_n_args(args)?;
-    match &*x {
-        JVal::Bool(b) => Ok(state.jbool(!b)),
-        _ => Err(JError::new(TypeError, "expected a bool")),
-    }
+    let x = x.to_bool()?;
+    Ok(state.jbool(!x))
 }
 
 fn jbuiltin_print(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [s] = get_n_args(args)?;
-    match &*s {
-        JVal::String(s) => {
-            println!("{}", s);
-            Ok(state.jnil())
-        }
-        _ => Err(JError::new(TypeError, "expected string")),
-    }
+    let s = s.to_str()?;
+    println!("{}", s);
+    Ok(state.jnil())
 }
 
 fn jbuiltin_repr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
@@ -53,67 +49,19 @@ fn jbuiltin_repr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     Ok(state.jstring(repr(&x)))
 }
 
-fn jbuiltin_display_debug(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
-    let [val] = get_n_args(args)?;
-    println!("{:?}", val);
-    Ok(state.jnil())
-}
-
-fn jbuiltin_display_debug_pretty(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
-    let [val] = get_n_args(args)?;
-    println!("{:#?}", val);
-    Ok(state.jnil())
-}
-
-fn jbuiltin_display_ptr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
-    let [val] = get_n_args(args)?;
-    println!("{:p}", val);
-    Ok(state.jnil())
-}
-
-fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
-    let [val] = get_n_args(args)?;
-    let (t, params, code) = match &*val {
-        JVal::Lambda(jl) => ("fn".to_string(), &jl.params, &jl.code),
-        JVal::Macro(jl) => ("fn".to_string(), &jl.params, &jl.code),
-        _ => {
-            return Err(JError::new(
-                TypeError,
-                "expected non-builtin lambda or macro",
-            ))
-        }
-    };
-    println!(
-        "({} {} {})",
-        t,
-        params,
-        code.iter()
-            .map(|v| repr(v))
-            .collect::<Vec<String>>()
-            .join(" ")
-    );
-    Ok(state.jnil())
-}
-
 fn jspecial_def(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
-    let [jsym, jval] = get_n_args(args)?;
-    let sym = match &*jsym {
-        JVal::Symbol(s) => s,
-        _ => return Err(JError::new(TypeError, "expected a symbol")),
-    };
-    let jval = eval(jval, Rc::clone(&env), state)?;
-    env.define(sym, jval);
+    let [sym, val] = get_n_args(args)?;
+    let sym = sym.to_symbol()?;
+    let val = eval(val, Rc::clone(&env), state)?;
+    env.define(sym, val);
     Ok(state.jnil())
 }
 
 fn jspecial_set(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
-    let [jsym, jval] = get_n_args(args)?;
-    let sym = match &*jsym {
-        JVal::Symbol(s) => s,
-        _ => return Err(JError::new(TypeError, "expected a symbol")),
-    };
-    let jval = eval(jval, Rc::clone(&env), state)?;
-    env.set(sym, jval, state)?;
+    let [sym, val] = get_n_args(args)?;
+    let sym = sym.to_symbol()?;
+    let val = eval(val, Rc::clone(&env), state)?;
+    env.set(sym, val, state)?;
     Ok(state.jnil())
 }
 
@@ -121,10 +69,7 @@ fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let ([pvals], exprs) = get_n_plus_args(args)?;
     let mut params = vec![];
     for val in pvals.iter_list()? {
-        match &*val {
-            JVal::Symbol(s) => params.push(s.to_string()),
-            _ => return Err(JError::new(TypeError, "expected a list of symbols")),
-        }
+        params.push(val.to_symbol()?.to_owned())
     }
     state.jlambda(env, params, exprs)
 }
@@ -133,21 +78,14 @@ fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let ([pvals], exprs) = get_n_plus_args(args)?;
     let mut params = vec![];
     for val in pvals.iter_list()? {
-        match &*val {
-            JVal::Symbol(s) => params.push(s.to_string()),
-            _ => return Err(JError::new(TypeError, "expected a list of symbols")),
-        }
+        params.push(val.to_symbol()?.to_owned())
     }
     state.jmacro(env, params, exprs)
 }
 
 fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let [pred, thencode, elsecode] = get_n_args(args)?;
-    let pred = eval(pred, Rc::clone(&env), state)?;
-    let pred = match &*pred {
-        JVal::Bool(b) => *b,
-        _ => return Err(JError::new(TypeError, "expected bool")),
-    };
+    let pred = eval(pred, Rc::clone(&env), state)?.to_bool()?;
     if pred {
         eval(thencode, env, state)
     } else {
@@ -171,6 +109,7 @@ fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
             JVal::Macro(_) => "macro",
             JVal::Builtin(_) => "builtin",
             JVal::SpecialForm(_) => "specialform",
+            JVal::Env(_) => "env",
         }
         .to_string(),
     ))
@@ -183,26 +122,33 @@ fn jbuiltin_eval(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
 
 fn jbuiltin_evalfile(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let [file] = get_n_args(args)?;
-    match &*file {
-        JVal::String(s) => match state.eval_file(s, env) {
-            Ok(Some(val)) => Ok(val),
-            Ok(None) => Ok(state.jnil()),
-            Err((pos, je)) => Err(JError::new(EvalError, &format!("{}: {}", pos, je))),
-        },
-        _ => Err(JError::new(TypeError, "expected string")),
+    let file = file.to_str()?;
+    match state.eval_file(file, env) {
+        Ok(Some(val)) => Ok(val),
+        Ok(None) => Ok(state.jnil()),
+        Err((pos, je)) => Err(JError::new(EvalError, &format!("{}: {}", pos, je))),
     }
+}
+
+fn jspecial_import(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
+    // (import "foo/bar" as bar)
+    let ([file], rest) = get_n_plus_args(args)?;
+    if rest.len() != 2 {
+        return Err(JError::new(EvalError, "invalid import form"));
+    }
+    let sym_as = rest[0].to_symbol()?;
+    if sym_as != "as" {
+        return Err(JError::new(EvalError, "invalid import form"));
+    }
+    let file = format!("{}.jbscm", eval(file, Rc::clone(&env), state)?.to_str()?);
+    let name = rest[1].to_symbol()?;
+    let module = state.import_module(file, Rc::clone(&env))?;
+    env.define(name, module);
+    Ok(state.jnil())
 }
 
 fn jbuiltin_begin(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
     Ok(args.iter_list().unwrap().last().unwrap())
-}
-
-fn jbuiltin_exit(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
-    let [exitcode] = get_n_args(args)?;
-    match &*exitcode {
-        JVal::Int(n) => std::process::exit((*n).try_into().unwrap()),
-        _ => Err(JError::new(TypeError, "expected an int")),
-    }
 }
 
 fn add_builtin<T>(name: &str, f: T, env: &JEnv, state: &mut JState)
@@ -222,7 +168,6 @@ where
 pub fn add_builtins(env: &JEnv, state: &mut JState) {
     // Program flow
     add_builtin("begin", jbuiltin_begin, env, state);
-    add_builtin("exit", jbuiltin_exit, env, state);
     add_special_form("if", jspecial_if, env, state);
 
     // Comparison
@@ -240,7 +185,9 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
 
     // Arithmetic operators
     add_builtin("+", jbuiltin_add, env, state);
+    add_builtin("-", jbuiltin_sub, env, state);
     add_builtin("*", jbuiltin_mul, env, state);
+    add_builtin("/", jbuiltin_div, env, state);
 
     // Logical operators
     add_builtin("not", jbuiltin_not, env, state);
@@ -268,9 +215,18 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     // Metaprogramming
     add_builtin("eval", jbuiltin_eval, env, state);
     add_builtin("evalfile", jbuiltin_evalfile, env, state);
+    add_special_form("import", jspecial_import, env, state);
     add_special_form("quote", jspecial_quote, env, state);
     add_special_form("macro", jspecial_macro, env, state);
 
+    // Env
+    add_builtin("env", jbuiltin_env, env, state);
+    add_builtin("env-lookup", jbuiltin_env_lookup, env, state);
+    add_builtin("env-def", jbuiltin_env_def, env, state);
+    add_builtin("env-set!", jbuiltin_env_set, env, state);
+    add_builtin("env-parent", jbuiltin_env_parent, env, state);
+
     // Sys
-    add_builtin("getenv", jbuiltin_getenv, env, state);
+    add_builtin("environment-variable", jbuiltin_get_env_var, env, state);
+    add_builtin("exit", jbuiltin_exit, env, state);
 }

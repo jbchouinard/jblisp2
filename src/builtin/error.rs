@@ -2,18 +2,13 @@ use crate::builtin::*;
 
 pub fn jbuiltin_error(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [emsg] = get_n_args(args)?;
-    match &*emsg {
-        JVal::String(s) => Ok(state.jerrorval(Exception, s)),
-        _ => Err(JError::new(TypeError, "expected a string")),
-    }
+    let emsg = emsg.to_str()?;
+    Ok(state.jerrorval(Exception, emsg))
 }
 
 pub fn jbuiltin_raise(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
     let [err] = get_n_args(args)?;
-    match &*err {
-        JVal::Error(je) => Err(je.clone()),
-        _ => Err(JError::new(TypeError, "expected an error")),
-    }
+    Err(err.to_error()?.clone())
 }
 
 // Error handling

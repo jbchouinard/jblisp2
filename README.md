@@ -44,7 +44,6 @@ make install
 - More builtin functions
 - Tail call optimization
 - More tests
-- First class envs
 - Imports, namespaces
 - Numeric data types: float, complex 
 - Mutable data structures: mutpair, vector, table

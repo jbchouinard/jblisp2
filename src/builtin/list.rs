@@ -6,19 +6,15 @@ pub fn jbuiltin_cons(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResul
 }
 
 pub fn jbuiltin_car(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
-    let [list] = get_n_args(args)?;
-    match &*list {
-        JVal::Pair(c) => Ok(c.car()),
-        _ => Err(JError::new(TypeError, "expected a pair")),
-    }
+    let [pair] = get_n_args(args)?;
+    let pair = pair.to_pair()?;
+    Ok(pair.car())
 }
 
 pub fn jbuiltin_cdr(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
-    let [list] = get_n_args(args)?;
-    match &*list {
-        JVal::Pair(c) => Ok(c.cdr()),
-        _ => Err(JError::new(TypeError, "expected a pair")),
-    }
+    let [pair] = get_n_args(args)?;
+    let pair = pair.to_pair()?;
+    Ok(pair.cdr())
 }
 
 pub fn jbuiltin_list(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
@@ -26,11 +22,9 @@ pub fn jbuiltin_list(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResu
 }
 
 pub fn jbuiltin_is_list(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
-    let [val] = get_n_args(args)?;
-    Ok(state.jbool(match &*val {
-        JVal::Pair(c) => c.is_list(),
-        _ => false,
-    }))
+    let [pair] = get_n_args(args)?;
+    let pair = pair.to_pair()?;
+    Ok(state.jbool(pair.is_list()))
 }
 
 pub fn jspecial_quote(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {

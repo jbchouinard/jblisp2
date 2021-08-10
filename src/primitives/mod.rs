@@ -200,6 +200,7 @@ pub enum JVal {
     Macro(Box<JLambda>),
     Builtin(JBuiltin),
     SpecialForm(JBuiltin),
+    Env(JEnvRef),
 }
 
 pub type JValRef = Rc<JVal>;
@@ -214,10 +215,17 @@ impl JVal {
     pub fn into_ref(self) -> JValRef {
         Rc::new(self)
     }
+
     pub fn to_int(&self) -> Result<JTInt, JError> {
         match self {
             Self::Int(n) => Ok(*n),
             _ => Err(JError::new(TypeError, "expected an int")),
+        }
+    }
+    pub fn to_bool(&self) -> Result<bool, JError> {
+        match self {
+            Self::Bool(n) => Ok(*n),
+            _ => Err(JError::new(TypeError, "expected a bool")),
         }
     }
     pub fn to_pair(&self) -> Result<&JPair, JError> {
@@ -226,6 +234,31 @@ impl JVal {
             _ => Err(JError::new(TypeError, "expected a pair")),
         }
     }
+    pub fn to_str(&self) -> Result<&str, JError> {
+        match self {
+            Self::String(s) => Ok(s),
+            _ => Err(JError::new(TypeError, "expected a string")),
+        }
+    }
+    pub fn to_symbol(&self) -> Result<&str, JError> {
+        match self {
+            Self::Symbol(s) => Ok(s),
+            _ => Err(JError::new(TypeError, "expected a symbol")),
+        }
+    }
+    pub fn to_env(&self) -> Result<JEnvRef, JError> {
+        match self {
+            Self::Env(e) => Ok(Rc::clone(e)),
+            _ => Err(JError::new(TypeError, "expected an env")),
+        }
+    }
+    pub fn to_error(&self) -> Result<&JError, JError> {
+        match self {
+            Self::Error(e) => Ok(e),
+            _ => Err(JError::new(TypeError, "expected an error")),
+        }
+    }
+
     pub fn is_list(&self) -> bool {
         match self {
             JVal::Nil => true,

@@ -29,7 +29,7 @@ impl fmt::Display for JErrorKind {
             JErrorKind::TypeError => write!(f, "TypeError"),
             JErrorKind::EvalError => write!(f, "EvalError"),
             JErrorKind::ApplyError => write!(f, "ApplyError"),
-            JErrorKind::NotDefined => write!(f, "NotDef"),
+            JErrorKind::NotDefined => write!(f, "NotDefined"),
             JErrorKind::OsError => write!(f, "OsError"),
             JErrorKind::SyntaxError => write!(f, "SyntaxError"),
             JErrorKind::UserDefined(s) => write!(f, "{}", s),

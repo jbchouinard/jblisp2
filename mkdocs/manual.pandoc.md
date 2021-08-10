@@ -471,6 +471,18 @@ Print string representation of a value.
 ---
 
 \newpage
+### Modules
+
+#### import
+```nohighlight
+(import module:string as name)
+```
+Import module and bind it to `name`. Note that module files are only evaluated once,
+re-importing gets a reference to the existing module.
+
+---
+
+\newpage
 ### Type Inspection
 
 #### type
@@ -547,6 +559,14 @@ Evaluate an expression.
 
 ---
 
+#### evalfile
+```nohighlight
+(evalfile filename:string)
+```
+Evaluate file in the global environment.
+
+---
+
 #### apply
 ```nohighlight
 (apply :procedure :list)
@@ -558,14 +578,6 @@ Apply a procedure to a list of arguments.
 >>> (apply + (list 1 2 3))
 6
 ```
-
----
-
-#### evalfile
-```nohighlight
-(evalfile filename:string)
-```
-Evaluate file in the global environment.
 
 ---
 
@@ -663,11 +675,62 @@ Raises an exception if `predicate` is false.
 ---
 
 \newpage
+### Environment Procedures
+
+#### env
+```nohighlight
+(env)
+```
+Get the enclosing environment for the current scope.
+
+---
+
+### env-lookup
+```nohighlight
+(env-lookup :env :symbol)
+```
+Look up symbol in the given environment.
+
+---
+
+### env-def
+```nohighlight
+(env-def :env :symbol :expr)
+```
+Define symbol in the given environment.
+
+---
+
+### env-set
+```nohighlight
+(env-set! :env :symbol :expr)
+```
+Set symbol in the given environment.
+
+---
+
+#### env-parent
+```nohighlight
+(env-parent :env)
+```
+Get parent env, or nil if there is no parent env.
+
+---
+
+### env-globals
+```nohighlight
+(env-globals)
+```
+Get the global environment.
+
+---
+
+\newpage
 ### System Procedures
 
-#### getenv
+#### environment-variable
 ```nohighlight
-(getenv var:string)
+(environment-variable var:string)
 ```
 Get value of environment variable. Raises exception if the variable is not set
 or contains non-UTF8 characters.

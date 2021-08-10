@@ -1,4 +1,5 @@
-use std::path::Path;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use crate::error::JErrorKind;
@@ -37,6 +38,7 @@ pub struct JState {
     interned_str: Interned<String>,
     pos: PositionTag,
     traceback: Vec<PositionTag>,
+    modules: HashMap<PathBuf, JEnvRef>,
 }
 
 impl JState {
@@ -54,6 +56,7 @@ impl JState {
                 col: 0,
             },
             traceback: vec![],
+            modules: HashMap::new(),
         }
     }
     pub fn update_pos(&mut self, pt: Option<&PositionTag>) {
@@ -69,6 +72,21 @@ impl JState {
     }
     pub fn traceback(&self) -> &[PositionTag] {
         &self.traceback
+    }
+
+    pub fn import_module<P: AsRef<Path>>(&mut self, p: P, env: JEnvRef) -> JResult {
+        let path = match std::fs::canonicalize(p) {
+            Ok(p) => p,
+            Err(e) => return Err(JError::new(OsError, &format!("{}", e))),
+        };
+        if self.modules.contains_key(&path) {
+            return Ok(JVal::Env(Rc::clone(self.modules.get(&path).unwrap())).into_ref());
+        }
+        let modenv = JEnv::new(Some(Rc::clone(&env))).into_ref();
+        if let Err((pos, err)) = self.eval_file(path, Rc::clone(&modenv)) {
+            return Err(JError::new(EvalError, &format!("{}: {}", pos, err)));
+        };
+        Ok(JVal::Env(modenv).into_ref())
     }
 
     pub fn eval_tokens(

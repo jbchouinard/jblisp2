@@ -14,6 +14,7 @@ pub fn repr(expr: &JVal) -> String {
         JVal::Macro(_) => "#[macro]".to_string(),
         JVal::Pair(c) => repr_cell(c),
         JVal::Quote(val) => format!("'{}", repr(&*val)),
+        JVal::Env(env) => format!("#[env {}]", env),
     }
 }
 

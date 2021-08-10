@@ -13,9 +13,11 @@ pub enum TokenValue {
     Quote,
     Int(JTInt),
     Ident(String),
+    Idsep,
     String(String),
     Comment(String),
     Eof,
+    Anychar(char),
 }
 
 #[derive(Debug)]
@@ -37,9 +39,11 @@ lazy_static! {
     static ref RE_QUOTE: Regex = Regex::new(r"^'").unwrap();
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_IDENT: Regex =
-        Regex::new(r"^[a-zA-Z+.*/<>=!?:$%_&~^-][0-9a-zA-Z+.*/<=>!?:$%_&~^-]*").unwrap();
+        Regex::new(r"^[a-zA-Z+.*/<>=!?$%_&~^-][0-9a-zA-Z+.*/<=>!?$%_&~^-]*").unwrap();
+    static ref RE_IDSEP: Regex = Regex::new(r"^::").unwrap();
     static ref RE_STRING: Regex = Regex::new(r#"^"([^"]|\\")*""#).unwrap();
-    static ref RE_COMMENT: Regex = Regex::new(r";[^\n]*").unwrap();
+    static ref RE_COMMENT: Regex = Regex::new(r"^;[^\n]*").unwrap();
+    static ref RE_ANYCHAR: Regex = Regex::new(r"^.").unwrap();
 }
 
 type TResult = std::result::Result<TokenValue, String>;
@@ -67,6 +71,10 @@ fn t_ident(val: &str) -> TResult {
     Ok(TokenValue::Ident(val.to_string()))
 }
 
+fn t_idsep(_: &str) -> TResult {
+    Ok(TokenValue::Idsep)
+}
+
 fn t_string(val: &str) -> TResult {
     Ok(TokenValue::String(val[1..val.len() - 1].to_string()))
 }
@@ -77,6 +85,10 @@ fn t_ws(s: &str) -> TResult {
 
 fn t_comment(s: &str) -> TResult {
     Ok(TokenValue::Comment(s.to_string()))
+}
+
+fn t_anychar(s: &str) -> TResult {
+    Ok(TokenValue::Anychar(s.chars().into_iter().next().unwrap()))
 }
 
 pub trait TokenIter {
@@ -140,6 +152,9 @@ impl TokenIter for Tokenizer {
         if let Some(token) = self.try_token(&RE_QUOTE, t_quote)? {
             return Ok(token);
         }
+        if let Some(token) = self.try_token(&RE_IDSEP, t_idsep)? {
+            return Ok(token);
+        }
         if let Some(token) = self.try_token(&RE_INT, t_int)? {
             return Ok(token);
         }
@@ -150,6 +165,9 @@ impl TokenIter for Tokenizer {
             return Ok(token);
         }
         if let Some(token) = self.try_token(&RE_COMMENT, t_comment)? {
+            return Ok(token);
+        }
+        if let Some(token) = self.try_token(&RE_ANYCHAR, t_anychar)? {
             return Ok(token);
         }
         Err(TokenError::new(

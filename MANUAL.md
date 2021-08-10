@@ -90,7 +90,7 @@ first and second values are sometimes referred to respectively as the
 `car` and `cdr`.
 
 *Evaluation Rule:* `pair` values are evaluated by procedure application,
-however, only `pair` values which are `lists`’s can be properly applied;
+however, only `pair` values which are `list`’s can be properly applied;
 evaluating a non-list `pair` raises an error.
 
 ------------------------------------------------------------------------
@@ -749,12 +749,74 @@ Raises an exception if `predicate` is false.
 
 ------------------------------------------------------------------------
 
-### System Procedures
+### Environment Procedures
 
-#### getenv
+#### env
 
 ``` nohighlight
-(getenv var:string)
+(env)
+```
+
+Get the enclosing environment for the current scope.
+
+------------------------------------------------------------------------
+
+### env-lookup
+
+``` nohighlight
+(env-lookup :env :symbol)
+```
+
+Look up symbol in the given environment.
+
+------------------------------------------------------------------------
+
+### env-def
+
+``` nohighlight
+(env-def :env :symbol :expr)
+```
+
+Define symbol in the given environment.
+
+------------------------------------------------------------------------
+
+### env-set
+
+``` nohighlight
+(env-set! :env :symbol :expr)
+```
+
+Set symbol in the given environment.
+
+------------------------------------------------------------------------
+
+#### env-parent
+
+``` nohighlight
+(env-parent :env)
+```
+
+Get parent env, or nil if there is no parent env.
+
+------------------------------------------------------------------------
+
+### env-globals
+
+``` nohighlight
+(env-globals)
+```
+
+Get the global environment.
+
+------------------------------------------------------------------------
+
+### System Procedures
+
+#### environment-variable
+
+``` nohighlight
+(environment-variable var:string)
 ```
 
 Get value of environment variable. Raises exception if the variable is
