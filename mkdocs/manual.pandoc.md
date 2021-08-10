@@ -80,7 +80,7 @@ values are sometimes referred to respectively as the `car` and `cdr`.
 
 *Evaluation Rule:*
 `pair` values are evaluated by procedure application, however, only `pair` values
-which are `lists`'s can be properly applied; evaluating a non-list `pair` raises an error.
+which are `list`'s can be properly applied; evaluating a non-list `pair` raises an error.
 
 ---
 
