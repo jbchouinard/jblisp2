@@ -91,11 +91,10 @@ impl JState {
 
     pub fn eval_tokens(
         &mut self,
-        name: &str,
         tokeniter: Box<dyn TokenIter>,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, (PositionTag, JError)> {
-        let forms = match Parser::new(name, tokeniter, self).parse_forms() {
+        let forms = match Parser::new(tokeniter, self).parse_forms() {
             Ok(forms) => forms,
             Err(pe) => return Err((pe.pos.clone(), pe.into())),
         };
@@ -115,8 +114,8 @@ impl JState {
         program: &str,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, (PositionTag, JError)> {
-        let tokeniter = Box::new(Tokenizer::new(program.to_string()));
-        self.eval_tokens(name, tokeniter, env)
+        let tokeniter = Box::new(Tokenizer::new(name.to_string(), program.to_string()));
+        self.eval_tokens(tokeniter, env)
     }
     pub fn eval_file<P: AsRef<Path>>(
         &mut self,

@@ -5,48 +5,28 @@ use crate::reader::PositionTag;
 use crate::*;
 
 pub struct Parser<'a> {
-    filename: String,
-    prev_lineno: usize,
-    lineno: usize,
-    prev_last_newline_pos: usize,
-    last_newline_pos: usize,
     tokeniter: Box<dyn TokenIter>,
     peek: Token,
     state: &'a mut JState,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(filename: &str, tokeniter: Box<dyn TokenIter>, state: &'a mut JState) -> Self {
+    pub fn new(tokeniter: Box<dyn TokenIter>, state: &'a mut JState) -> Self {
         let mut this = Self {
-            filename: filename.to_string(),
-            prev_lineno: 0,
-            lineno: 1,
-            prev_last_newline_pos: 0,
-            last_newline_pos: 0,
             tokeniter,
             // Dummy value until we read the first real token
-            peek: Token::new(TokenValue::Whitespace("".to_string()), 0),
+            peek: Token::new(
+                TokenValue::Comment("".to_string()),
+                PositionTag::new("", 0, 0),
+            ),
             state,
         };
         this.next().unwrap();
         this
     }
 
-    fn ptag(&self, pos: usize) -> PositionTag {
-        let (col, lineno) = if pos >= self.last_newline_pos {
-            (pos - self.last_newline_pos, self.lineno)
-        } else {
-            (pos - self.prev_last_newline_pos, self.prev_lineno)
-        };
-        PositionTag {
-            filename: self.filename.clone(),
-            lineno,
-            col,
-        }
-    }
-
-    fn error(&self, pos: usize, reason: &str) -> ParserError {
-        ParserError::new(self.ptag(pos), reason)
+    fn error(&self, pos: PositionTag, reason: &str) -> ParserError {
+        ParserError::new(pos, reason)
     }
 
     fn _next(&mut self) -> Result<Token, ParserError> {
@@ -60,37 +40,11 @@ impl<'a> Parser<'a> {
 
     fn next(&mut self) -> Result<Token, ParserError> {
         let next = self._next()?;
-        loop {
-            match &self.peek.value {
-                TokenValue::Comment(_) => {
-                    self._next()?;
-                }
-                TokenValue::Whitespace(_) => {
-                    self.whitespace()?;
-                }
-                _ => break,
-            };
+        // Skip comments
+        while let TokenValue::Comment(_) = &self.peek.value {
+            self._next()?;
         }
         Ok(next)
-    }
-
-    fn whitespace(&mut self) -> Result<(), ParserError> {
-        if let TokenValue::Whitespace(_) = &self.peek.value {
-            self.prev_lineno = self.lineno;
-            self.prev_last_newline_pos = self.last_newline_pos;
-        }
-        while let TokenValue::Whitespace(ws) = &self.peek.value {
-            let mut newline_count = 0;
-            for (p, c) in ws.chars().enumerate() {
-                if c == '\n' {
-                    newline_count += 1;
-                    self.last_newline_pos = self.peek.pos + p;
-                }
-            }
-            self.lineno += newline_count;
-            self.next()?;
-        }
-        Ok(())
     }
 
     fn expect(&mut self, tok: TokenValue) -> Result<Token, ParserError> {
@@ -142,9 +96,8 @@ impl<'a> Parser<'a> {
         if self.peek.value == TokenValue::Eof {
             return Ok(None);
         }
-        let ptag = self.ptag(self.peek.pos);
         match self.expr() {
-            Ok(val) => Ok(Some((ptag, val))),
+            Ok(val) => Ok(Some((self.peek.pos.clone(), val))),
             Err(e) => Err(e),
         }
     }
@@ -164,7 +117,10 @@ mod tests {
     use crate::reader::tokenizer::Tokenizer;
 
     fn test_parser(state: &mut JState, input: &str, expected: JValRef) {
-        let mut parser = Parser::new("test", Box::new(Tokenizer::new(input.to_string())), state);
+        let mut parser = Parser::new(
+            Box::new(Tokenizer::new("test".to_string(), input.to_string())),
+            state,
+        );
         let val = parser.expr().unwrap();
         assert_eq!(expected, val);
     }

@@ -4,10 +4,10 @@ use lazy_static::lazy_static;
 use regex::Regex;
 
 use crate::primitives::JTInt;
+use crate::PositionTag;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenValue {
-    Whitespace(String),
     LParen,
     RParen,
     Quote,
@@ -23,11 +23,11 @@ pub enum TokenValue {
 #[derive(Debug)]
 pub struct Token {
     pub value: TokenValue,
-    pub pos: usize,
+    pub pos: PositionTag,
 }
 
 impl Token {
-    pub fn new(value: TokenValue, pos: usize) -> Self {
+    pub fn new(value: TokenValue, pos: PositionTag) -> Self {
         Self { value, pos }
     }
 }
@@ -79,10 +79,6 @@ fn t_string(val: &str) -> TResult {
     Ok(TokenValue::String(val[1..val.len() - 1].to_string()))
 }
 
-fn t_ws(s: &str) -> TResult {
-    Ok(TokenValue::Whitespace(s.to_string()))
-}
-
 fn t_comment(s: &str) -> TResult {
     Ok(TokenValue::Comment(s.to_string()))
 }
@@ -96,13 +92,47 @@ pub trait TokenIter {
 }
 
 pub struct Tokenizer {
+    filename: String,
     input: String,
     pos: usize,
+    lineno: usize,
+    last_newline_pos: usize,
 }
 
 impl Tokenizer {
-    pub fn new(input: String) -> Self {
-        Self { input, pos: 0 }
+    pub fn new(filename: String, input: String) -> Self {
+        Self::with_lineno(filename, input, 1)
+    }
+    pub fn with_lineno(filename: String, input: String, lineno: usize) -> Self {
+        Self {
+            filename,
+            input,
+            pos: 0,
+            lineno,
+            last_newline_pos: 0,
+        }
+    }
+    fn ptag(&self, pos: usize) -> PositionTag {
+        PositionTag {
+            filename: self.filename.clone(),
+            lineno: self.lineno,
+            col: pos - self.last_newline_pos,
+        }
+    }
+
+    fn eat_whitespace(&mut self) {
+        if let Some(mat) = RE_WS.find(&self.input[self.pos..]) {
+            let spos = self.pos;
+            self.pos += mat.end();
+            let mut newline_count = 0;
+            for (p, c) in mat.as_str().chars().enumerate() {
+                if c == '\n' {
+                    newline_count += 1;
+                    self.last_newline_pos = spos + p;
+                }
+            }
+            self.lineno += newline_count;
+        };
     }
 
     fn try_token<T>(&mut self, re: &Regex, cons: T) -> Result<Option<Token>, TokenError>
@@ -114,8 +144,8 @@ impl Tokenizer {
                 let spos = self.pos;
                 self.pos += mat.end();
                 match cons(mat.as_str()) {
-                    Ok(tokval) => Ok(Some(Token::new(tokval, spos))),
-                    Err(reason) => Err(TokenError::new(&reason, spos)),
+                    Ok(tokval) => Ok(Some(Token::new(tokval, self.ptag(spos)))),
+                    Err(reason) => Err(TokenError::new(&reason, self.ptag(spos))),
                 }
             }
             None => Ok(None),
@@ -127,9 +157,11 @@ impl Tokenizer {
         loop {
             let next = self.next_token()?;
             if next.value == TokenValue::Eof {
+                tokens.push(next);
                 break;
+            } else {
+                tokens.push(next);
             }
-            tokens.push(next)
         }
         Ok(tokens)
     }
@@ -137,11 +169,9 @@ impl Tokenizer {
 
 impl TokenIter for Tokenizer {
     fn next_token(&mut self) -> Result<Token, TokenError> {
+        self.eat_whitespace();
         if self.pos >= self.input.len() {
-            return Ok(Token::new(TokenValue::Eof, self.pos));
-        }
-        if let Some(token) = self.try_token(&RE_WS, t_ws)? {
-            return Ok(token);
+            return Ok(Token::new(TokenValue::Eof, self.ptag(self.pos)));
         }
         if let Some(token) = self.try_token(&RE_LPAREN, t_lparen)? {
             return Ok(token);
@@ -175,7 +205,7 @@ impl TokenIter for Tokenizer {
                 "unexpected character {}",
                 &self.input[self.pos..self.pos + 1]
             ),
-            self.pos,
+            self.ptag(self.pos),
         ))
     }
 }
@@ -184,29 +214,34 @@ impl TokenIter for std::vec::IntoIter<Token> {
     fn next_token(&mut self) -> Result<Token, TokenError> {
         match self.next() {
             Some(tok) => Ok(tok),
-            None => Ok(Token::new(TokenValue::Eof, 0)),
+            None => Ok(Token::new(TokenValue::Eof, PositionTag::new("", 0, 0))),
         }
     }
 }
 
 #[derive(Default)]
 pub struct TokenValidator {
+    filename: String,
     balance: Vec<TokenValue>,
     tokens: Vec<Token>,
+    lineno: usize,
 }
 
 /// Balanced parens validation for multi-line input.
 impl TokenValidator {
-    pub fn new() -> Self {
+    pub fn new(filename: &str) -> Self {
         Self {
+            filename: filename.to_string(),
             balance: vec![],
             tokens: vec![],
+            lineno: 0,
         }
     }
     /// Returns None when more input is expected based on counting parens.
     /// Returns tokens when it looks like it may form a complete expression.
     pub fn input(&mut self, s: String) -> Result<Option<Vec<Token>>, TokenError> {
-        let new_toks = Tokenizer::new(s).tokenize()?;
+        self.lineno += 1;
+        let new_toks = Tokenizer::with_lineno(self.filename.clone(), s, self.lineno).tokenize()?;
         for tok in new_toks.into_iter() {
             match tok.value {
                 TokenValue::LParen => self.balance.push(TokenValue::LParen),
@@ -221,6 +256,8 @@ impl TokenValidator {
         Ok(if self.balance.is_empty() {
             Some(std::mem::take(&mut self.tokens))
         } else {
+            // Remove the last EOF token
+            self.tokens.pop();
             None
         })
     }
@@ -228,7 +265,7 @@ impl TokenValidator {
 
 #[derive(Debug)]
 pub struct TokenError {
-    pub pos: usize,
+    pub pos: PositionTag,
     pub reason: String,
 }
 
@@ -239,7 +276,7 @@ impl fmt::Display for TokenError {
 }
 
 impl TokenError {
-    pub fn new(reason: &str, pos: usize) -> Self {
+    pub fn new(reason: &str, pos: PositionTag) -> Self {
         Self {
             pos,
             reason: reason.to_string(),
@@ -252,18 +289,9 @@ mod tests {
     use super::*;
 
     fn test_tokenizer(input: &str, expected: Vec<TokenValue>) {
-        let mut tokenizer = Tokenizer::new(input.to_string());
+        let mut tokenizer = Tokenizer::new("test".to_string(), input.to_string());
         let tokens = tokenizer.tokenize().unwrap();
-        let tokvalues: Vec<TokenValue> = tokens
-            .into_iter()
-            .map(|t| t.value)
-            // Ignore whitespace
-            .filter(|t| match t {
-                TokenValue::Whitespace(_) => false,
-                _ => true,
-            })
-            .collect();
-
+        let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
         assert_eq!(expected, tokvalues);
     }
 
@@ -277,6 +305,7 @@ mod tests {
                 TokenValue::Int(12),
                 TokenValue::Int(-15),
                 TokenValue::RParen,
+                TokenValue::Eof,
             ],
         );
     }
@@ -291,6 +320,7 @@ mod tests {
                 TokenValue::String("foo".to_string()),
                 TokenValue::String("bar".to_string()),
                 TokenValue::RParen,
+                TokenValue::Eof,
             ],
         );
     }
@@ -309,6 +339,7 @@ mod tests {
                 TokenValue::Int(3),
                 TokenValue::RParen,
                 TokenValue::RParen,
+                TokenValue::Eof,
             ],
         );
     }
@@ -329,6 +360,7 @@ mod tests {
                 TokenValue::Int(3),
                 TokenValue::RParen,
                 TokenValue::RParen,
+                TokenValue::Eof,
             ],
         );
     }

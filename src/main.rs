@@ -77,7 +77,7 @@ fn repl(mut interpreter: Interpreter) {
 
     loop {
         match get_tokens(&mut rl) {
-            Ok(tokens) => match interpreter.eval_tokens("#STDIN", Box::new(tokens.into_iter())) {
+            Ok(tokens) => match interpreter.eval_tokens(Box::new(tokens.into_iter())) {
                 Ok(Some(val)) => println!("{}", val),
                 Ok(None) => (),
                 Err((pos, err)) => eprintln!("{}: Unhandled {}", pos, err),
@@ -90,7 +90,7 @@ fn repl(mut interpreter: Interpreter) {
 /// Get tokens that looks like they form a complete expression (balanced parens)
 /// in multiple lines of input if necessary.
 fn get_tokens(rl: &mut Editor<()>) -> Result<Vec<Token>, TokenError> {
-    let mut validator = TokenValidator::new();
+    let mut validator = TokenValidator::new("#STDIN");
     let mut input = readline(rl, ">>> ");
     loop {
         match validator.input(input.to_string()) {

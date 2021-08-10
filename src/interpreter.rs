@@ -52,11 +52,9 @@ impl Interpreter {
     }
     pub fn eval_tokens(
         &mut self,
-        name: &str,
         tokens: Box<dyn TokenIter>,
     ) -> Result<Option<JValRef>, (PositionTag, JError)> {
-        self.state
-            .eval_tokens(name, tokens, Rc::clone(&self.globals))
+        self.state.eval_tokens(tokens, Rc::clone(&self.globals))
     }
 
     /// Evaluate a `jbscheme` script, and return the value of its last expression
