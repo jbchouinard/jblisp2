@@ -1,5 +1,6 @@
 use std::fmt;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::env::JEnvRef;
 use crate::state::JState;
@@ -8,6 +9,12 @@ use crate::*;
 pub mod intern;
 
 pub type JTInt = i128;
+
+static BUILTIN_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+fn builtin_id() -> usize {
+    BUILTIN_COUNTER.fetch_add(1, Ordering::SeqCst)
+}
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct JPair(JValRef, JValRef);
@@ -62,13 +69,24 @@ pub type JBuiltinFn = Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>;
 
 #[derive(Clone)]
 pub struct JBuiltin {
+    id: usize,
     pub name: String,
     pub f: JBuiltinFn,
 }
 
+impl JBuiltin {
+    pub fn new(name: String, f: JBuiltinFn) -> Self {
+        Self {
+            id: builtin_id(),
+            name,
+            f,
+        }
+    }
+}
+
 impl fmt::Display for JBuiltin {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "builtin {}", &self.name)
+        write!(f, "builtin {} \"{}\"", self.id, &self.name)
     }
 }
 
@@ -81,12 +99,9 @@ impl fmt::Debug for JBuiltin {
     }
 }
 
-#[allow(clippy::ptr_eq)]
 impl PartialEq for JBuiltin {
     fn eq(&self, other: &Self) -> bool {
-        self.name == other.name
-            && &*self.f as *const dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult as *const u8
-                == &*other.f as *const dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult as *const u8
+        self.id == other.id
     }
 }
 

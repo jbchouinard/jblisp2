@@ -260,14 +260,14 @@ impl JState {
         name: String,
         f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,
     ) -> JValRef {
-        JVal::Builtin(JBuiltin { name, f }).into_ref()
+        JVal::Builtin(JBuiltin::new(name, f)).into_ref()
     }
     pub fn jspecialform(
         &self,
         name: String,
         f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,
     ) -> JValRef {
-        JVal::SpecialForm(JBuiltin { name, f }).into_ref()
+        JVal::SpecialForm(JBuiltin::new(name, f)).into_ref()
     }
 }
 

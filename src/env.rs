@@ -2,11 +2,19 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static ENV_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+fn env_id() -> usize {
+    ENV_COUNTER.fetch_add(1, Ordering::SeqCst)
+}
 
 use crate::*;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Clone)]
 pub struct JEnv {
+    id: usize,
     pub parent: Option<JEnvRef>,
     vars: RefCell<HashMap<String, JValRef>>,
 }
@@ -16,6 +24,7 @@ pub type JEnvRef = Rc<JEnv>;
 impl JEnv {
     pub fn new(parent: Option<JEnvRef>) -> Self {
         Self {
+            id: env_id(),
             parent,
             vars: RefCell::new(HashMap::new()),
         }
@@ -58,7 +67,19 @@ impl JEnv {
     }
 }
 
+impl PartialEq for JEnv {
+    fn eq(&self, other: &JEnv) -> bool {
+        self.id == other.id
+    }
+}
+
 impl fmt::Display for JEnv {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "#[env {}]", self.id)
+    }
+}
+
+impl fmt::Debug for JEnv {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let mut parts = vec!["{".to_string()];
         for (k, v) in self.vars.borrow().iter() {
