@@ -126,7 +126,7 @@ binding and procedure application. See [Quoting and Evaluation](#quoting-and-eva
 
 #### error
 ```nohighlight
-(error "some-message")
+(error type "some-message")
 ```
 Error values do no inherently do anything, until they are [`raise`](#raise)'d as exceptions.
 See [Exceptions](#exceptions).
@@ -643,9 +643,9 @@ Create macro. See ['defmacro'](#defmacro).
 
 Errors can be raised to interrupt program flow, and can be caught with the `try` form.
 
-#### error
+#### exception
 ```nohighlight
-(error :string)
+(exception :string)
 ```
 
 #### raise
@@ -664,7 +664,7 @@ is bound to `err` when `catch` is evaluated.
 ```nohighlight
 ; Example
 >>> (defn errored ()
-...		(raise (error "oh no!"))
+...		(raise (exception "oh no!"))
 ...		(print "never evaluated"))
 >>> (errored)
 Unhandled Error: oh no!

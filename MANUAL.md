@@ -144,7 +144,7 @@ is useful to prevent `symbol` binding and procedure application. See
 #### error
 
 ``` nohighlight
-(error "some-message")
+(error type "some-message")
 ```
 
 Error values do no inherently do anything, until they are
@@ -727,10 +727,10 @@ Create macro. See [‘defmacro’](#defmacro).
 Errors can be raised to interrupt program flow, and can be caught with
 the `try` form.
 
-#### error
+#### exception
 
 ``` nohighlight
-(error :string)
+(exception :string)
 ```
 
 #### raise
@@ -751,7 +751,7 @@ raised error value is bound to `err` when `catch` is evaluated.
 ``` nohighlight
 ; Example
 >>> (defn errored ()
-...     (raise (error "oh no!"))
+...     (raise (exception "oh no!"))
 ...     (print "never evaluated"))
 >>> (errored)
 Unhandled Error: oh no!

@@ -28,10 +28,13 @@
     (print (repr x)))
 
 (defn assert-msg (pred reason)
-    (if pred () (raise (error reason))))
+    (if pred () (raise (exception reason))))
 
 (defn assert (pred)
     (assert-msg pred "assertion failed"))
+
+(defmacro deferror (name)
+    (list defn name (list 'reason) (list error (list quote name) 'reason)))
 
 (defn apply (op args) (eval (cons op args)))
 

@@ -8,7 +8,7 @@ build:
 	cargo build --release
 
 doc:
-	cargo doc --no-deps
+	cargo doc --release --no-deps
 
 install:
 	install -m 755 target/release/jibi $(DESTDIR)$(PREFIX)/bin/
@@ -18,7 +18,7 @@ test:
 
 clean:
 	cargo clean
-	rm -rf mkdocs/site $(MD_MANUAL) $(PDF_MANUAL)
+	rm -rf mkdocs/site MANUAL.md $(PDF_MANUAL)
 
 PDF_MANUAL = Jibi\ Scheme\ Manual.pdf
 MD_MANUAL = mkdocs/docs/index.md

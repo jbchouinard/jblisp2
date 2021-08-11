@@ -21,7 +21,7 @@
         (list concat (list repr val) " is not of type " (repr t))))
 
 (defmacro assert-raise (code)
-    (let errnoraise (error "did not raise an error")
+    (let errnoraise (exception "did not raise an error")
         (list try
             (list begin
                 code
@@ -51,7 +51,7 @@
         " ok, "
         (repr failed-count)
         " failed"))
-    (if (equal? failed-count 0) () (raise (error "Some tests failed."))))
+    (if (equal? failed-count 0) () (raise (exception "Some tests failed."))))
 
 (defmacro test-suite (name . tests)
     (list begin

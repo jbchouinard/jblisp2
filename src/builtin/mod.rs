@@ -211,6 +211,7 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
 
     // Error handling
     add_builtin("error", jbuiltin_error, env, state);
+    add_builtin("exception", jbuiltin_exception, env, state);
     add_builtin("raise", jbuiltin_raise, env, state);
     add_special_form("try", jspecial_try, env, state);
 

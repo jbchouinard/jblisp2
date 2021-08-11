@@ -41,6 +41,7 @@ make install
 
 ## Roadmap
 - Reader macros
+- Specific error catch
 - More builtin functions
 - Tail call optimization
 - More tests
