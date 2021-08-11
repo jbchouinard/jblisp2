@@ -1,6 +1,9 @@
 (def ok-count 0)
 (def failed-count 0)
 
+(defn inc-failed () (set! failed-count (+ 1 failed-count)))
+(defn inc-ok () (set! ok-count (+ 1 ok-count)))
+
 (def test-verbose
     (try
         (equal? "1" (environment-variable "TEST_VERBOSE"))
@@ -32,11 +35,11 @@
     (list try
         (list begin
             (cons begin exprs)
-            (list set! 'ok-count (list + ok-count 1))
+            (list inc-ok)
             (list if test-verbose
                 (list print (list concat name ": ok")) ()))
         (list begin
-            (list set! 'failed-count (list + failed-count 1))
+            (list inc-failed)
             (list print (list concat name ": failed (" (list repr 'err) ")")) ())))
 
 (defn test-start (name)

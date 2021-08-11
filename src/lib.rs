@@ -40,7 +40,7 @@
 //! // (Interpreter::new() instead creates a bare interpreter, with empty globals.)
 //! let mut jibi = Interpreter::default();
 //! jibi.eval_str("hello.rs", r#"
-//! 	(defn add (x y) (+ x y))
+//!     (defn add (x y) (+ x y))
 //! "#).unwrap();
 //! let args = vec![jibi.jint(10), jibi.jint(100)];
 //! let res = jibi.call("add", args).unwrap();

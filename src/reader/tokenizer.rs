@@ -36,8 +36,14 @@ lazy_static! {
     static ref RE_RPAREN: Regex = Regex::new(r"^\)").unwrap();
     static ref RE_QUOTE: Regex = Regex::new(r"^'").unwrap();
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
-    static ref RE_IDENT: Regex =
-        Regex::new(r"^[a-zA-Z+.*/<>=!?$%_&~^-][0-9a-zA-Z+.*/<=>!?$%_&~^-]*").unwrap();
+    static ref RE_IDENT: Regex = Regex::new(
+        r"(?x)
+            ^
+            ([a-zA-Z+.*/<>=!?$%_&~^-][0-9a-zA-Z+.*/<=>!?$%_&~^-]*)
+            (::[a-zA-Z+.*/<>=!?$%_&~^-][0-9a-zA-Z+.*/<=>!?$%_&~^-]*)*
+        "
+    )
+    .unwrap();
     static ref RE_STRING: Regex = Regex::new(r#"^"([^"]|\\")*""#).unwrap();
     static ref RE_COMMENT: Regex = Regex::new(r"^;[^\n]*").unwrap();
     static ref RE_ANYCHAR: Regex = Regex::new(r"^.").unwrap();

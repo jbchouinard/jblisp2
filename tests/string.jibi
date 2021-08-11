@@ -1,5 +1,5 @@
-(evalfile "stl/unittest.jibi")
+(import "stl/unittest" as ut)
 
-(test-suite "string"
-    (test "string concat"
-        (assert-equal "foobar" (concat "foo" "bar"))))
+(ut::test-suite "string"
+    (ut::test "string concat"
+        (ut::assert-equal "foobar" (concat "foo" "bar"))))

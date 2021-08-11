@@ -67,6 +67,20 @@ impl ReaderMacro {
     pub fn wrap(&self, tokens: Box<dyn TokenIter>) -> ReaderMacroIterator {
         ReaderMacroIterator::new(tokens, self.clone())
     }
+    pub fn matches_rule(&self, tokens: &[Token]) -> bool {
+        if tokens.len() != self.rule.len() {
+            return false;
+        }
+        for (tok, matcher) in tokens.iter().zip(self.rule.iter()) {
+            if !matcher.matches(&tok.value) {
+                return false;
+            }
+        }
+        true
+    }
+    pub fn apply_rule(&self, tokens: Vec<Token>) -> Vec<Token> {
+        (self.transformer)(tokens)
+    }
 }
 
 pub struct ReaderMacroIterator {
@@ -78,10 +92,11 @@ pub struct ReaderMacroIterator {
 
 impl ReaderMacroIterator {
     pub fn new(tokens: Box<dyn TokenIter>, rm: ReaderMacro) -> Self {
+        let rl = rm.rule.len();
         Self {
             tokens,
             rm,
-            buffer_in: VecDeque::new(),
+            buffer_in: VecDeque::with_capacity(rl),
             buffer_out: VecDeque::new(),
         }
     }
@@ -89,7 +104,24 @@ impl ReaderMacroIterator {
 
 impl TokenIter for ReaderMacroIterator {
     fn next_token(&mut self) -> Result<Token, TokenError> {
-        // TODO
-        self.tokens.next_token()
+        loop {
+            if !self.buffer_out.is_empty() {
+                return Ok(self.buffer_out.pop_front().unwrap());
+            }
+            while self.buffer_in.len() < self.rm.rule.len() {
+                self.buffer_in.push_back(self.tokens.next_token()?)
+            }
+            let buf = self.buffer_in.make_contiguous();
+            if self.rm.matches_rule(buf) {
+                let toks_in: Vec<Token> = std::mem::replace(
+                    &mut self.buffer_in,
+                    VecDeque::with_capacity(self.rm.rule.len()),
+                )
+                .into();
+                self.buffer_out = self.rm.apply_rule(toks_in).into();
+            } else {
+                return Ok(self.buffer_in.pop_front().unwrap());
+            }
+        }
     }
 }

@@ -184,6 +184,7 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("ddp", jbuiltin_display_debug_pretty, env, state);
     add_builtin("dda", jbuiltin_display_ptr, env, state);
     add_builtin("ddc", jbuiltin_display_code, env, state);
+    add_special_form("ddm", jspecial_display_debug_macro, env, state);
 
     // Arithmetic operators
     add_builtin("+", jbuiltin_add, env, state);

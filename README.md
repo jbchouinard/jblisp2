@@ -16,6 +16,7 @@ Features:
 - Lexical scoping and closures
 - Procedural macros
 - Exception handling
+- Namespaced modules
 - Automatic reference counting
 
 ## Documentation
@@ -40,7 +41,7 @@ make install
 ```
 
 ## Roadmap
-- Reader macros
+- Reader macro definition
 - Specific error catch
 - More builtin functions
 - Tail call optimization
