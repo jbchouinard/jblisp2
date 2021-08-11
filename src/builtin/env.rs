@@ -15,7 +15,7 @@ pub fn jbuiltin_env_parent(args: JValRef, _env: JEnvRef, state: &mut JState) -> 
     let env = env.to_env()?;
     Ok(match &env.parent {
         Some(penv) => JVal::Env(Rc::clone(penv)).into_ref(),
-        None => state.jnil(),
+        None => state.nil(),
     })
 }
 
@@ -31,7 +31,7 @@ pub fn jbuiltin_env_def(args: JValRef, _env: JEnvRef, state: &mut JState) -> JRe
     let env = env.to_env()?;
     let sym = sym.to_symbol()?;
     env.define(sym, val);
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 pub fn jbuiltin_env_set(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
@@ -39,5 +39,5 @@ pub fn jbuiltin_env_set(args: JValRef, _env: JEnvRef, state: &mut JState) -> JRe
     let env = env.to_env()?;
     let sym = sym.to_symbol()?;
     env.set(sym, val, state)?;
-    Ok(state.jnil())
+    Ok(state.nil())
 }

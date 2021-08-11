@@ -6,19 +6,19 @@ use crate::*;
 pub fn jbuiltin_display_debug(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
     println!("{:?}", val);
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 pub fn jbuiltin_display_debug_pretty(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
     println!("{:#?}", val);
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 pub fn jbuiltin_display_ptr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
     println!("{:p}", val);
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 pub fn jspecial_display_debug_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -26,24 +26,24 @@ pub fn jspecial_display_debug_macro(args: JValRef, env: JEnvRef, state: &mut JSt
     let first = eval(args.car(), env, state)?;
     let args = args.cdr();
     let lambda = match &*first {
-        JVal::Macro(l) => l.clone(),
+        JVal::ProcMacro(l) => l.clone(),
         _ => return Err(JError::new(TypeError, "expected a macro")),
     };
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
     lambda.params.bind(args, Rc::clone(&invoke_env))?;
-    let mut last_res = state.jnil();
+    let mut last_res = state.nil();
     for expr in &lambda.code {
         last_res = eval(Rc::clone(expr), Rc::clone(&invoke_env), state)?;
     }
     println!("{}", last_res);
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 pub fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
     let (t, params, code) = match &*val {
         JVal::Lambda(jl) => ("fn".to_string(), &jl.params, &jl.code),
-        JVal::Macro(jl) => ("fn".to_string(), &jl.params, &jl.code),
+        JVal::ProcMacro(jl) => ("fn".to_string(), &jl.params, &jl.code),
         _ => {
             return Err(JError::new(
                 TypeError,
@@ -60,5 +60,5 @@ pub fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -
             .collect::<Vec<String>>()
             .join(" ")
     );
-    Ok(state.jnil())
+    Ok(state.nil())
 }

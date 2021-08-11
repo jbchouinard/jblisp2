@@ -42,7 +42,7 @@
 //! jibi.eval_str("hello.rs", r#"
 //!     (defn add (x y) (+ x y))
 //! "#).unwrap();
-//! let args = vec![jibi.jint(10), jibi.jint(100)];
+//! let args = vec![jibi.int(10), jibi.int(100)];
 //! let res = jibi.call("add", args).unwrap();
 //! println!("{}", res);
 //! ```
@@ -54,6 +54,7 @@ mod interpreter;
 mod reader;
 mod repr;
 mod state;
+mod traceback;
 mod types;
 
 use eval::eval;
@@ -62,12 +63,14 @@ use types::*;
 
 // Exports
 pub use env::{JEnv, JEnvRef};
-pub use error::{JError, JErrorKind, JErrorKind::*, JResult};
+pub(crate) use error::JErrorKind::*;
+pub use error::{JError, JErrorKind, JResult};
 pub use interpreter::{Interpreter, PRELUDE};
 pub use reader::parser::Parser;
 pub use reader::tokenizer::{Token, TokenError, TokenIter, TokenValidator, TokenValue, Tokenizer};
 pub use reader::PositionTag;
-pub use state::{JState, TbFrame};
+pub use state::JState;
+pub use traceback::TracebackFrame;
 pub use types::{JPair, JVal, JValRef};
 
-pub type JException = (PositionTag, JError, Vec<TbFrame>);
+pub type JException = (PositionTag, JError, Vec<TracebackFrame>);

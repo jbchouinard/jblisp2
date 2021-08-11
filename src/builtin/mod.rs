@@ -25,30 +25,30 @@ mod sys;
 
 fn jbuiltin_equal(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
-    Ok(state.jbool(x == y))
+    Ok(state.bool(x == y))
 }
 
 fn jbuiltin_eq(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
-    Ok(state.jbool(Rc::ptr_eq(&x, &y)))
+    Ok(state.bool(Rc::ptr_eq(&x, &y)))
 }
 
 fn jbuiltin_not(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x] = get_n_args(args)?;
     let x = x.to_bool()?;
-    Ok(state.jbool(!x))
+    Ok(state.bool(!x))
 }
 
 fn jbuiltin_print(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [s] = get_n_args(args)?;
     let s = s.to_str()?;
     println!("{}", s);
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 fn jbuiltin_repr(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x] = get_n_args(args)?;
-    Ok(state.jstring(repr(&x)))
+    Ok(state.string(repr(&x)))
 }
 
 fn jspecial_def(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -56,7 +56,7 @@ fn jspecial_def(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let sym = sym.to_symbol()?;
     let val = eval(val, Rc::clone(&env), state)?;
     env.define(sym, val);
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 fn jspecial_set(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -64,7 +64,7 @@ fn jspecial_set(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let sym = sym.to_symbol()?;
     let val = eval(val, Rc::clone(&env), state)?;
     env.set(sym, val, state)?;
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -73,7 +73,7 @@ fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     for val in pvals.iter_list()? {
         params.push(val.to_symbol()?.to_owned())
     }
-    state.jlambda(env, params, exprs)
+    state.lambda(env, params, exprs)
 }
 
 fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -82,7 +82,7 @@ fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     for val in pvals.iter_list()? {
         params.push(val.to_symbol()?.to_owned())
     }
-    state.jmacro(env, params, exprs)
+    state.procmacro(env, params, exprs)
 }
 
 fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -97,7 +97,7 @@ fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
 
 fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [val] = get_n_args(args)?;
-    Ok(state.jsymbol(
+    Ok(state.symbol(
         match *val {
             JVal::Nil => "nil",
             JVal::Pair { .. } => "pair",
@@ -108,7 +108,7 @@ fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
             JVal::String(_) => "string",
             JVal::Error(_) => "error",
             JVal::Lambda(_) => "lambda",
-            JVal::Macro(_) => "macro",
+            JVal::ProcMacro(_) => "procmacro",
             JVal::Builtin(_) => "builtin",
             JVal::SpecialForm(_) => "specialform",
             JVal::Env(_) => "env",
@@ -127,7 +127,7 @@ fn jbuiltin_evalfile(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult
     let file = file.to_str()?;
     match state.eval_file(file, env) {
         Ok(Some(val)) => Ok(val),
-        Ok(None) => Ok(state.jnil()),
+        Ok(None) => Ok(state.nil()),
         Err((pos, je, _)) => Err(JError::new(EvalError, &format!("{}: {}", pos, je))),
     }
 }
@@ -146,7 +146,7 @@ fn jspecial_import(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let name = rest[1].to_symbol()?;
     let module = state.import_module(file, Rc::clone(&env))?;
     env.define(name, module);
-    Ok(state.jnil())
+    Ok(state.nil())
 }
 
 fn jbuiltin_begin(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
@@ -157,14 +157,14 @@ fn add_builtin<T>(name: &str, f: T, env: &JEnv, state: &mut JState)
 where
     T: 'static + Fn(JValRef, JEnvRef, &mut JState) -> JResult,
 {
-    env.define(name, state.jbuiltin(name.to_string(), Rc::new(f)));
+    env.define(name, state.builtin(name.to_string(), Rc::new(f)));
 }
 
 fn add_special_form<T>(name: &str, f: T, env: &JEnv, state: &mut JState)
 where
     T: 'static + Fn(JValRef, JEnvRef, &mut JState) -> JResult,
 {
-    env.define(name, state.jspecialform(name.to_string(), Rc::new(f)));
+    env.define(name, state.specialform(name.to_string(), Rc::new(f)));
 }
 
 pub fn add_builtins(env: &JEnv, state: &mut JState) {
@@ -176,10 +176,12 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("eq?", jbuiltin_eq, env, state);
     add_builtin("equal?", jbuiltin_equal, env, state);
 
-    // Print, debug
+    // Print
     add_builtin("repr", jbuiltin_repr, env, state);
     add_builtin("print", jbuiltin_print, env, state);
     add_builtin("type", jbuiltin_type, env, state);
+
+    // Debug
     add_builtin("dd", jbuiltin_display_debug, env, state);
     add_builtin("ddp", jbuiltin_display_debug_pretty, env, state);
     add_builtin("dda", jbuiltin_display_ptr, env, state);
@@ -210,16 +212,18 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_special_form("set!", jspecial_set, env, state);
     add_special_form("fn", jspecial_lambda, env, state);
 
-    // Error handling
+    // Exceptions
     add_builtin("error", jbuiltin_error, env, state);
     add_builtin("exception", jbuiltin_exception, env, state);
     add_builtin("raise", jbuiltin_raise, env, state);
     add_special_form("try", jspecial_try, env, state);
 
+    // Modules
+    add_special_form("import", jspecial_import, env, state);
+
     // Metaprogramming
     add_builtin("eval", jbuiltin_eval, env, state);
     add_builtin("evalfile", jbuiltin_evalfile, env, state);
-    add_special_form("import", jspecial_import, env, state);
     add_special_form("quote", jspecial_quote, env, state);
     add_special_form("macro", jspecial_macro, env, state);
 

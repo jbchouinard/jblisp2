@@ -51,6 +51,9 @@ impl Interpreter {
             std::process::exit(1);
         }
     }
+
+    /// Evaluate a stream of tokens and return the value of the last expression,
+    /// (or None if the program contains no expressions).
     pub fn eval_tokens(
         &mut self,
         tokens: Box<dyn TokenIter>,
@@ -86,13 +89,15 @@ impl Interpreter {
         let proc = self.globals.try_lookup(name)?;
         let mut sexpr = vec![proc];
         sexpr.extend(args);
-        let sexpr = self.state.jlist(sexpr);
+        let sexpr = self.state.list(sexpr);
         eval(sexpr, Rc::clone(&self.globals), &mut self.state)
     }
-    pub fn print_exc((pos, err, tb): JException) {
+
+    /// Print exception and traceback.
+    pub fn print_exc((pos, err, mut tb): JException) {
         eprintln!("Traceback:");
-        for tbf in tb {
-            eprintln!("  {}", tbf);
+        while !tb.is_empty() {
+            eprintln!("  {}", tb.pop().unwrap());
         }
         eprintln!("  File \"{}\", line {}", pos.filename, pos.lineno);
         eprintln!("{}", err);
@@ -114,68 +119,68 @@ impl Interpreter {
         self.globals.lookup(name)
     }
     /// Construct a `jibi` `nil` (always interned).
-    pub fn jnil(&mut self) -> JValRef {
-        self.state.jnil()
+    pub fn nil(&mut self) -> JValRef {
+        self.state.nil()
     }
     /// Construct a `jibi` `bool` (always interned).
-    pub fn jbool(&mut self, b: bool) -> JValRef {
-        self.state.jbool(b)
+    pub fn bool(&mut self, b: bool) -> JValRef {
+        self.state.bool(b)
     }
-    pub fn jint(&mut self, n: JTInt) -> JValRef {
-        self.state.jint(n)
+    pub fn int(&mut self, n: JTInt) -> JValRef {
+        self.state.int(n)
     }
     /// Construct a `jibi` `symbol` (always interned).
-    pub fn jsymbol(&mut self, s: String) -> JValRef {
-        self.state.jsymbol(s)
+    pub fn symbol(&mut self, s: String) -> JValRef {
+        self.state.symbol(s)
     }
     /// Construct a `jibi` `string` (may be interned).
-    pub fn jstring(&mut self, s: String) -> JValRef {
-        self.state.jstring(s)
+    pub fn string(&mut self, s: String) -> JValRef {
+        self.state.string(s)
     }
     /// Construct a `jibi` `quote`.
-    pub fn jquote(&mut self, v: JValRef) -> JValRef {
-        self.state.jquote(v)
+    pub fn quote(&mut self, v: JValRef) -> JValRef {
+        self.state.quote(v)
     }
     /// Construct a `jibi` list (linked list made from `pair` and terminated
     /// by `nil`).
-    pub fn jlist(&mut self, v: Vec<JValRef>) -> JValRef {
-        self.state.jlist(v)
+    pub fn list(&mut self, v: Vec<JValRef>) -> JValRef {
+        self.state.list(v)
     }
     /// Construct a `jibi` `pair` (cons cell).
-    pub fn jpair(&mut self, left: JValRef, right: JValRef) -> JValRef {
-        self.state.jpair(left, right)
+    pub fn pair(&mut self, left: JValRef, right: JValRef) -> JValRef {
+        self.state.pair(left, right)
     }
     /// Construct a `jibi` `error` value.
     ///
     /// Note that [`JError`] can be found both in [`Ok`]`(`[`JValRef`]`)`, as first class values
     /// that can be passed around in `jibi`, and in [`Err`]`(`[`JError`]`)` when it is
     /// `raise`'d by `jibi` code, or due to parsing or evaluation errors.
-    pub fn jerrorval(&mut self, kind: JErrorKind, reason: &str) -> JValRef {
-        self.state.jerrorval(kind, reason)
+    pub fn error(&mut self, kind: JErrorKind, reason: &str) -> JValRef {
+        self.state.error(kind, reason)
     }
     /// Construct a `jibi` `lambda`.
-    pub fn jlambda(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
-        self.state.jlambda(Rc::clone(&self.globals), params, body)
+    pub fn lambda(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
+        self.state.lambda(Rc::clone(&self.globals), params, body)
     }
-    /// Construct a `jibi` `macro`.
-    pub fn jmacro(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
-        self.state.jmacro(Rc::clone(&self.globals), params, body)
+    /// Construct a `jibi` `procmacro`.
+    pub fn procmacro(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
+        self.state.procmacro(Rc::clone(&self.globals), params, body)
     }
     /// Define a `jibi` builtin procedure.
-    pub fn jbuiltin<F>(&mut self, name: String, f: F) -> JValRef
+    pub fn builtin<F>(&mut self, name: String, f: F) -> JValRef
     where
         F: 'static + Fn(JValRef, JEnvRef, &mut JState) -> JResult,
     {
-        let v = self.state.jbuiltin(name.clone(), Rc::new(f));
+        let v = self.state.builtin(name.clone(), Rc::new(f));
         self.def(&name, Rc::clone(&v));
         v
     }
     /// Define a `jibi` builtin special form.
-    pub fn jspecialform<F>(&mut self, name: String, f: F) -> JValRef
+    pub fn specialform<F>(&mut self, name: String, f: F) -> JValRef
     where
         F: 'static + Fn(JValRef, JEnvRef, &mut JState) -> JResult,
     {
-        let v = self.state.jbuiltin(name.clone(), Rc::new(f));
+        let v = self.state.builtin(name.clone(), Rc::new(f));
         self.def(&name, Rc::clone(&v));
         v
     }

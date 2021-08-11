@@ -4,7 +4,8 @@ use jibi::Interpreter;
 
 fn execfile<P: AsRef<Path>>(path: P) {
     let mut interpreter = Interpreter::default();
-    interpreter.eval_file(path).unwrap();
+    let res = interpreter.eval_file(path);
+    assert!(res.is_ok());
 }
 
 #[test]

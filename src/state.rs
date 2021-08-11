@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fmt;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
@@ -30,58 +29,6 @@ fn make_str(s: String) -> JValRef {
     JVal::String(s).into_ref()
 }
 
-#[derive(Clone, Debug)]
-pub struct TbFrame {
-    pos: Option<PositionTag>,
-    env: JEnvRef,
-    proc: JValRef,
-}
-
-impl TbFrame {
-    pub fn from_lambda(val: JValRef) -> Option<Self> {
-        let (pos, env, proc) = match &*val {
-            JVal::Lambda(l) => (l.defpos.clone(), Rc::clone(&l.closure), Rc::clone(&val)),
-            JVal::Macro(l) => (l.defpos.clone(), Rc::clone(&l.closure), Rc::clone(&val)),
-            _ => return None,
-        };
-        Some(Self { pos, env, proc })
-    }
-    pub fn from_builtin(val: JValRef, env: JEnvRef) -> Option<Self> {
-        let proc = match &*val {
-            JVal::Builtin(_) => val,
-            JVal::SpecialForm(_) => val,
-            _ => return None,
-        };
-        Some(Self {
-            pos: None,
-            proc,
-            env,
-        })
-    }
-    pub fn from_any(val: JValRef, env: JEnvRef) -> Option<Self> {
-        match &*val {
-            JVal::Lambda(_) => Self::from_lambda(val),
-            JVal::Macro(_) => Self::from_lambda(val),
-            JVal::Builtin(_) => Self::from_builtin(val, env),
-            JVal::SpecialForm(_) => Self::from_builtin(val, env),
-            _ => None,
-        }
-    }
-}
-
-impl fmt::Display for TbFrame {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        match &self.pos {
-            Some(pos) => write!(
-                f,
-                "File \"{}\", line {}, in {}",
-                pos.filename, pos.lineno, self.proc
-            ),
-            None => write!(f, "In {}", self.proc),
-        }
-    }
-}
-
 pub struct JState {
     const_nil: JValRef,
     const_true: JValRef,
@@ -90,7 +37,7 @@ pub struct JState {
     interned_sym: Interned<String>,
     interned_str: Interned<String>,
     pos: PositionTag,
-    traceback: Vec<TbFrame>,
+    traceback: Vec<TracebackFrame>,
     modules: HashMap<PathBuf, JEnvRef>,
     reader_macros: Vec<ReaderMacro>,
 }
@@ -119,15 +66,15 @@ impl JState {
             self.pos = pos.clone();
         }
     }
-    pub fn traceback_push(&mut self, tf: Option<TbFrame>) {
+    pub fn traceback_push(&mut self, tf: Option<TracebackFrame>) {
         if let Some(tf) = tf {
             self.traceback.push(tf)
         }
     }
-    pub fn traceback_take(&mut self) -> Vec<TbFrame> {
+    pub fn traceback_take(&mut self) -> Vec<TracebackFrame> {
         std::mem::take(&mut self.traceback)
     }
-    pub fn traceback(&self) -> &[TbFrame] {
+    pub fn traceback(&self) -> &[TracebackFrame] {
         &self.traceback
     }
 
@@ -161,7 +108,7 @@ impl JState {
         &mut self,
         tokeniter: Box<dyn TokenIter>,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TbFrame>)> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TracebackFrame>)> {
         let tokeniter = self.apply_reader_macros(tokeniter);
         let forms = match Parser::new(tokeniter, self).parse_forms() {
             Ok(forms) => forms,
@@ -182,7 +129,7 @@ impl JState {
         name: &str,
         program: &str,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TbFrame>)> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TracebackFrame>)> {
         let tokeniter = Box::new(Tokenizer::new(name.to_string(), program.to_string()));
         self.eval_tokens(tokeniter, env)
     }
@@ -190,7 +137,7 @@ impl JState {
         &mut self,
         path: P,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TbFrame>)> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TracebackFrame>)> {
         let path = path.as_ref();
         let text = match std::fs::read_to_string(path) {
             Ok(text) => text,
@@ -206,51 +153,51 @@ impl JState {
     }
 
     // Constructors
-    pub fn jnil(&self) -> JValRef {
+    pub fn nil(&self) -> JValRef {
         Rc::clone(&self.const_nil)
     }
-    pub fn jbool(&self, val: bool) -> JValRef {
+    pub fn bool(&self, val: bool) -> JValRef {
         if val {
             Rc::clone(&self.const_true)
         } else {
             Rc::clone(&self.const_false)
         }
     }
-    pub fn jint(&mut self, val: JTInt) -> JValRef {
+    pub fn int(&mut self, val: JTInt) -> JValRef {
         if val > INT_INTERN_MAX_VAL {
             (self.interned_int.constructor)(val)
         } else {
             self.interned_int.get_or_insert(val)
         }
     }
-    pub fn jsymbol(&mut self, val: String) -> JValRef {
+    pub fn symbol(&mut self, val: String) -> JValRef {
         self.interned_sym.get_or_insert(val)
     }
-    pub fn jstring(&mut self, val: String) -> JValRef {
+    pub fn string(&mut self, val: String) -> JValRef {
         if val.len() > STR_INTERN_MAX_LEN {
             (self.interned_str.constructor)(val)
         } else {
             self.interned_str.get_or_insert(val)
         }
     }
-    pub fn jquote(&self, v: JValRef) -> JValRef {
+    pub fn quote(&self, v: JValRef) -> JValRef {
         JVal::Quote(v).into_ref()
     }
-    pub fn jlist(&self, mut v: Vec<JValRef>) -> JValRef {
-        let mut cur = self.jnil();
+    pub fn list(&self, mut v: Vec<JValRef>) -> JValRef {
+        let mut cur = self.nil();
         v.reverse();
         for val in v {
-            cur = self.jpair(val, cur);
+            cur = self.pair(val, cur);
         }
         cur
     }
-    pub fn jpair(&self, left: JValRef, right: JValRef) -> JValRef {
+    pub fn pair(&self, left: JValRef, right: JValRef) -> JValRef {
         JVal::Pair(JPair::cons(left, right)).into_ref()
     }
-    pub fn jerrorval(&self, kind: JErrorKind, reason: &str) -> JValRef {
+    pub fn error(&self, kind: JErrorKind, reason: &str) -> JValRef {
         JVal::Error(JError::new(kind, reason)).into_ref()
     }
-    pub fn jlambda(&mut self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
+    pub fn lambda(&mut self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
         Ok(JVal::Lambda(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
@@ -259,8 +206,8 @@ impl JState {
         }))
         .into_ref())
     }
-    pub fn jmacro(&mut self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
-        Ok(JVal::Macro(Box::new(JLambda {
+    pub fn procmacro(&mut self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
+        Ok(JVal::ProcMacro(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
             code,
@@ -268,14 +215,14 @@ impl JState {
         }))
         .into_ref())
     }
-    pub fn jbuiltin(
+    pub fn builtin(
         &self,
         name: String,
         f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,
     ) -> JValRef {
         JVal::Builtin(JBuiltin::new(name, f)).into_ref()
     }
-    pub fn jspecialform(
+    pub fn specialform(
         &self,
         name: String,
         f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,

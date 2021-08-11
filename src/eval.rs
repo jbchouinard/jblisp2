@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use crate::state::TbFrame;
 use crate::*;
 
 pub fn eval(expr: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -20,13 +19,13 @@ fn apply(list: &JPair, env: JEnvRef, state: &mut JState) -> JResult {
         JVal::Builtin(b) => apply_builtin(b, args, env, state),
         JVal::SpecialForm(b) => apply_special_form(b, args, env, state),
         JVal::Lambda(l) => apply_lambda(l, args, env, state),
-        JVal::Macro(l) => apply_macro(l, args, env, state),
+        JVal::ProcMacro(l) => apply_proc_macro(l, args, env, state),
         _ => return Err(JError::new(TypeError, "expected a callable")),
     };
     match res {
         Ok(val) => Ok(val),
         Err(err) => {
-            state.traceback_push(TbFrame::from_any(func, envclone));
+            state.traceback_push(TracebackFrame::from_any(func, envclone));
             Err(err)
         }
     }
@@ -46,17 +45,17 @@ fn apply_lambda(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JStat
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
     let args = eval_args(args, env, state)?;
     lambda.params.bind(args, Rc::clone(&invoke_env))?;
-    let mut last_res = state.jnil();
+    let mut last_res = state.nil();
     for expr in &lambda.code {
         last_res = eval(Rc::clone(expr), Rc::clone(&invoke_env), state)?;
     }
     Ok(last_res)
 }
 
-fn apply_macro(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
+fn apply_proc_macro(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
     lambda.params.bind(args, Rc::clone(&invoke_env))?;
-    let mut last_res = state.jnil();
+    let mut last_res = state.nil();
     for expr in &lambda.code {
         last_res = eval(Rc::clone(expr), Rc::clone(&invoke_env), state)?;
     }
@@ -69,5 +68,5 @@ fn eval_args(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
         .map(|v| eval(v, Rc::clone(&env), state))
         .collect::<Result<Vec<JValRef>, JError>>()?;
 
-    Ok(state.jlist(evaluated))
+    Ok(state.list(evaluated))
 }

@@ -1,61 +1,68 @@
-(import "stl/unittest" as ut)
+(import-from "stl/unittest" 
+    test
+    test-suite
+    assert-not
+    assert-eq
+    assert-type
+    assert-equal
+    assert-raise)
 
-(ut::test-suite "lang"
-    (ut::test "asserting false things raises"
-        (ut::assert-raise (assert false)))
+(test-suite "lang"
+    (test "asserting false things raises"
+        (assert-raise (assert false)))
 
-    (ut::test "not true is false"
-        (ut::assert-equal true (not false)))
+    (test "not true is false"
+        (assert-equal true (not false)))
 
-    (ut::test "string is string" 
-        (ut::assert-type "foo" string))
+    (test "string is string" 
+        (assert-type "foo" string))
 
-    (ut::test "nil is nil"
-        (ut::assert-eq () (list)))
+    (test "nil is nil"
+        (assert-eq () (list)))
 
-    (ut::test "true is true"
-        (ut::assert-eq (not false) (not false)))
+    (test "true is true"
+        (assert-eq (not false) (not false)))
 
-    (ut::test "list is pair"
+    (test "list is pair"
         (assert (pair? (list 1 2 3))))
 
-    (ut::test "pair is pair"
+    (test "pair is pair"
         (assert (pair? (cons 1 2))))
 
-    (ut::test "list is list"
+    (test "list is list"
         (assert (list? (list 1 2 3))))
 
-    (ut::test "pair is not list"
-        (ut::assert-not (list? (cons 1 2))))
+    (test "pair is not list"
+        (assert-not (list? (cons 1 2))))
 
-    (ut::test "let bindings"
-        (ut::assert-equal 110
+    (test "let bindings"
+        (assert-equal 110
             (let x 100
             (let y 10
                 (+ x y)))))
 
-    (ut::test "set! unbound raises error"
-        (ut::assert-raise (set! unbound)))
+    (test "set! unbound raises error"
+        (assert-raise (set! unbound)))
 
-    (ut::test "set! changes local binding"
-        (ut::assert-equal 7 (
+    (test "set! changes local binding"
+        (assert-equal 7 (
             let x 0
                 (set! x 7)
                 x)))
 
-    (ut::test "eval a quoted sexpr" 
+    (test "eval a quoted sexpr" 
         (assert (eval (quote (eq? nil nil)))))
 
-    (ut::test "apply"
-        (ut::assert-equal 6 (apply + (list 1 2 3))))
+    (test "apply"
+        (assert-equal 6 (apply + (list 1 2 3))))
 
-    (ut::test "map"
-        (ut::assert-equal
+    (test "map"
+        (assert-equal
             (list 2 4 6)
             (map (fn (x) (* 2 x)) (list 1 2 3))))
 
-    (ut::test "fold"
-        (ut::assert-equal
+    (test "fold"
+        (assert-equal
             (list 4 3 2 1)
             (fold cons () (list 1 2 3 4))))
 
@@ -65,19 +72,19 @@
 
     (defn varia-list (. xs) xs)
 
-    (ut::test "variadic parameters 1"
-        (ut::assert-equal (varia-car 1 2 3) 1))
+    (test "variadic parameters 1"
+        (assert-equal (varia-car 1 2 3) 1))
 
-    (ut::test "variadic parameters 2"
-        (ut::assert-equal (varia-cdr 1 2 3) (list 2 3)))
+    (test "variadic parameters 2"
+        (assert-equal (varia-cdr 1 2 3) (list 2 3)))
 
-    (ut::test "variadic parameters 3"
-        (ut::assert-equal (varia-cdr 1) ()))
+    (test "variadic parameters 3"
+        (assert-equal (varia-cdr 1) ()))
 
-    (ut::test "variadic parameters 4"
-        (ut::assert-equal (varia-list 1 2 3) (list 1 2 3)))
+    (test "variadic parameters 4"
+        (assert-equal (varia-list 1 2 3) (list 1 2 3)))
 
     (defn varia-let () (let x 12 "no-bueno" x))
 
-    (ut::test "variadic let"
-        (ut::assert-equal (varia-let) 12)))
+    (test "variadic let"
+        (assert-equal (varia-let) 12)))

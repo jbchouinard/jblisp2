@@ -11,7 +11,7 @@ pub fn repr(expr: &JVal) -> String {
         JVal::Builtin(b) => format!("#[function {}]", b),
         JVal::SpecialForm(b) => format!("#[specialform {}]", b),
         JVal::Lambda(_) => "#[lambda]".to_string(),
-        JVal::Macro(_) => "#[macro]".to_string(),
+        JVal::ProcMacro(_) => "#[macro]".to_string(),
         JVal::Pair(c) => repr_cell(c),
         JVal::Quote(val) => format!("'{}", repr(&*val)),
         JVal::Env(env) => format!("{}", env),

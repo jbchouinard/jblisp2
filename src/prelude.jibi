@@ -19,7 +19,7 @@
 (defn error? (val) (type? val error))
 (defn bool? (val) (type? val bool))
 (defn lambda? (val) (type? val lambda))
-(defn macro? (val) (type? val macro))
+(defn procmacro? (val) (type? val procmacro))
 (defn builtin? (val) (type? val builtin))
 (defn specialform? (val) (type? val specialform))
 (defn quote? (val) (type? val quote))
@@ -82,3 +82,13 @@
 
 ; TODO
 (def vector list)
+
+(defmacro use (mod . names)
+    (cons begin (map (fn (name)
+        (list defglobal name (list env-lookup mod (list quote name))))
+        names)))
+
+(defmacro import-from (mod . names)
+    (import mod as some-module)
+    (list let 'some-module some-module
+        (cons use (cons 'some-module names))))

@@ -3,14 +3,14 @@ use crate::builtin::*;
 pub fn jbuiltin_exception(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [emsg] = get_n_args(args)?;
     let emsg = emsg.to_str()?;
-    Ok(state.jerrorval(Exception, emsg))
+    Ok(state.error(Exception, emsg))
 }
 
 pub fn jbuiltin_error(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [etype, emsg] = get_n_args(args)?;
     let etype = etype.to_symbol()?;
     let emsg = emsg.to_str()?;
-    Ok(state.jerrorval(UserDefined(etype.to_string()), emsg))
+    Ok(state.error(UserDefined(etype.to_string()), emsg))
 }
 
 pub fn jbuiltin_raise(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {

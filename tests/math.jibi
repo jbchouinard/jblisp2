@@ -1,8 +1,8 @@
-(import "stl/unittest" as ut)
+(import-from "stl/unittest" test test-suite assert-equal)
 
-(ut::test-suite "math"
-    (ut::test "int-int addition"
-        (ut::assert-equal 100 (+ 50 50)))
+(test-suite "math"
+    (test "int-int addition"
+        (assert-equal 100 (+ 50 50)))
 
-    (ut::test "int-int multiplication"
-        (ut::assert-equal 670 (* 10 67))))
+    (test "int-int multiplication"
+        (assert-equal 670 (* 10 67))))

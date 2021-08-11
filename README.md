@@ -40,19 +40,20 @@ make
 make install
 ```
 
-## Roadmap
+## Todo?
+- JIBI_PATH for imports
+- Builtins: lets, or, and, cond
 - Reader macro definition
 - Specific error catch
-- More builtin functions
-- Tail call optimization
-- More tests
 - Numeric data types: float, complex, arbitrary precision int
 - Mutable data structures: mutpair, vector, table
+- Standard libraries: io, sockets, math
 - Debugger
 - Continuations
 - Reference cycle detection
-- Standard libraries: io, sockets, math
-- Peformance optimizations
-- JIT compiler
+- Tail call optimization
+- JIT compilation
+
+---
 
 Copyright 2021 Jérome Boisvert-Chouinard

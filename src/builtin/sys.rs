@@ -7,7 +7,7 @@ pub fn jbuiltin_get_env_var(args: JValRef, _env: JEnvRef, state: &mut JState) ->
     let [var] = get_n_args(args)?;
     let var = var.to_str()?;
     match std::env::var(var) {
-        Ok(val) => Ok(state.jstring(val)),
+        Ok(val) => Ok(state.string(val)),
         Err(e) => Err(JError::new(OsError, &format!("{}", e))),
     }
 }

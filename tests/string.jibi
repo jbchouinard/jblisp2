@@ -1,5 +1,5 @@
-(import "stl/unittest" as ut)
+(import-from "stl/unittest" test test-suite assert-equal)
 
-(ut::test-suite "string"
-    (ut::test "string concat"
-        (ut::assert-equal "foobar" (concat "foo" "bar"))))
+(test-suite "string"
+    (test "string concat"
+        (assert-equal "foobar" (concat "foo" "bar"))))
