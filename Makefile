@@ -19,6 +19,7 @@ test:
 clean:
 	cargo clean
 	rm -rf mkdocs/site MANUAL.md $(PDF_MANUAL)
+	rm -rf gh-pages/*
 
 PDF_MANUAL = Jibi\ Scheme\ Manual.pdf
 MD_MANUAL = mkdocs/docs/index.md
@@ -35,7 +36,11 @@ mkdocs/site: doc $(PDF_MANUAL) $(MD_MANUAL)
 	cp -r target/doc/* mkdocs/site/crate
 	cp $(PDF_MANUAL) mkdocs/site
 
+gh-pages: mkdocs/site
+	mkdir -p $@
+	cp -r $</* gh-pages
+
 MANUAL.md: $(MD_MANUAL)
 	cp "$<" "$@"
 
-.PHONY: default build doc install test clean
+.PHONY: default build doc install test clean gh-pages
