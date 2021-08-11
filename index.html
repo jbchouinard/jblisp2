@@ -241,19 +241,17 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#env">env</a>
     </li>
-        </ul>
+    <li class="toctree-l4"><a class="reference internal" href="#env-lookup">env-lookup</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#env-lookup">env-lookup</a>
+    <li class="toctree-l4"><a class="reference internal" href="#env-def">env-def</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#env-def">env-def</a>
+    <li class="toctree-l4"><a class="reference internal" href="#env-set">env-set</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#env-set">env-set</a>
-        <ul>
     <li class="toctree-l4"><a class="reference internal" href="#env-parent">env-parent</a>
     </li>
-        </ul>
+    <li class="toctree-l4"><a class="reference internal" href="#env-globals">env-globals</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#env-globals">env-globals</a>
+        </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#system-procedures">System Procedures</a>
         <ul>
@@ -334,7 +332,7 @@
             <div class="section">
               
                 <h1 id="jibi-scheme">Jibi Scheme</h1>
-<p><strong>version 0.0.10</strong></p>
+<p><strong>version 0.1.0</strong></p>
 <p>A homebrew interpreted, non-RnRS compliant dialect of Scheme.</p>
 <h2 id="types">Types</h2>
 <h3 id="primitive-types">Primitive Types</h3>
@@ -788,17 +786,17 @@ handled #[error Exception &quot;oh no!&quot;]
 </code></pre>
 <p>Get the enclosing environment for the current scope.</p>
 <hr />
-<h3 id="env-lookup">env-lookup</h3>
+<h4 id="env-lookup">env-lookup</h4>
 <pre><code class="language-nohighlight">(env-lookup :env :symbol)
 </code></pre>
 <p>Look up symbol in the given environment.</p>
 <hr />
-<h3 id="env-def">env-def</h3>
+<h4 id="env-def">env-def</h4>
 <pre><code class="language-nohighlight">(env-def :env :symbol :expr)
 </code></pre>
 <p>Define symbol in the given environment.</p>
 <hr />
-<h3 id="env-set">env-set</h3>
+<h4 id="env-set">env-set</h4>
 <pre><code class="language-nohighlight">(env-set! :env :symbol :expr)
 </code></pre>
 <p>Set symbol in the given environment.</p>
@@ -808,7 +806,7 @@ handled #[error Exception &quot;oh no!&quot;]
 </code></pre>
 <p>Get parent env, or nil if there is no parent env.</p>
 <hr />
-<h3 id="env-globals">env-globals</h3>
+<h4 id="env-globals">env-globals</h4>
 <pre><code class="language-nohighlight">(env-globals)
 </code></pre>
 <p>Get the global environment.</p>
@@ -894,5 +892,5 @@ not set or contains non-UTF8 characters.</p>
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-08-11 05:52:14.105932+00:00
+Build Date UTC : 2021-08-11 06:01:01.926281+00:00
 -->
