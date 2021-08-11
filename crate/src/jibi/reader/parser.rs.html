@@ -178,14 +178,6 @@
 <span id="176">176</span>
 <span id="177">177</span>
 <span id="178">178</span>
-<span id="179">179</span>
-<span id="180">180</span>
-<span id="181">181</span>
-<span id="182">182</span>
-<span id="183">183</span>
-<span id="184">184</span>
-<span id="185">185</span>
-<span id="186">186</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="kw">super</span><span class="ident">::tokenizer</span>::{<span class="ident">Token</span>, <span class="ident">TokenValue</span>};
 <span class="kw">use</span> <span class="kw">super</span><span class="ident">::ParserError</span>;
@@ -252,9 +244,9 @@
     <span class="kw">fn</span> <span class="ident">atom</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">JValRef</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next</span>()<span class="question-mark">?</span>;
         <span class="kw">match</span> <span class="ident">next</span>.<span class="ident">value</span> {
-            <span class="ident">TokenValue::Int</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">jint</span>(<span class="ident">n</span>)),
-            <span class="ident">TokenValue::Ident</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">jsymbol</span>(<span class="ident">s</span>)),
-            <span class="ident">TokenValue::String</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">jstring</span>(<span class="ident">s</span>)),
+            <span class="ident">TokenValue::Int</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">int</span>(<span class="ident">n</span>)),
+            <span class="ident">TokenValue::Ident</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">symbol</span>(<span class="ident">s</span>)),
+            <span class="ident">TokenValue::String</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">string</span>(<span class="ident">s</span>)),
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">error</span>(<span class="ident">next</span>.<span class="ident">pos</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;unexpected token {:?}&quot;</span>, <span class="ident">next</span>.<span class="ident">value</span>))),
         }
     }
@@ -266,7 +258,7 @@
             <span class="ident">list</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">expr</span>()<span class="question-mark">?</span>);
         }
         <span class="self">self</span>.<span class="ident">expect</span>(<span class="ident">TokenValue::RParen</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">list</span>))
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">list</span>))
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_form</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PositionTag</span>, <span class="ident">JValRef</span>)<span class="op">&gt;</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
@@ -306,29 +298,21 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_parser_1</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">JState::default</span>();
-        <span class="kw">let</span> <span class="ident">lst</span> <span class="op">=</span> <span class="macro">vec!</span>[
-            <span class="ident">state</span>.<span class="ident">jsymbol</span>(<span class="string">&quot;+&quot;</span>.<span class="ident">to_string</span>()),
-            <span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">12</span>),
-            <span class="ident">state</span>.<span class="ident">jint</span>(<span class="op">-</span><span class="number">15</span>),
-        ];
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">lst</span>);
+        <span class="kw">let</span> <span class="ident">lst</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">state</span>.<span class="ident">symbol</span>(<span class="string">&quot;+&quot;</span>.<span class="ident">to_string</span>()), <span class="ident">state</span>.<span class="ident">int</span>(<span class="number">12</span>), <span class="ident">state</span>.<span class="ident">int</span>(<span class="op">-</span><span class="number">15</span>)];
+        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">lst</span>);
         <span class="ident">test_parser</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>, <span class="string">&quot;(+ 12 -15)&quot;</span>, <span class="ident">expected</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_parser_2</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">JState::default</span>();
-        <span class="kw">let</span> <span class="ident">inner_lst</span> <span class="op">=</span> <span class="macro">vec!</span>[
-            <span class="ident">state</span>.<span class="ident">jsymbol</span>(<span class="string">&quot;+&quot;</span>.<span class="ident">to_string</span>()),
-            <span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">12</span>),
-            <span class="ident">state</span>.<span class="ident">jint</span>(<span class="op">-</span><span class="number">33</span>),
-        ];
+        <span class="kw">let</span> <span class="ident">inner_lst</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">state</span>.<span class="ident">symbol</span>(<span class="string">&quot;+&quot;</span>.<span class="ident">to_string</span>()), <span class="ident">state</span>.<span class="ident">int</span>(<span class="number">12</span>), <span class="ident">state</span>.<span class="ident">int</span>(<span class="op">-</span><span class="number">33</span>)];
         <span class="kw">let</span> <span class="ident">lst</span> <span class="op">=</span> <span class="macro">vec!</span>[
-            <span class="ident">state</span>.<span class="ident">jsymbol</span>(<span class="string">&quot;*&quot;</span>.<span class="ident">to_string</span>()),
-            <span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">inner_lst</span>),
-            <span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">42</span>),
+            <span class="ident">state</span>.<span class="ident">symbol</span>(<span class="string">&quot;*&quot;</span>.<span class="ident">to_string</span>()),
+            <span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">inner_lst</span>),
+            <span class="ident">state</span>.<span class="ident">int</span>(<span class="number">42</span>),
         ];
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">lst</span>);
+        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">lst</span>);
         <span class="ident">test_parser</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>, <span class="string">&quot;(* (+ 12 -33) 42)&quot;</span>, <span class="ident">expected</span>)
     }
 
@@ -336,35 +320,35 @@
     <span class="kw">fn</span> <span class="ident">test_parser_3</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">JState::default</span>();
         <span class="kw">let</span> <span class="ident">lst</span> <span class="op">=</span> <span class="macro">vec!</span>[
-            <span class="ident">state</span>.<span class="ident">jsymbol</span>(<span class="string">&quot;concat&quot;</span>.<span class="ident">to_string</span>()),
-            <span class="ident">state</span>.<span class="ident">jstring</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>()),
-            <span class="ident">state</span>.<span class="ident">jstring</span>(<span class="string">&quot;bar&quot;</span>.<span class="ident">to_string</span>()),
+            <span class="ident">state</span>.<span class="ident">symbol</span>(<span class="string">&quot;concat&quot;</span>.<span class="ident">to_string</span>()),
+            <span class="ident">state</span>.<span class="ident">string</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>()),
+            <span class="ident">state</span>.<span class="ident">string</span>(<span class="string">&quot;bar&quot;</span>.<span class="ident">to_string</span>()),
         ];
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">lst</span>);
+        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">lst</span>);
         <span class="ident">test_parser</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>, <span class="string">&quot;(concat \&quot;foo\&quot; \&quot;bar\&quot;)&quot;</span>, <span class="ident">expected</span>)
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_parser_4</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">JState::default</span>();
-        <span class="kw">let</span> <span class="ident">inner_lst</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">1</span>), <span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">2</span>), <span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">3</span>)];
+        <span class="kw">let</span> <span class="ident">inner_lst</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">state</span>.<span class="ident">int</span>(<span class="number">1</span>), <span class="ident">state</span>.<span class="ident">int</span>(<span class="number">2</span>), <span class="ident">state</span>.<span class="ident">int</span>(<span class="number">3</span>)];
         <span class="kw">let</span> <span class="ident">lst</span> <span class="op">=</span> <span class="macro">vec!</span>[
-            <span class="ident">state</span>.<span class="ident">jsymbol</span>(<span class="string">&quot;quote&quot;</span>.<span class="ident">to_string</span>()),
-            <span class="ident">state</span>.<span class="ident">jquote</span>(<span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">inner_lst</span>)),
+            <span class="ident">state</span>.<span class="ident">symbol</span>(<span class="string">&quot;quote&quot;</span>.<span class="ident">to_string</span>()),
+            <span class="ident">state</span>.<span class="ident">quote</span>(<span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">inner_lst</span>)),
         ];
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">lst</span>);
+        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">lst</span>);
         <span class="ident">test_parser</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>, <span class="string">&quot;(quote &#39;(1 2 3))&quot;</span>, <span class="ident">expected</span>)
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_parser_5</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">JState::default</span>();
-        <span class="kw">let</span> <span class="ident">inner_lst</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">1</span>), <span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">2</span>), <span class="ident">state</span>.<span class="ident">jint</span>(<span class="number">3</span>)];
+        <span class="kw">let</span> <span class="ident">inner_lst</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">state</span>.<span class="ident">int</span>(<span class="number">1</span>), <span class="ident">state</span>.<span class="ident">int</span>(<span class="number">2</span>), <span class="ident">state</span>.<span class="ident">int</span>(<span class="number">3</span>)];
         <span class="kw">let</span> <span class="ident">lst</span> <span class="op">=</span> <span class="macro">vec!</span>[
-            <span class="ident">state</span>.<span class="ident">jsymbol</span>(<span class="string">&quot;quote&quot;</span>.<span class="ident">to_string</span>()),
-            <span class="ident">state</span>.<span class="ident">jquote</span>(<span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">inner_lst</span>)),
+            <span class="ident">state</span>.<span class="ident">symbol</span>(<span class="string">&quot;quote&quot;</span>.<span class="ident">to_string</span>()),
+            <span class="ident">state</span>.<span class="ident">quote</span>(<span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">inner_lst</span>)),
         ];
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">jlist</span>(<span class="ident">lst</span>);
+        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">list</span>(<span class="ident">lst</span>);
         <span class="ident">test_parser</span>(
             <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>,
             <span class="string">&quot;(quote ; this is a comment

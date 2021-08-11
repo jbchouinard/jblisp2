@@ -85,7 +85,7 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#lambda">lambda</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#macro">macro</a>
+    <li class="toctree-l4"><a class="reference internal" href="#procmacro">procmacro</a>
     </li>
         </ul>
     </li>
@@ -110,6 +110,10 @@
     <li class="toctree-l4"><a class="reference internal" href="#let">let</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#lets">lets</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#defglobal">defglobal</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#setglobal">setglobal!</a>
     </li>
         </ul>
     </li>
@@ -153,7 +157,7 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#list_1">list</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#nil_1">nil?</a>
+    <li class="toctree-l4"><a class="reference internal" href="#empty">empty?</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#list_2">list?</a>
     </li>
@@ -162,6 +166,8 @@
     <li class="toctree-l4"><a class="reference internal" href="#fold">fold</a>
     </li>
         </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#range">range</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#string-operations">String Operations</a>
         <ul>
@@ -195,6 +201,10 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#import">import</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#use">use</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#import-from">import-from</a>
+    </li>
         </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#type-inspection">Type Inspection</a>
@@ -221,13 +231,15 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#defmacro">defmacro</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#macro_1">macro</a>
+    <li class="toctree-l4"><a class="reference internal" href="#macro">macro</a>
     </li>
         </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#exceptions">Exceptions</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#error_1">error</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#exception">exception</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#raise">raise</a>
     </li>
@@ -271,15 +283,33 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#ddc">ddc</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#ddm">ddm</a>
+    </li>
         </ul>
     </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#standard-libraries">Standard Libraries</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#math">math</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#unittest">unittest</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#test">test</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#test-start">test-start</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#test-exit">test-exit</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#test-suite">test-suite</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#assert-not">assert-not</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#assert-eq">assert-eq</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#assert-equal">assert-equal</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#assert-raise">assert-raise</a>
+    </li>
+        </ul>
     </li>
         </ul>
     </li>
@@ -419,7 +449,7 @@ is useful to prevent <code>symbol</code> binding and procedure application. See
 <a href="#quoting-and-evaluation">Quoting and Evaluation</a>.</p>
 <hr />
 <h4 id="error">error</h4>
-<pre><code class="language-nohighlight">(error &quot;some-message&quot;)
+<pre><code class="language-nohighlight">(error type &quot;some-message&quot;)
 </code></pre>
 <p>Error values do no inherently do anything, until they are
 <a href="#raise"><code>raise</code></a>’d as exceptions. See <a href="#exceptions">Exceptions</a>.</p>
@@ -433,12 +463,12 @@ is useful to prevent <code>symbol</code> binding and procedure application. See
 <p><em>Evaluation Rule:</em> A <code>lambda</code> value evaluates to itself. It is applied
 when it is the first element of a <code>list</code>.</p>
 <hr />
-<h4 id="macro">macro</h4>
+<h4 id="procmacro">procmacro</h4>
 <pre><code class="language-nohighlight">(macro params :expr ...)
 </code></pre>
-<p>See <a href="#macro-definition">Macro Definition</a>.</p>
-<p><em>Evaluation Rule:</em> A <code>macro</code> value evaluates to itself. It is applied
-when it is the first element of a <code>list</code>.</p>
+<p>Procedural macros. See <a href="#macro-definition">Macro Definition</a>.</p>
+<p><em>Evaluation Rule:</em> A <code>procmacro</code> value evaluates to itself. It is
+applied when it is the first element of a <code>list</code>.</p>
 <hr />
 <h3 id="builtin-callable-types">Builtin Callable Types</h3>
 <h4 id="function">function</h4>
@@ -488,6 +518,17 @@ exists.</p>
 5
 7
 </code></pre>
+<hr />
+<h4 id="defglobal">defglobal</h4>
+<pre><code class="language-nohighlight">(defglobal name :expr)
+</code></pre>
+<p>Create and assign binding in global env.</p>
+<hr />
+<h4 id="setglobal">setglobal!</h4>
+<pre><code class="language-nohighlight">(setglobal! name :expr)
+</code></pre>
+<p>Change existing binding in global env. Raises error if a binding does
+not already exists.</p>
 <hr />
 <h3 id="function-definition">Function Definition</h3>
 <h4 id="defn">defn</h4>
@@ -571,8 +612,8 @@ true
 &gt;&gt;&gt; (equal? (list 1 2 3) (cons 1 (list 2 3)))
 </code></pre>
 <hr />
-<h4 id="nil_1">nil?</h4>
-<pre><code class="language-nohighlight">(nil? :expr)
+<h4 id="empty">empty?</h4>
+<pre><code class="language-nohighlight">(empty? :expr)
 </code></pre>
 <p>Check if value is the empty list (nil).</p>
 <hr />
@@ -600,6 +641,12 @@ true
 &gt;&gt;&gt; (fold cons () (list 1 2 3))
 (3 2 1)
 </code></pre>
+<hr />
+<h3 id="range">range</h3>
+<pre><code class="language-nohighlight">(range from:integer to:integer)
+</code></pre>
+<p>Produce list of integers for range [<code>from</code>, <code>to</code>), where <code>to</code> >=
+<code>from</code>.</p>
 <hr />
 <h3 id="string-operations">String Operations</h3>
 <h4 id="concat">concat</h4>
@@ -641,11 +688,48 @@ true
 <p>Print string representation of a value.</p>
 <hr />
 <h3 id="modules">Modules</h3>
+<p>(Work in progress.)</p>
+<p><code>jibi</code> has a basic namespaced module system. A module is simply a
+<code>.jibi</code> file.</p>
+<p>They provide no privacy, all variables defined in the module scope are
+accessible to importers.</p>
+<p>Module files are only evaluated once, re-importing gets a reference to
+the existing module.</p>
+<p>At the moment only the current working directory is searched to find
+modules, thus importing “stl/unittest” looks for the file
+<code>./stl/unittest.jibi'.</code></p>
 <h4 id="import">import</h4>
 <pre><code class="language-nohighlight">(import module:string as name)
 </code></pre>
-<p>Import module and bind it to <code>name</code>. Note that module files are only
-evaluated once, re-importing gets a reference to the existing module.</p>
+<p>Import module and bind it to <code>name</code>.</p>
+<pre><code class="language-nohighlight">; Example
+&gt;&gt;&gt; (import &quot;stl/math&quot; as math)
+&gt;&gt;&gt; (math::product (list 2 3 4))
+24
+</code></pre>
+<hr />
+<h4 id="use">use</h4>
+<pre><code class="language-nohighlight">(use module:symbol name ...)
+</code></pre>
+<p>Bind a name from a module into the global scope.</p>
+<pre><code class="language-nohighlight">; Example
+&gt;&gt;&gt; (import &quot;stl/math&quot; as math)
+&gt;&gt;&gt; (use math product sum)
+&gt;&gt;&gt; (product (list 2 3 4))
+24
+</code></pre>
+<hr />
+<h4 id="import-from">import-from</h4>
+<pre><code class="language-nohighlight">(import-from module:string name ...)
+</code></pre>
+<p>Import specific names from a module.</p>
+<pre><code class="language-nohighlight">; Example
+&gt;&gt;&gt; (import-from &quot;stl/math&quot; product sum)
+&gt;&gt;&gt; (sum (list 2 3 4))
+9
+&gt;&gt;&gt; (product (list 2 3 4))
+24
+</code></pre>
 <hr />
 <h3 id="type-inspection">Type Inspection</h3>
 <h4 id="type">type</h4>
@@ -744,7 +828,7 @@ local scope where the macro is called:</p>
 1005
 </code></pre>
 <hr />
-<h4 id="macro_1">macro</h4>
+<h4 id="macro">macro</h4>
 <pre><code class="language-nohighlight">(macro formals :expr ...)
 </code></pre>
 <p>Create macro. See <a href="#defmacro">‘defmacro’</a>.</p>
@@ -753,11 +837,17 @@ local scope where the macro is called:</p>
 <p>Errors can be raised to interrupt program flow, and can be caught with
 the <code>try</code> form.</p>
 <h4 id="error_1">error</h4>
-<pre><code class="language-nohighlight">(error :string)
+<pre><code class="language-nohighlight">(error type:symbol reason:string)
 </code></pre>
+<p>Create error with custom type.</p>
+<h4 id="exception">exception</h4>
+<pre><code class="language-nohighlight">(exception reason:string)
+</code></pre>
+<p>Create error of type Exception.</p>
 <h4 id="raise">raise</h4>
 <pre><code class="language-nohighlight">(raise :error)
 </code></pre>
+<p>Raise an error (can be any error type, not just Exception).</p>
 <h4 id="try">try</h4>
 <pre><code class="language-nohighlight">(try body:expr catch:expr)
 </code></pre>
@@ -765,7 +855,7 @@ the <code>try</code> form.</p>
 raised error value is bound to <code>err</code> when <code>catch</code> is evaluated.</p>
 <pre><code class="language-nohighlight">; Example
 &gt;&gt;&gt; (defn errored ()
-...     (raise (error &quot;oh no!&quot;))
+...     (raise (exception &quot;oh no!&quot;))
 ...     (print &quot;never evaluated&quot;))
 &gt;&gt;&gt; (errored)
 Unhandled Error: oh no!
@@ -784,7 +874,7 @@ handled #[error Exception &quot;oh no!&quot;]
 <h4 id="env">env</h4>
 <pre><code class="language-nohighlight">(env)
 </code></pre>
-<p>Get the enclosing environment for the current scope.</p>
+<p>Get the nearest enclosing environment (most local scope).</p>
 <hr />
 <h4 id="env-lookup">env-lookup</h4>
 <pre><code class="language-nohighlight">(env-lookup :env :symbol)
@@ -804,7 +894,7 @@ handled #[error Exception &quot;oh no!&quot;]
 <h4 id="env-parent">env-parent</h4>
 <pre><code class="language-nohighlight">(env-parent :env)
 </code></pre>
-<p>Get parent env, or nil if there is no parent env.</p>
+<p>Get parent env, or <code>nil</code> if there is no parent env.</p>
 <hr />
 <h4 id="env-globals">env-globals</h4>
 <pre><code class="language-nohighlight">(env-globals)
@@ -840,13 +930,25 @@ not set or contains non-UTF8 characters.</p>
 <p>Print pointer address.</p>
 <hr />
 <h4 id="ddc">ddc</h4>
-<pre><code class="language-nohighlight">(ddc :lambda|:macro)
+<pre><code class="language-nohighlight">(ddc :lambda|:procmacro)
 </code></pre>
 <p>Print code of (non-builtin) lambda or macro.</p>
 <hr />
+<h4 id="ddm">ddm</h4>
+<pre><code class="language-nohighlight">(ddm :procmacro :expr ...)
+</code></pre>
+<p>Print code generated by a <code>procmacro</code> for the given arguments.</p>
+<hr />
 <h2 id="standard-libraries">Standard Libraries</h2>
-<h3 id="math">math</h3>
 <h3 id="unittest">unittest</h3>
+<h4 id="test">test</h4>
+<h4 id="test-start">test-start</h4>
+<h4 id="test-exit">test-exit</h4>
+<h4 id="test-suite">test-suite</h4>
+<h4 id="assert-not">assert-not</h4>
+<h4 id="assert-eq">assert-eq</h4>
+<h4 id="assert-equal">assert-equal</h4>
+<h4 id="assert-raise">assert-raise</h4>
               
             </div>
           </div>
@@ -892,5 +994,5 @@ not set or contains non-UTF8 characters.</p>
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-08-11 06:01:01.926281+00:00
+Build Date UTC : 2021-08-11 21:10:47.532584+00:00
 -->

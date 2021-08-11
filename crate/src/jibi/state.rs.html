@@ -238,62 +238,8 @@
 <span id="236">236</span>
 <span id="237">237</span>
 <span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
-<span class="kw">use</span> <span class="ident">std::fmt</span>;
 <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
@@ -324,58 +270,6 @@
     <span class="ident">JVal::String</span>(<span class="ident">s</span>).<span class="ident">into_ref</span>()
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TbFrame</span> {
-    <span class="ident">pos</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PositionTag</span><span class="op">&gt;</span>,
-    <span class="ident">env</span>: <span class="ident">JEnvRef</span>,
-    <span class="ident">proc</span>: <span class="ident">JValRef</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">TbFrame</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_lambda</span>(<span class="ident">val</span>: <span class="ident">JValRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">pos</span>, <span class="ident">env</span>, <span class="ident">proc</span>) <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">val</span> {
-            <span class="ident">JVal::Lambda</span>(<span class="ident">l</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">l</span>.<span class="ident">defpos</span>.<span class="ident">clone</span>(), <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">l</span>.<span class="ident">closure</span>), <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>)),
-            <span class="ident">JVal::Macro</span>(<span class="ident">l</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">l</span>.<span class="ident">defpos</span>.<span class="ident">clone</span>(), <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">l</span>.<span class="ident">closure</span>), <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>)),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
-        };
-        <span class="prelude-val">Some</span>(<span class="self">Self</span> { <span class="ident">pos</span>, <span class="ident">env</span>, <span class="ident">proc</span> })
-    }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_builtin</span>(<span class="ident">val</span>: <span class="ident">JValRef</span>, <span class="ident">env</span>: <span class="ident">JEnvRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">proc</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">val</span> {
-            <span class="ident">JVal::Builtin</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>,
-            <span class="ident">JVal::SpecialForm</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
-        };
-        <span class="prelude-val">Some</span>(<span class="self">Self</span> {
-            <span class="ident">pos</span>: <span class="prelude-val">None</span>,
-            <span class="ident">proc</span>,
-            <span class="ident">env</span>,
-        })
-    }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_any</span>(<span class="ident">val</span>: <span class="ident">JValRef</span>, <span class="ident">env</span>: <span class="ident">JEnvRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">val</span> {
-            <span class="ident">JVal::Lambda</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::from_lambda</span>(<span class="ident">val</span>),
-            <span class="ident">JVal::Macro</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::from_lambda</span>(<span class="ident">val</span>),
-            <span class="ident">JVal::Builtin</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::from_builtin</span>(<span class="ident">val</span>, <span class="ident">env</span>),
-            <span class="ident">JVal::SpecialForm</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::from_builtin</span>(<span class="ident">val</span>, <span class="ident">env</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">TbFrame</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pos</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">pos</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(
-                <span class="ident">f</span>,
-                <span class="string">&quot;File \&quot;{}\&quot;, line {}, in {}&quot;</span>,
-                <span class="ident">pos</span>.<span class="ident">filename</span>, <span class="ident">pos</span>.<span class="ident">lineno</span>, <span class="self">self</span>.<span class="ident">proc</span>
-            ),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;In {}&quot;</span>, <span class="self">self</span>.<span class="ident">proc</span>),
-        }
-    }
-}
-
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">JState</span> {
     <span class="ident">const_nil</span>: <span class="ident">JValRef</span>,
     <span class="ident">const_true</span>: <span class="ident">JValRef</span>,
@@ -384,7 +278,7 @@
     <span class="ident">interned_sym</span>: <span class="ident">Interned</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="ident">interned_str</span>: <span class="ident">Interned</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="ident">pos</span>: <span class="ident">PositionTag</span>,
-    <span class="ident">traceback</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TbFrame</span><span class="op">&gt;</span>,
+    <span class="ident">traceback</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TracebackFrame</span><span class="op">&gt;</span>,
     <span class="ident">modules</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">JEnvRef</span><span class="op">&gt;</span>,
     <span class="ident">reader_macros</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ReaderMacro</span><span class="op">&gt;</span>,
 }
@@ -413,15 +307,15 @@
             <span class="self">self</span>.<span class="ident">pos</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">clone</span>();
         }
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">traceback_push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">tf</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TbFrame</span><span class="op">&gt;</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">traceback_push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">tf</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TracebackFrame</span><span class="op">&gt;</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tf</span>) <span class="op">=</span> <span class="ident">tf</span> {
             <span class="self">self</span>.<span class="ident">traceback</span>.<span class="ident">push</span>(<span class="ident">tf</span>)
         }
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">traceback_take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TbFrame</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">traceback_take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TracebackFrame</span><span class="op">&gt;</span> {
         <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">traceback</span>)
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">traceback</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">TbFrame</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">traceback</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">TracebackFrame</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">traceback</span>
     }
 
@@ -455,7 +349,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">tokeniter</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TokenIter</span><span class="op">&gt;</span>,
         <span class="ident">env</span>: <span class="ident">JEnvRef</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>, (<span class="ident">PositionTag</span>, <span class="ident">JError</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TbFrame</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>, (<span class="ident">PositionTag</span>, <span class="ident">JError</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TracebackFrame</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">tokeniter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">apply_reader_macros</span>(<span class="ident">tokeniter</span>);
         <span class="kw">let</span> <span class="ident">forms</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Parser::new</span>(<span class="ident">tokeniter</span>, <span class="self">self</span>).<span class="ident">parse_forms</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">forms</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">forms</span>,
@@ -476,7 +370,7 @@
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">program</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">env</span>: <span class="ident">JEnvRef</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>, (<span class="ident">PositionTag</span>, <span class="ident">JError</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TbFrame</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>, (<span class="ident">PositionTag</span>, <span class="ident">JError</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TracebackFrame</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">tokeniter</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">Tokenizer::new</span>(<span class="ident">name</span>.<span class="ident">to_string</span>(), <span class="ident">program</span>.<span class="ident">to_string</span>()));
         <span class="self">self</span>.<span class="ident">eval_tokens</span>(<span class="ident">tokeniter</span>, <span class="ident">env</span>)
     }
@@ -484,7 +378,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">path</span>: <span class="ident">P</span>,
         <span class="ident">env</span>: <span class="ident">JEnvRef</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>, (<span class="ident">PositionTag</span>, <span class="ident">JError</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TbFrame</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>, (<span class="ident">PositionTag</span>, <span class="ident">JError</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TracebackFrame</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">as_ref</span>();
         <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">std::fs::read_to_string</span>(<span class="ident">path</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">text</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">text</span>,
@@ -500,51 +394,51 @@
     }
 
     <span class="comment">// Constructors</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jnil</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">nil</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">const_nil</span>)
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jbool</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bool</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="kw">if</span> <span class="ident">val</span> {
             <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">const_true</span>)
         } <span class="kw">else</span> {
             <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">const_false</span>)
         }
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jint</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">JTInt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">int</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">JTInt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="kw">if</span> <span class="ident">val</span> <span class="op">&gt;</span> <span class="ident">INT_INTERN_MAX_VAL</span> {
             (<span class="self">self</span>.<span class="ident">interned_int</span>.<span class="ident">constructor</span>)(<span class="ident">val</span>)
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">interned_int</span>.<span class="ident">get_or_insert</span>(<span class="ident">val</span>)
         }
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jsymbol</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">symbol</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="self">self</span>.<span class="ident">interned_sym</span>.<span class="ident">get_or_insert</span>(<span class="ident">val</span>)
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jstring</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="kw">if</span> <span class="ident">val</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">STR_INTERN_MAX_LEN</span> {
             (<span class="self">self</span>.<span class="ident">interned_str</span>.<span class="ident">constructor</span>)(<span class="ident">val</span>)
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">interned_str</span>.<span class="ident">get_or_insert</span>(<span class="ident">val</span>)
         }
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jquote</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">v</span>: <span class="ident">JValRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quote</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">v</span>: <span class="ident">JValRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="ident">JVal::Quote</span>(<span class="ident">v</span>).<span class="ident">into_ref</span>()
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jlist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">jnil</span>();
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">nil</span>();
         <span class="ident">v</span>.<span class="ident">reverse</span>();
         <span class="kw">for</span> <span class="ident">val</span> <span class="kw">in</span> <span class="ident">v</span> {
-            <span class="ident">cur</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">jpair</span>(<span class="ident">val</span>, <span class="ident">cur</span>);
+            <span class="ident">cur</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pair</span>(<span class="ident">val</span>, <span class="ident">cur</span>);
         }
         <span class="ident">cur</span>
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jpair</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="ident">JValRef</span>, <span class="ident">right</span>: <span class="ident">JValRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pair</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="ident">JValRef</span>, <span class="ident">right</span>: <span class="ident">JValRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="ident">JVal::Pair</span>(<span class="ident">JPair::cons</span>(<span class="ident">left</span>, <span class="ident">right</span>)).<span class="ident">into_ref</span>()
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jerrorval</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">JErrorKind</span>, <span class="ident">reason</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">JErrorKind</span>, <span class="ident">reason</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="ident">JVal::Error</span>(<span class="ident">JError::new</span>(<span class="ident">kind</span>, <span class="ident">reason</span>)).<span class="ident">into_ref</span>()
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jlambda</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">clos</span>: <span class="ident">JEnvRef</span>, <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lambda</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">clos</span>: <span class="ident">JEnvRef</span>, <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">JVal::Lambda</span>(<span class="ident">Box::new</span>(<span class="ident">JLambda</span> {
             <span class="ident">closure</span>: <span class="ident">clos</span>,
             <span class="ident">params</span>: <span class="ident">JParams::new</span>(<span class="ident">params</span>)<span class="question-mark">?</span>,
@@ -553,8 +447,8 @@
         }))
         .<span class="ident">into_ref</span>())
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jmacro</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">clos</span>: <span class="ident">JEnvRef</span>, <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">JVal::Macro</span>(<span class="ident">Box::new</span>(<span class="ident">JLambda</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">procmacro</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">clos</span>: <span class="ident">JEnvRef</span>, <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">JValRef</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {
+        <span class="prelude-val">Ok</span>(<span class="ident">JVal::ProcMacro</span>(<span class="ident">Box::new</span>(<span class="ident">JLambda</span> {
             <span class="ident">closure</span>: <span class="ident">clos</span>,
             <span class="ident">params</span>: <span class="ident">JParams::new</span>(<span class="ident">params</span>)<span class="question-mark">?</span>,
             <span class="ident">code</span>,
@@ -562,14 +456,14 @@
         }))
         .<span class="ident">into_ref</span>())
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jbuiltin</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">builtin</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">name</span>: <span class="ident">String</span>,
         <span class="ident">f</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">JValRef</span>, <span class="ident">JEnvRef</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="ident">JVal::Builtin</span>(<span class="ident">JBuiltin::new</span>(<span class="ident">name</span>, <span class="ident">f</span>)).<span class="ident">into_ref</span>()
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jspecialform</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">specialform</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">name</span>: <span class="ident">String</span>,
         <span class="ident">f</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">JValRef</span>, <span class="ident">JEnvRef</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span><span class="op">&gt;</span>,

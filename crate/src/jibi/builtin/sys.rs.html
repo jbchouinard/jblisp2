@@ -28,7 +28,7 @@
     <span class="kw">let</span> [<span class="ident">var</span>] <span class="op">=</span> <span class="ident">get_n_args</span>(<span class="ident">args</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">var</span> <span class="op">=</span> <span class="ident">var</span>.<span class="ident">to_str</span>()<span class="question-mark">?</span>;
     <span class="kw">match</span> <span class="ident">std::env::var</span>(<span class="ident">var</span>) {
-        <span class="prelude-val">Ok</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">jstring</span>(<span class="ident">val</span>)),
+        <span class="prelude-val">Ok</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">string</span>(<span class="ident">val</span>)),
         <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">JError::new</span>(<span class="ident">OsError</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>))),
     }
 }

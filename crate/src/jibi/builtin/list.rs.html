@@ -38,7 +38,7 @@
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jbuiltin_cons</span>(<span class="ident">args</span>: <span class="ident">JValRef</span>, <span class="ident">_env</span>: <span class="ident">JEnvRef</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {
     <span class="kw">let</span> [<span class="ident">x</span>, <span class="ident">y</span>] <span class="op">=</span> <span class="ident">get_n_args</span>(<span class="ident">args</span>)<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">jpair</span>(<span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>), <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">y</span>)))
+    <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">pair</span>(<span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>), <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">y</span>)))
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jbuiltin_car</span>(<span class="ident">args</span>: <span class="ident">JValRef</span>, <span class="ident">_env</span>: <span class="ident">JEnvRef</span>, <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {
@@ -60,7 +60,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jbuiltin_is_list</span>(<span class="ident">args</span>: <span class="ident">JValRef</span>, <span class="ident">_env</span>: <span class="ident">JEnvRef</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {
     <span class="kw">let</span> [<span class="ident">pair</span>] <span class="op">=</span> <span class="ident">get_n_args</span>(<span class="ident">args</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">pair</span> <span class="op">=</span> <span class="ident">pair</span>.<span class="ident">to_pair</span>()<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">jbool</span>(<span class="ident">pair</span>.<span class="ident">is_list</span>()))
+    <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">bool</span>(<span class="ident">pair</span>.<span class="ident">is_list</span>()))
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jspecial_quote</span>(<span class="ident">args</span>: <span class="ident">JValRef</span>, <span class="ident">_env</span>: <span class="ident">JEnvRef</span>, <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {
