@@ -371,7 +371,7 @@ Get second item of a pair (rest of list).
 ```nohighlight
 (list :expr ...)
 ```
-Construct a list, which is a linked list made from pairs and termninated by `nil`.
+Construct a list, which is a linked list made from pairs and terminated by `nil`.
 
 ```nohighlight
 ; Example
