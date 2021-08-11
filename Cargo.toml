@@ -1,7 +1,7 @@
 [package]
 name = "jbscheme"
 description = "A tiny embedabble interpreted Scheme dialect."
-version = "0.0.9"
+version = "0.0.10"
 authors = ["Jérome Boisvert-Chouinard"]
 repository = "https://github.com/jbchouinard/jbscheme"
 homepage = "https://jbchouinard.github.io/jbscheme"
