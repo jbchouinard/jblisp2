@@ -138,9 +138,10 @@ impl JState {
             return Ok(JVal::Env(Rc::clone(self.modules.get(&path).unwrap())).into_ref());
         }
         let modenv = JEnv::new(Some(Rc::clone(&env))).into_ref();
-        if let Err((pos, err, _)) = self.eval_file(path, Rc::clone(&modenv)) {
+        if let Err((pos, err, _)) = self.eval_file(path.clone(), Rc::clone(&modenv)) {
             return Err(JError::new(EvalError, &format!("{}: {}", pos, err)));
         };
+        self.modules.insert(path, Rc::clone(&modenv));
         Ok(JVal::Env(modenv).into_ref())
     }
 

@@ -15,7 +15,7 @@ Features:
 - First class functions
 - Lexical scoping and closures
 - Procedural macros
-- Exception handling (raise, try)
+- Exception handling
 - Automatic reference counting
 
 ## Documentation
@@ -40,10 +40,10 @@ make install
 ```
 
 ## Roadmap
+- Imports, namespaces
 - More builtin functions
 - Tail call optimization
 - More tests
-- Imports, namespaces
 - Numeric data types: float, complex 
 - Mutable data structures: mutpair, vector, table
 - Debugger

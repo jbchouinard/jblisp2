@@ -44,8 +44,8 @@ impl Interpreter {
     /// Execute the `jbscheme` [prelude](PRELUDE), which defines common constants, procedures
     /// and macros.
     pub fn exec_prelude(&mut self) {
-        if let Err((pos, je, _)) = self.eval_str("#PRELUDE", PRELUDE) {
-            eprintln!("{}: {}", pos, je);
+        if let Err(exc) = self.eval_str("#PRELUDE", PRELUDE) {
+            Interpreter::print_exc(exc);
             std::process::exit(1);
         }
     }
@@ -88,11 +88,12 @@ impl Interpreter {
         eval(sexpr, Rc::clone(&self.globals), &mut self.state)
     }
     pub fn print_exc((pos, err, tb): JException) {
-        println!("Traceback:");
+        eprintln!("Traceback:");
         for tbf in tb {
             eprintln!("  {}", tbf);
         }
-        eprintln!("{}: Unhandled {}", pos, err)
+        eprintln!("  File \"{}\", line {}", pos.filename, pos.lineno);
+        eprintln!("{}", err);
     }
 
     /// Create a global binding (variable definition).

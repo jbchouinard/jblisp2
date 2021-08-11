@@ -96,8 +96,9 @@ impl<'a> Parser<'a> {
         if self.peek.value == TokenValue::Eof {
             return Ok(None);
         }
+        let spos = self.peek.pos.clone();
         match self.expr() {
-            Ok(val) => Ok(Some((self.peek.pos.clone(), val))),
+            Ok(val) => Ok(Some((spos, val))),
             Err(e) => Err(e),
         }
     }
