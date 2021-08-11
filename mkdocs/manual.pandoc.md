@@ -695,7 +695,7 @@ Get the enclosing environment for the current scope.
 
 ---
 
-### env-lookup
+#### env-lookup
 ```nohighlight
 (env-lookup :env :symbol)
 ```
@@ -703,7 +703,7 @@ Look up symbol in the given environment.
 
 ---
 
-### env-def
+#### env-def
 ```nohighlight
 (env-def :env :symbol :expr)
 ```
@@ -711,7 +711,7 @@ Define symbol in the given environment.
 
 ---
 
-### env-set
+#### env-set
 ```nohighlight
 (env-set! :env :symbol :expr)
 ```
@@ -727,7 +727,7 @@ Get parent env, or nil if there is no parent env.
 
 ---
 
-### env-globals
+#### env-globals
 ```nohighlight
 (env-globals)
 ```
