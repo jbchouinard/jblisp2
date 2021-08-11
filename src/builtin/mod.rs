@@ -7,6 +7,7 @@ use env::*;
 use error::*;
 use list::*;
 use math::*;
+pub use readermacros::add_reader_macros;
 use string::*;
 use sys::*;
 
@@ -16,6 +17,7 @@ mod env;
 mod error;
 mod list;
 mod math;
+mod readermacros;
 mod string;
 mod sys;
 

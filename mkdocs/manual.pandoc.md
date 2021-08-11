@@ -432,14 +432,24 @@ Concatenate multiple strings.
 \newpage
 ### Integer Operations
 
-#### add (+)
+#### +
 ```nohighlight
 (+ :integer ...)
 ```
 
-#### mul (\*)
+#### -
+```nohighlight
+(- :integer ...)
+```
+
+#### \*
 ```nohighlight
 (* :integer ...)
+```
+
+#### /
+```nohighlight
+(/ :integer ...)
 ```
 
 ---

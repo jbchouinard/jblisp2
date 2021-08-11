@@ -2,6 +2,7 @@ use std::path::Path;
 use std::rc::Rc;
 
 use crate::builtin::add_builtins;
+use crate::builtin::add_reader_macros;
 use crate::state::JState;
 use crate::*;
 
@@ -17,6 +18,7 @@ impl Default for interpreter::Interpreter {
     /// (the [prelude](PRELUDE)).
     fn default() -> Self {
         let mut interpreter = Self::new();
+        add_reader_macros(&mut interpreter.state);
         interpreter.define_builtins();
         interpreter.exec_prelude();
         interpreter

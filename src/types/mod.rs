@@ -10,7 +10,7 @@ pub mod intern;
 
 pub type JTInt = i128;
 
-static BUILTIN_COUNTER: AtomicUsize = AtomicUsize::new(0);
+static BUILTIN_COUNTER: AtomicUsize = AtomicUsize::new(1);
 
 fn builtin_id() -> usize {
     BUILTIN_COUNTER.fetch_add(1, Ordering::SeqCst)

@@ -3,6 +3,7 @@ use std::fmt;
 use crate::{JError, SyntaxError};
 
 pub mod parser;
+pub mod readermacro;
 pub mod tokenizer;
 
 #[derive(Debug, PartialEq, Clone)]

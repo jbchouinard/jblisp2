@@ -15,10 +15,7 @@ impl<'a> Parser<'a> {
         let mut this = Self {
             tokeniter,
             // Dummy value until we read the first real token
-            peek: Token::new(
-                TokenValue::Comment("".to_string()),
-                PositionTag::new("", 0, 0),
-            ),
+            peek: Token::new(TokenValue::Eof, PositionTag::new("", 0, 0)),
             state,
         };
         this.next().unwrap();
@@ -29,22 +26,13 @@ impl<'a> Parser<'a> {
         ParserError::new(pos, reason)
     }
 
-    fn _next(&mut self) -> Result<Token, ParserError> {
+    fn next(&mut self) -> Result<Token, ParserError> {
         let next = match self.tokeniter.next_token() {
             Ok(tok) => tok,
             Err(te) => return Err(self.error(te.pos, &te.reason)),
         };
         let cur = std::mem::replace(&mut self.peek, next);
         Ok(cur)
-    }
-
-    fn next(&mut self) -> Result<Token, ParserError> {
-        let next = self._next()?;
-        // Skip comments
-        while let TokenValue::Comment(_) = &self.peek.value {
-            self._next()?;
-        }
-        Ok(next)
     }
 
     fn expect(&mut self, tok: TokenValue) -> Result<Token, ParserError> {

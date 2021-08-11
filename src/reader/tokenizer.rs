@@ -13,9 +13,7 @@ pub enum TokenValue {
     Quote,
     Int(JTInt),
     Ident(String),
-    Idsep,
     String(String),
-    Comment(String),
     Eof,
     Anychar(char),
 }
@@ -40,7 +38,6 @@ lazy_static! {
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_IDENT: Regex =
         Regex::new(r"^[a-zA-Z+.*/<>=!?$%_&~^-][0-9a-zA-Z+.*/<=>!?$%_&~^-]*").unwrap();
-    static ref RE_IDSEP: Regex = Regex::new(r"^::").unwrap();
     static ref RE_STRING: Regex = Regex::new(r#"^"([^"]|\\")*""#).unwrap();
     static ref RE_COMMENT: Regex = Regex::new(r"^;[^\n]*").unwrap();
     static ref RE_ANYCHAR: Regex = Regex::new(r"^.").unwrap();
@@ -71,16 +68,8 @@ fn t_ident(val: &str) -> TResult {
     Ok(TokenValue::Ident(val.to_string()))
 }
 
-fn t_idsep(_: &str) -> TResult {
-    Ok(TokenValue::Idsep)
-}
-
 fn t_string(val: &str) -> TResult {
     Ok(TokenValue::String(val[1..val.len() - 1].to_string()))
-}
-
-fn t_comment(s: &str) -> TResult {
-    Ok(TokenValue::Comment(s.to_string()))
 }
 
 fn t_anychar(s: &str) -> TResult {
@@ -120,19 +109,33 @@ impl Tokenizer {
         }
     }
 
-    fn eat_whitespace(&mut self) {
-        if let Some(mat) = RE_WS.find(&self.input[self.pos..]) {
-            let spos = self.pos;
-            self.pos += mat.end();
-            let mut newline_count = 0;
-            for (p, c) in mat.as_str().chars().enumerate() {
-                if c == '\n' {
-                    newline_count += 1;
-                    self.last_newline_pos = spos + p;
-                }
+    fn eat_comment(&mut self) -> bool {
+        match RE_COMMENT.find(&self.input[self.pos..]) {
+            Some(mat) => {
+                self.pos += mat.end();
+                true
             }
-            self.lineno += newline_count;
-        };
+            None => false,
+        }
+    }
+
+    fn eat_whitespace(&mut self) -> bool {
+        match RE_WS.find(&self.input[self.pos..]) {
+            Some(mat) => {
+                let spos = self.pos;
+                self.pos += mat.end();
+                let mut newline_count = 0;
+                for (p, c) in mat.as_str().chars().enumerate() {
+                    if c == '\n' {
+                        newline_count += 1;
+                        self.last_newline_pos = spos + p;
+                    }
+                }
+                self.lineno += newline_count;
+                true
+            }
+            None => false,
+        }
     }
 
     fn try_token<T>(&mut self, re: &Regex, cons: T) -> Result<Option<Token>, TokenError>
@@ -166,7 +169,8 @@ impl Tokenizer {
 
 impl TokenIter for Tokenizer {
     fn next_token(&mut self) -> Result<Token, TokenError> {
-        self.eat_whitespace();
+        while self.eat_whitespace() || self.eat_comment() {}
+
         if self.pos >= self.input.len() {
             return Ok(Token::new(TokenValue::Eof, self.ptag(self.pos)));
         }
@@ -179,9 +183,6 @@ impl TokenIter for Tokenizer {
         if let Some(token) = self.try_token(&RE_QUOTE, t_quote)? {
             return Ok(token);
         }
-        if let Some(token) = self.try_token(&RE_IDSEP, t_idsep)? {
-            return Ok(token);
-        }
         if let Some(token) = self.try_token(&RE_INT, t_int)? {
             return Ok(token);
         }
@@ -189,9 +190,6 @@ impl TokenIter for Tokenizer {
             return Ok(token);
         }
         if let Some(token) = self.try_token(&RE_STRING, t_string)? {
-            return Ok(token);
-        }
-        if let Some(token) = self.try_token(&RE_COMMENT, t_comment)? {
             return Ok(token);
         }
         if let Some(token) = self.try_token(&RE_ANYCHAR, t_anychar)? {
@@ -349,7 +347,6 @@ mod tests {
             vec![
                 TokenValue::LParen,
                 TokenValue::Ident("quote".to_string()),
-                TokenValue::Comment("; this is a comment!".to_string()),
                 TokenValue::Quote,
                 TokenValue::LParen,
                 TokenValue::Int(1),

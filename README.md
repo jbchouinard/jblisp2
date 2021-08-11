@@ -40,7 +40,8 @@ make install
 ```
 
 ## Roadmap
-- Imports, namespaces
+- Reader macros
+- Namespace reader macro
 - More builtin functions
 - Tail call optimization
 - More tests
@@ -50,5 +51,6 @@ make install
 - Continuations
 - Reference cycle detection
 - Standard library
+- Documentation
 
 Copyright 2021 Jérome Boisvert-Chouinard

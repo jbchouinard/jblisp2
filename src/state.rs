@@ -5,8 +5,8 @@ use std::rc::Rc;
 
 use crate::error::JErrorKind;
 use crate::reader::parser::Parser;
-use crate::reader::tokenizer::TokenIter;
-use crate::reader::tokenizer::Tokenizer;
+use crate::reader::readermacro::ReaderMacro;
+use crate::reader::tokenizer::{TokenIter, Tokenizer};
 use crate::reader::PositionTag;
 use crate::types::intern::Interned;
 use crate::*;
@@ -92,6 +92,7 @@ pub struct JState {
     pos: PositionTag,
     traceback: Vec<TbFrame>,
     modules: HashMap<PathBuf, JEnvRef>,
+    reader_macros: Vec<ReaderMacro>,
 }
 
 impl JState {
@@ -110,6 +111,7 @@ impl JState {
             },
             traceback: vec![],
             modules: HashMap::new(),
+            reader_macros: vec![],
         }
     }
     pub fn update_pos(&mut self, pt: Option<&PositionTag>) {
@@ -127,6 +129,16 @@ impl JState {
     }
     pub fn traceback(&self) -> &[TbFrame] {
         &self.traceback
+    }
+
+    pub fn add_reader_macro(&mut self, rm: ReaderMacro) {
+        self.reader_macros.push(rm);
+    }
+    pub fn apply_reader_macros(&self, mut t: Box<dyn TokenIter>) -> Box<dyn TokenIter> {
+        for rm in &self.reader_macros {
+            t = Box::new(rm.wrap(t))
+        }
+        t
     }
 
     pub fn import_module<P: AsRef<Path>>(&mut self, p: P, env: JEnvRef) -> JResult {
@@ -150,6 +162,7 @@ impl JState {
         tokeniter: Box<dyn TokenIter>,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TbFrame>)> {
+        let tokeniter = self.apply_reader_macros(tokeniter);
         let forms = match Parser::new(tokeniter, self).parse_forms() {
             Ok(forms) => forms,
             Err(pe) => return Err((pe.pos.clone(), pe.into(), self.traceback_take())),

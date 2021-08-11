@@ -3,7 +3,7 @@
 
 (def test-verbose
     (try
-        (equal? "1" (getenv "TEST_VERBOSE"))
+        (equal? "1" (environment-variable "TEST_VERBOSE"))
         false))
 
 (defn assert-not (x) (assert (not x)))
