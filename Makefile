@@ -11,7 +11,7 @@ doc:
 	cargo doc --no-deps
 
 install:
-	install -m 755 target/release/jbscheme $(DESTDIR)$(PREFIX)/bin/
+	install -m 755 target/release/jibi $(DESTDIR)$(PREFIX)/bin/
 
 test:
 	cargo test
@@ -20,7 +20,7 @@ clean:
 	cargo clean
 	rm -rf mkdocs/site $(MD_MANUAL) $(PDF_MANUAL)
 
-PDF_MANUAL = JB\ Scheme\ Manual.pdf
+PDF_MANUAL = Jibi\ Scheme\ Manual.pdf
 MD_MANUAL = mkdocs/docs/index.md
 
 $(PDF_MANUAL): PANDOC_OPTS = -V documentclass=scrreprt

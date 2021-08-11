@@ -1,5 +1,5 @@
-# JB Scheme
-**version 0.0.7**
+# Jibi Scheme
+**version 0.1.0**
 
 A homebrew interpreted, non-RnRS compliant dialect of Scheme.
 
@@ -60,7 +60,7 @@ A `bool` value evaluates to itself.
 ```nohighlight
 nil
 ```
-In JB Scheme, `nil` and all empty lists `()` are the same object, therefore
+In Jibi Scheme, `nil` and all empty lists `()` are the same object, therefore
 `(eq? () ())` is true.
 
 *Evaluation Rule:*
@@ -598,7 +598,7 @@ Apply a procedure to a list of arguments.
 ```nohighlight
 (defmacro name formals :expr ...)
 ```
-jbscheme macros are "procedural"; they are simply lambdas which return code.
+jibi macros are "procedural"; they are simply lambdas which return code.
 
 The body of the macro is first evaluated in the macro's lexical environment.
 Then the resulting expression is evaluated in the caller's environment.

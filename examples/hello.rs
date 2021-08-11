@@ -1,4 +1,4 @@
-use jbscheme::Interpreter;
+use jibi::Interpreter;
 
 fn main() {
     // Create an interpreter pre-loaded with definitions for builtins; and constants,

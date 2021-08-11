@@ -1,9 +1,9 @@
-site_name: JB Scheme
-site_url: https://jbchouinard.github.io/jbscheme
+site_name: Jibi Scheme
+site_url: https://jbchouinard.github.io/jibi
 theme: readthedocs
 nav:
   - Language Reference: index.md
-  - Dowload PDF: /jbscheme/JB Scheme Manual.pdf
-  - Crate Documentation: /jbscheme/crate/jbscheme/index.html
-  - GitHub Repo: https://github.com/jbchouinard/jbscheme
+  - Dowload PDF: /jibi/Jibi Scheme Manual.pdf
+  - Crate Documentation: /jibi/crate/jibi/index.html
+  - GitHub Repo: https://github.com/jbchouinard/jibi
 

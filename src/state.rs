@@ -114,7 +114,7 @@ impl JState {
             reader_macros: vec![],
         }
     }
-    pub fn update_pos(&mut self, pt: Option<&PositionTag>) {
+    fn update_pos(&mut self, pt: Option<&PositionTag>) {
         if let Some(pos) = pt {
             self.pos = pos.clone();
         }
@@ -134,7 +134,7 @@ impl JState {
     pub fn add_reader_macro(&mut self, rm: ReaderMacro) {
         self.reader_macros.push(rm);
     }
-    pub fn apply_reader_macros(&self, mut t: Box<dyn TokenIter>) -> Box<dyn TokenIter> {
+    fn apply_reader_macros(&self, mut t: Box<dyn TokenIter>) -> Box<dyn TokenIter> {
         for rm in &self.reader_macros {
             t = Box::new(rm.wrap(t))
         }

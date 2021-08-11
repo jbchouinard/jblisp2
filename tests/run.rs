@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use jbscheme::Interpreter;
+use jibi::Interpreter;
 
 fn execfile<P: AsRef<Path>>(path: P) {
     let mut interpreter = Interpreter::default();

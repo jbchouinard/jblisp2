@@ -161,8 +161,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "jbscheme"
-version = "0.0.10"
+name = "jibi"
+version = "0.1.0"
 dependencies = [
  "home",
  "lazy_static",

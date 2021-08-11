@@ -1,16 +1,16 @@
-//! [JB Scheme Language Documentation](https://jbchouinard.github.io/jbscheme/)
+//! [Jibi Scheme Language Documentation](https://jbchouinard.github.io/jibi/)
 //!
-//! # JB Scheme Rust Interop
+//! # Jibi Rust Interop
 //!
 //! ## Memory
-//! All `jbscheme` values are reference-counted with [`Rc`](std::rc::Rc). There is no
+//! All `jibi` values are reference-counted with [`Rc`](std::rc::Rc). There is no
 //! explicit garbage collection or cycle detection.
 //!
-//! Each `jbscheme` [`Interpreter`] has its own state and global environment. Multiple
-//! interpreters can run in parallel, but `jbscheme` values cannot be shared
+//! Each `jibi` [`Interpreter`] has its own state and global environment. Multiple
+//! interpreters can run in parallel, but `jibi` values cannot be shared
 //! between threads.
 //!
-//! `jbscheme` values must be constructed with the methods on [`Interpreter`] or [`JState`].
+//! `jibi` values must be constructed with the methods on [`Interpreter`] or [`JState`].
 //! Passing in references to [`JVal`]'s created outside the interpreter, or from
 //! a different interpreter running in the same thread, may break language semantics,
 //! since some types are interned separately by each interpreter, and correct behavior
@@ -24,26 +24,27 @@
 //! between interpreters should be fine.
 //!
 //! ## Error Handling
-//! [`JError`] represents exceptions in the `jbscheme` language. They can arise
-//! from a call to `raise` in `jbscheme` code, or from parsing or evaluation errors.
+//! [`JError`] represents exceptions in the `jibi` language. They can arise
+//! from a call to `raise` in `jibi` code, or from parsing or evaluation errors.
 //!
 //! [`JError`] may be found both in an error value ([`JVal::Error`]), representing
-//! an `error` created in `jbscheme` but not raised, and in [`Err`]`(`[`JError`]`)`
+//! an `error` created in `jibi` but not raised, and in [`Err`]`(`[`JError`]`)`
 //! when it is raised.
 //!
 //! ## Example
 //! ```
-//! use jbscheme::Interpreter;
+//! use jibi::Interpreter;
 //!
 //! // Create an interpreter pre-loaded with definitions for builtins; and constants,
 //! // lambdas and macros defined by the prelude.
 //! // (Interpreter::new() instead creates a bare interpreter, with empty globals.)
-//! let mut interpreter = Interpreter::default();
-//! match interpreter.eval_str("hello.rs", r#"(print "Hello World!")"#) {
-//!     Ok(Some(jval)) => println!("{}", jval),
-//!     Ok(None) => (),
-//!     Err(exc) => Interpreter::print_exc(exc),
-//! };
+//! let mut scm = Interpreter::default();
+//! scm.eval_str("hello.rs", r#"
+//! 	(defn add (x y) (+ x y))
+//! "#).unwrap();
+//! let args = vec![scm.jint(10), scm.jint(100)];
+//! let res = scm.call("add", args).unwrap();
+//! println!("{}", res);
 //! ```
 mod builtin;
 mod env;

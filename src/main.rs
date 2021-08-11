@@ -6,19 +6,19 @@ use lazy_static::lazy_static;
 use rustyline::Editor;
 use structopt::StructOpt;
 
-use jbscheme::{Interpreter, Token, TokenError, TokenValidator};
+use jibi::{Interpreter, Token, TokenError, TokenValidator};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 lazy_static! {
     static ref HISTORY_FILE: PathBuf = match home_dir() {
         Some(mut p) => {
-            p.push(".jbscheme_history");
+            p.push(".jibi_history");
             p
         }
         None => {
             eprintln!("could not locate home dir, saving history to current dir");
-            PathBuf::from_str(".jbscheme_history").unwrap()
+            PathBuf::from_str(".jibi_history").unwrap()
         }
     };
 }
@@ -71,7 +71,7 @@ fn run(files: Vec<PathBuf>, interactive: bool) {
 }
 
 fn repl(mut interpreter: Interpreter) {
-    println!("jbscheme v{}", VERSION);
+    println!("jibi v{}", VERSION);
     let mut rl = Editor::<()>::new();
     let _ = rl.load_history(&*HISTORY_FILE);
 

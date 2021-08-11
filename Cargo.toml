@@ -1,21 +1,21 @@
 [package]
-name = "jbscheme"
+name = "jibi"
 description = "A tiny embedabble interpreted Scheme dialect."
-version = "0.0.10"
+version = "0.1.0"
 authors = ["Jérome Boisvert-Chouinard"]
-repository = "https://github.com/jbchouinard/jbscheme"
-homepage = "https://jbchouinard.github.io/jbscheme"
-documentation = "https://jbchouinard.github.io/jbscheme/crate/jbscheme"
+repository = "https://github.com/jbchouinard/jibi"
+homepage = "https://jbchouinard.github.io/jibi"
+documentation = "https://jbchouinard.github.io/jibi/crate/jibi"
 license = "MIT"
 readme = "README.md"
 edition = "2018"
 
 [lib]
-name = "jbscheme"
+name = "jibi"
 path = "src/lib.rs"
 
 [[bin]]
-name = "jbscheme"
+name = "jibi"
 path = "src/main.rs"
 
 [dependencies]
