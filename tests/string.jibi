@@ -1,4 +1,4 @@
-(evalfile "stl/unittest.jbscm")
+(evalfile "stl/unittest.jibi")
 
 (test-suite "string"
     (test "string concat"

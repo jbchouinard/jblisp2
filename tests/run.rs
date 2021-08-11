@@ -9,15 +9,15 @@ fn execfile<P: AsRef<Path>>(path: P) {
 
 #[test]
 fn tests_lang() {
-    execfile("tests/lang.jbscm")
+    execfile("tests/lang.jibi")
 }
 
 #[test]
 fn tests_string() {
-    execfile("tests/string.jbscm")
+    execfile("tests/string.jibi")
 }
 
 #[test]
 fn tests_math() {
-    execfile("tests/math.jbscm")
+    execfile("tests/math.jibi")
 }

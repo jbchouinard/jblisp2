@@ -38,12 +38,12 @@
 //! // Create an interpreter pre-loaded with definitions for builtins; and constants,
 //! // lambdas and macros defined by the prelude.
 //! // (Interpreter::new() instead creates a bare interpreter, with empty globals.)
-//! let mut scm = Interpreter::default();
-//! scm.eval_str("hello.rs", r#"
+//! let mut jibi = Interpreter::default();
+//! jibi.eval_str("hello.rs", r#"
 //! 	(defn add (x y) (+ x y))
 //! "#).unwrap();
-//! let args = vec![scm.jint(10), scm.jint(100)];
-//! let res = scm.call("add", args).unwrap();
+//! let args = vec![jibi.jint(10), jibi.jint(100)];
+//! let res = jibi.call("add", args).unwrap();
 //! println!("{}", res);
 //! ```
 mod builtin;

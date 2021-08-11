@@ -142,7 +142,7 @@ fn jspecial_import(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     if sym_as != "as" {
         return Err(JError::new(EvalError, "invalid import form"));
     }
-    let file = format!("{}.jbscm", eval(file, Rc::clone(&env), state)?.to_str()?);
+    let file = format!("{}.jibi", eval(file, Rc::clone(&env), state)?.to_str()?);
     let name = rest[1].to_symbol()?;
     let module = state.import_module(file, Rc::clone(&env))?;
     env.define(name, module);

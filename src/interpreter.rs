@@ -6,7 +6,7 @@ use crate::builtin::add_reader_macros;
 use crate::state::JState;
 use crate::*;
 
-pub const PRELUDE: &str = include_str!("prelude.jbscm");
+pub const PRELUDE: &str = include_str!("prelude.jibi");
 
 pub struct Interpreter {
     state: JState,
