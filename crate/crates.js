@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["jbscheme"];
+window.ALL_CRATES = ["jibi"];

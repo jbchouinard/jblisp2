@@ -7,9 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="None">
   
-  <link rel="canonical" href="https://jbchouinard.github.io/jbscheme/">
+  <link rel="canonical" href="https://jbchouinard.github.io/jibi/">
   <link rel="shortcut icon" href="img/favicon.ico">
-  <title>JB Scheme</title>
+  <title>Jibi Scheme</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
 
   <link rel="stylesheet" href="css/theme.css" />
@@ -20,7 +20,7 @@
     // Current page data
     var mkdocs_page_name = "Language Reference";
     var mkdocs_page_input_path = "index.md";
-    var mkdocs_page_url = "/jbscheme/";
+    var mkdocs_page_url = "/jibi/";
   </script>
   
   <script src="js/jquery-2.1.1.min.js" defer></script>
@@ -37,7 +37,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-        <a href="." class="icon icon-home"> JB Scheme</a>
+        <a href="." class="icon icon-home"> Jibi Scheme</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
       <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
@@ -171,9 +171,13 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#integer-operations">Integer Operations</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#add">add (+)</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_1">+</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#mul">mul (*)</a>
+    <li class="toctree-l4"><a class="reference internal" href="#-">-</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_2">*</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_3">/</a>
     </li>
         </ul>
     </li>
@@ -184,6 +188,12 @@
     <li class="toctree-l4"><a class="reference internal" href="#repr">repr</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#display">display</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#modules">Modules</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#import">import</a>
     </li>
         </ul>
     </li>
@@ -201,9 +211,9 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#eval">eval</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#apply">apply</a>
-    </li>
     <li class="toctree-l4"><a class="reference internal" href="#evalfile">evalfile</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#apply">apply</a>
     </li>
         </ul>
     </li>
@@ -227,9 +237,27 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#environment-procedures">Environment Procedures</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#env">env</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#env-lookup">env-lookup</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#env-def">env-def</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#env-set">env-set</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#env-parent">env-parent</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#env-globals">env-globals</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#system-procedures">System Procedures</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#getenv">getenv</a>
+    <li class="toctree-l4"><a class="reference internal" href="#environment-variable">environment-variable</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#exit">exit</a>
     </li>
@@ -261,15 +289,15 @@
                     </li>
                 </ul>
                 <ul>
-                    <li class="toctree-l1"><a class="" href="/jbscheme/JB Scheme Manual.pdf">Dowload PDF</a>
+                    <li class="toctree-l1"><a class="" href="/jibi/Jibi Scheme Manual.pdf">Dowload PDF</a>
                     </li>
                 </ul>
                 <ul>
-                    <li class="toctree-l1"><a class="" href="/jbscheme/crate/jbscheme/index.html">Crate Documentation</a>
+                    <li class="toctree-l1"><a class="" href="/jibi/crate/jibi/index.html">Crate Documentation</a>
                     </li>
                 </ul>
                 <ul>
-                    <li class="toctree-l1"><a class="" href="https://github.com/jbchouinard/jbscheme">GitHub Repo</a>
+                    <li class="toctree-l1"><a class="" href="https://github.com/jbchouinard/jibi">GitHub Repo</a>
                     </li>
                 </ul>
       </div>
@@ -281,7 +309,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href=".">JB Scheme</a>
+        <a href=".">Jibi Scheme</a>
       </nav>
 
       
@@ -305,8 +333,8 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="jb-scheme">JB Scheme</h1>
-<p><strong>version 0.0.7</strong></p>
+                <h1 id="jibi-scheme">Jibi Scheme</h1>
+<p><strong>version 0.0.10</strong></p>
 <p>A homebrew interpreted, non-RnRS compliant dialect of Scheme.</p>
 <h2 id="types">Types</h2>
 <h3 id="primitive-types">Primitive Types</h3>
@@ -344,7 +372,7 @@ be used as predicates, e.g. for <code>if</code>.</p>
 <h4 id="nil">nil</h4>
 <pre><code class="language-nohighlight">nil
 </code></pre>
-<p>In JB Scheme, <code>nil</code> and all empty lists <code>()</code> are the same object,
+<p>In Jibi Scheme, <code>nil</code> and all empty lists <code>()</code> are the same object,
 therefore <code>(eq? () ())</code> is true.</p>
 <p><em>Evaluation Rule:</em> <code>nil</code> evaluates to itself.</p>
 <hr />
@@ -357,7 +385,7 @@ type. It is simply a grouping of two values of any types (2-tuple); the
 first and second values are sometimes referred to respectively as the
 <code>car</code> and <code>cdr</code>.</p>
 <p><em>Evaluation Rule:</em> <code>pair</code> values are evaluated by procedure application,
-however, only <code>pair</code> values which are <code>lists</code>’s can be properly applied;
+however, only <code>pair</code> values which are <code>list</code>’s can be properly applied;
 evaluating a non-list <code>pair</code> raises an error.</p>
 <hr />
 <h4 id="list">list</h4>
@@ -586,11 +614,17 @@ true
 </code></pre>
 <hr />
 <h3 id="integer-operations">Integer Operations</h3>
-<h4 id="add">add (+)</h4>
+<h4 id="_1">+</h4>
 <pre><code class="language-nohighlight">(+ :integer ...)
 </code></pre>
-<h4 id="mul">mul (*)</h4>
+<h4 id="-">-</h4>
+<pre><code class="language-nohighlight">(- :integer ...)
+</code></pre>
+<h4 id="_2">*</h4>
 <pre><code class="language-nohighlight">(* :integer ...)
+</code></pre>
+<h4 id="_3">/</h4>
+<pre><code class="language-nohighlight">(/ :integer ...)
 </code></pre>
 <hr />
 <h3 id="printing">Printing</h3>
@@ -607,6 +641,13 @@ true
 <pre><code class="language-nohighlight">(display :expr)
 </code></pre>
 <p>Print string representation of a value.</p>
+<hr />
+<h3 id="modules">Modules</h3>
+<h4 id="import">import</h4>
+<pre><code class="language-nohighlight">(import module:string as name)
+</code></pre>
+<p>Import module and bind it to <code>name</code>. Note that module files are only
+evaluated once, re-importing gets a reference to the existing module.</p>
 <hr />
 <h3 id="type-inspection">Type Inspection</h3>
 <h4 id="type">type</h4>
@@ -662,6 +703,11 @@ a
 10
 </code></pre>
 <hr />
+<h4 id="evalfile">evalfile</h4>
+<pre><code class="language-nohighlight">(evalfile filename:string)
+</code></pre>
+<p>Evaluate file in the global environment.</p>
+<hr />
 <h4 id="apply">apply</h4>
 <pre><code class="language-nohighlight">(apply :procedure :list)
 </code></pre>
@@ -671,17 +717,11 @@ a
 6
 </code></pre>
 <hr />
-<h4 id="evalfile">evalfile</h4>
-<pre><code class="language-nohighlight">(evalfile filename:string)
-</code></pre>
-<p>Evaluate file in the global environment.</p>
-<hr />
 <h3 id="macro-definition">Macro Definition</h3>
 <h4 id="defmacro">defmacro</h4>
 <pre><code class="language-nohighlight">(defmacro name formals :expr ...)
 </code></pre>
-<p>jbscheme macros are “procedural”; they are simply lambdas which return
-code.</p>
+<p>jibi macros are “procedural”; they are simply lambdas which return code.</p>
 <p>The body of the macro is first evaluated in the macro’s lexical
 environment. Then the resulting expression is evaluated in the caller’s
 environment.</p>
@@ -742,9 +782,40 @@ handled #[error Exception &quot;oh no!&quot;]
 </code></pre>
 <p>Raises an exception if <code>predicate</code> is false.</p>
 <hr />
+<h3 id="environment-procedures">Environment Procedures</h3>
+<h4 id="env">env</h4>
+<pre><code class="language-nohighlight">(env)
+</code></pre>
+<p>Get the enclosing environment for the current scope.</p>
+<hr />
+<h3 id="env-lookup">env-lookup</h3>
+<pre><code class="language-nohighlight">(env-lookup :env :symbol)
+</code></pre>
+<p>Look up symbol in the given environment.</p>
+<hr />
+<h3 id="env-def">env-def</h3>
+<pre><code class="language-nohighlight">(env-def :env :symbol :expr)
+</code></pre>
+<p>Define symbol in the given environment.</p>
+<hr />
+<h3 id="env-set">env-set</h3>
+<pre><code class="language-nohighlight">(env-set! :env :symbol :expr)
+</code></pre>
+<p>Set symbol in the given environment.</p>
+<hr />
+<h4 id="env-parent">env-parent</h4>
+<pre><code class="language-nohighlight">(env-parent :env)
+</code></pre>
+<p>Get parent env, or nil if there is no parent env.</p>
+<hr />
+<h3 id="env-globals">env-globals</h3>
+<pre><code class="language-nohighlight">(env-globals)
+</code></pre>
+<p>Get the global environment.</p>
+<hr />
 <h3 id="system-procedures">System Procedures</h3>
-<h4 id="getenv">getenv</h4>
-<pre><code class="language-nohighlight">(getenv var:string)
+<h4 id="environment-variable">environment-variable</h4>
+<pre><code class="language-nohighlight">(environment-variable var:string)
 </code></pre>
 <p>Get value of environment variable. Raises exception if the variable is
 not set or contains non-UTF8 characters.</p>
@@ -823,5 +894,5 @@ not set or contains non-UTF8 characters.</p>
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-08-08 00:38:52.940916+00:00
+Build Date UTC : 2021-08-11 05:52:14.105932+00:00
 -->
