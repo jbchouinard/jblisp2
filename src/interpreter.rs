@@ -2,7 +2,6 @@ use std::path::Path;
 use std::rc::Rc;
 
 use crate::builtin::add_builtins;
-use crate::error::JError;
 use crate::state::JState;
 use crate::*;
 
@@ -45,7 +44,7 @@ impl Interpreter {
     /// Execute the `jbscheme` [prelude](PRELUDE), which defines common constants, procedures
     /// and macros.
     pub fn exec_prelude(&mut self) {
-        if let Err((pos, je)) = self.eval_str("#PRELUDE", PRELUDE) {
+        if let Err((pos, je, _)) = self.eval_str("#PRELUDE", PRELUDE) {
             eprintln!("{}: {}", pos, je);
             std::process::exit(1);
         }
@@ -53,7 +52,7 @@ impl Interpreter {
     pub fn eval_tokens(
         &mut self,
         tokens: Box<dyn TokenIter>,
-    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
+    ) -> Result<Option<JValRef>, JException> {
         self.state.eval_tokens(tokens, Rc::clone(&self.globals))
     }
 
@@ -62,21 +61,14 @@ impl Interpreter {
     ///
     /// * `name`: Name used to report errors in the program (e.g. filename, "stdin").
     /// * `program`: One or more `jbscheme` expressions.
-    pub fn eval_str(
-        &mut self,
-        name: &str,
-        program: &str,
-    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
+    pub fn eval_str(&mut self, name: &str, program: &str) -> Result<Option<JValRef>, JException> {
         self.state.eval_str(name, program, Rc::clone(&self.globals))
     }
     /// Evaluate a `jbscheme` script file, and return the value of the last expression
     /// or None if the file contains no expressions).
     //
     /// * `path`: Path to script file.
-    pub fn eval_file<P: AsRef<Path>>(
-        &mut self,
-        path: P,
-    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
+    pub fn eval_file<P: AsRef<Path>>(&mut self, path: P) -> Result<Option<JValRef>, JException> {
         self.state.eval_file(path, Rc::clone(&self.globals))
     }
     /// Evaluate a `jbscheme` expression.
@@ -95,6 +87,14 @@ impl Interpreter {
         let sexpr = self.state.jlist(sexpr);
         eval(sexpr, Rc::clone(&self.globals), &mut self.state)
     }
+    pub fn print_exc((pos, err, tb): JException) {
+        println!("Traceback:");
+        for tbf in tb {
+            eprintln!("  {}", tbf);
+        }
+        eprintln!("{}: Unhandled {}", pos, err)
+    }
+
     /// Create a global binding (variable definition).
     ///
     /// * `name`: Name to bind. It is possible to bind names which are not valid

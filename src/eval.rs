@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use crate::state::TbFrame;
 use crate::*;
 
 pub fn eval(expr: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -14,12 +15,20 @@ pub fn eval(expr: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
 fn apply(list: &JPair, env: JEnvRef, state: &mut JState) -> JResult {
     let func = eval(list.car(), Rc::clone(&env), state)?;
     let args = list.cdr();
-    match &*func {
+    let envclone = Rc::clone(&env);
+    let res = match &*func {
         JVal::Builtin(b) => apply_builtin(b, args, env, state),
         JVal::SpecialForm(b) => apply_special_form(b, args, env, state),
         JVal::Lambda(l) => apply_lambda(l, args, env, state),
         JVal::Macro(l) => apply_macro(l, args, env, state),
-        _ => Err(JError::new(TypeError, "expected a callable")),
+        _ => return Err(JError::new(TypeError, "expected a callable")),
+    };
+    match res {
+        Ok(val) => Ok(val),
+        Err(err) => {
+            state.traceback_push(TbFrame::from_any(func, envclone));
+            Err(err)
+        }
     }
 }
 

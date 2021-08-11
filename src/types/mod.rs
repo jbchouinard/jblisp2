@@ -171,6 +171,7 @@ pub struct JLambda {
     pub closure: JEnvRef,
     pub params: JParams,
     pub code: Vec<JValRef>,
+    pub defpos: Option<PositionTag>,
 }
 
 // Implement manually because of cyclical references from the closure's parent Envs

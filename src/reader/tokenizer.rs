@@ -3,7 +3,7 @@ use std::fmt;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-use crate::primitives::JTInt;
+use crate::types::JTInt;
 use crate::PositionTag;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -154,15 +154,12 @@ impl Tokenizer {
 
     pub fn tokenize(&mut self) -> Result<Vec<Token>, TokenError> {
         let mut tokens = vec![];
-        loop {
-            let next = self.next_token()?;
-            if next.value == TokenValue::Eof {
-                tokens.push(next);
-                break;
-            } else {
-                tokens.push(next);
-            }
+        let mut next = self.next_token()?;
+        while next.value != TokenValue::Eof {
+            tokens.push(next);
+            next = self.next_token()?;
         }
+        tokens.push(next);
         Ok(tokens)
     }
 }

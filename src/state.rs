@@ -1,13 +1,14 @@
 use std::collections::HashMap;
+use std::fmt;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use crate::error::JErrorKind;
-use crate::primitives::intern::Interned;
 use crate::reader::parser::Parser;
 use crate::reader::tokenizer::TokenIter;
 use crate::reader::tokenizer::Tokenizer;
 use crate::reader::PositionTag;
+use crate::types::intern::Interned;
 use crate::*;
 
 const STR_INTERN_MAX_LEN: usize = 1024;
@@ -29,6 +30,58 @@ fn make_str(s: String) -> JValRef {
     JVal::String(s).into_ref()
 }
 
+#[derive(Clone, Debug)]
+pub struct TbFrame {
+    pos: Option<PositionTag>,
+    env: JEnvRef,
+    proc: JValRef,
+}
+
+impl TbFrame {
+    pub fn from_lambda(val: JValRef) -> Option<Self> {
+        let (pos, env, proc) = match &*val {
+            JVal::Lambda(l) => (l.defpos.clone(), Rc::clone(&l.closure), Rc::clone(&val)),
+            JVal::Macro(l) => (l.defpos.clone(), Rc::clone(&l.closure), Rc::clone(&val)),
+            _ => return None,
+        };
+        Some(Self { pos, env, proc })
+    }
+    pub fn from_builtin(val: JValRef, env: JEnvRef) -> Option<Self> {
+        let proc = match &*val {
+            JVal::Builtin(_) => val,
+            JVal::SpecialForm(_) => val,
+            _ => return None,
+        };
+        Some(Self {
+            pos: None,
+            proc,
+            env,
+        })
+    }
+    pub fn from_any(val: JValRef, env: JEnvRef) -> Option<Self> {
+        match &*val {
+            JVal::Lambda(_) => Self::from_lambda(val),
+            JVal::Macro(_) => Self::from_lambda(val),
+            JVal::Builtin(_) => Self::from_builtin(val, env),
+            JVal::SpecialForm(_) => Self::from_builtin(val, env),
+            _ => None,
+        }
+    }
+}
+
+impl fmt::Display for TbFrame {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        match &self.pos {
+            Some(pos) => write!(
+                f,
+                "File \"{}\", line {}, in {}",
+                pos.filename, pos.lineno, self.proc
+            ),
+            None => write!(f, "In {}", self.proc),
+        }
+    }
+}
+
 pub struct JState {
     const_nil: JValRef,
     const_true: JValRef,
@@ -37,7 +90,7 @@ pub struct JState {
     interned_sym: Interned<String>,
     interned_str: Interned<String>,
     pos: PositionTag,
-    traceback: Vec<PositionTag>,
+    traceback: Vec<TbFrame>,
     modules: HashMap<PathBuf, JEnvRef>,
 }
 
@@ -64,13 +117,15 @@ impl JState {
             self.pos = pos.clone();
         }
     }
-    pub fn traceback_push(&mut self, pt: &PositionTag) {
-        self.traceback.push(pt.clone())
+    pub fn traceback_push(&mut self, tf: Option<TbFrame>) {
+        if let Some(tf) = tf {
+            self.traceback.push(tf)
+        }
     }
-    pub fn traceback_take(&mut self) -> Vec<PositionTag> {
+    pub fn traceback_take(&mut self) -> Vec<TbFrame> {
         std::mem::take(&mut self.traceback)
     }
-    pub fn traceback(&self) -> &[PositionTag] {
+    pub fn traceback(&self) -> &[TbFrame] {
         &self.traceback
     }
 
@@ -83,7 +138,7 @@ impl JState {
             return Ok(JVal::Env(Rc::clone(self.modules.get(&path).unwrap())).into_ref());
         }
         let modenv = JEnv::new(Some(Rc::clone(&env))).into_ref();
-        if let Err((pos, err)) = self.eval_file(path, Rc::clone(&modenv)) {
+        if let Err((pos, err, _)) = self.eval_file(path, Rc::clone(&modenv)) {
             return Err(JError::new(EvalError, &format!("{}: {}", pos, err)));
         };
         Ok(JVal::Env(modenv).into_ref())
@@ -93,17 +148,17 @@ impl JState {
         &mut self,
         tokeniter: Box<dyn TokenIter>,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TbFrame>)> {
         let forms = match Parser::new(tokeniter, self).parse_forms() {
             Ok(forms) => forms,
-            Err(pe) => return Err((pe.pos.clone(), pe.into())),
+            Err(pe) => return Err((pe.pos.clone(), pe.into(), self.traceback_take())),
         };
         let mut last_eval = None;
         for (pos, expr) in forms {
             self.update_pos(Some(&pos));
             last_eval = match eval(expr, Rc::clone(&env), self) {
                 Ok(val) => Some(val),
-                Err(je) => return Err((self.pos.clone(), je)),
+                Err(je) => return Err((self.pos.clone(), je, self.traceback_take())),
             }
         }
         Ok(last_eval)
@@ -113,7 +168,7 @@ impl JState {
         name: &str,
         program: &str,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TbFrame>)> {
         let tokeniter = Box::new(Tokenizer::new(name.to_string(), program.to_string()));
         self.eval_tokens(tokeniter, env)
     }
@@ -121,7 +176,7 @@ impl JState {
         &mut self,
         path: P,
         env: JEnvRef,
-    ) -> Result<Option<JValRef>, (PositionTag, JError)> {
+    ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TbFrame>)> {
         let path = path.as_ref();
         let text = match std::fs::read_to_string(path) {
             Ok(text) => text,
@@ -129,6 +184,7 @@ impl JState {
                 return Err((
                     PositionTag::new("", 0, 0),
                     JError::new(JErrorKind::OsError, &format!("{}", e)),
+                    self.traceback_take(),
                 ))
             }
         };
@@ -185,6 +241,7 @@ impl JState {
             closure: clos,
             params: JParams::new(params)?,
             code,
+            defpos: Some(self.pos.clone()),
         }))
         .into_ref())
     }
@@ -193,6 +250,7 @@ impl JState {
             closure: clos,
             params: JParams::new(params)?,
             code,
+            defpos: Some(self.pos.clone()),
         }))
         .into_ref())
     }

@@ -40,7 +40,6 @@ make install
 ```
 
 ## Roadmap
-- Tracebacks
 - More builtin functions
 - Tail call optimization
 - More tests

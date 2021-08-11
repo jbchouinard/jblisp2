@@ -126,7 +126,7 @@ fn jbuiltin_evalfile(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult
     match state.eval_file(file, env) {
         Ok(Some(val)) => Ok(val),
         Ok(None) => Ok(state.jnil()),
-        Err((pos, je)) => Err(JError::new(EvalError, &format!("{}: {}", pos, je))),
+        Err((pos, je, _)) => Err(JError::new(EvalError, &format!("{}: {}", pos, je))),
     }
 }
 

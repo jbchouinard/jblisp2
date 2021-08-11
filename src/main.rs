@@ -59,8 +59,8 @@ fn run(files: Vec<PathBuf>, interactive: bool) {
     let mut interpreter = Interpreter::default();
 
     for file in &files {
-        if let Err((pos, e)) = interpreter.eval_file(&file) {
-            eprintln!("{}: {}", pos, e);
+        if let Err(exc) = interpreter.eval_file(&file) {
+            Interpreter::print_exc(exc);
             std::process::exit(1);
         }
     }
@@ -80,7 +80,7 @@ fn repl(mut interpreter: Interpreter) {
             Ok(tokens) => match interpreter.eval_tokens(Box::new(tokens.into_iter())) {
                 Ok(Some(val)) => println!("{}", val),
                 Ok(None) => (),
-                Err((pos, err)) => eprintln!("{}: Unhandled {}", pos, err),
+                Err(exc) => Interpreter::print_exc(exc),
             },
             Err(e) => eprintln!("{}", e),
         }

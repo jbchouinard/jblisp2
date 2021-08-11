@@ -42,7 +42,7 @@
 //! match interpreter.eval_str("hello.rs", r#"(print "Hello World!")"#) {
 //!     Ok(Some(jval)) => println!("{}", jval),
 //!     Ok(None) => (),
-//!     Err((pos, err)) => eprintln!("{}: {}", pos, err),
+//!     Err(exc) => Interpreter::print_exc(exc),
 //! };
 //! ```
 mod builtin;
@@ -50,21 +50,23 @@ mod env;
 mod error;
 mod eval;
 mod interpreter;
-mod primitives;
 mod reader;
 mod repr;
 mod state;
+mod types;
 
 use eval::eval;
-use primitives::*;
 use repr::repr;
+use types::*;
 
 // Exports
 pub use env::{JEnv, JEnvRef};
 pub use error::{JError, JErrorKind, JErrorKind::*, JResult};
 pub use interpreter::{Interpreter, PRELUDE};
-pub use primitives::{JPair, JVal, JValRef};
 pub use reader::parser::Parser;
 pub use reader::tokenizer::{Token, TokenError, TokenIter, TokenValidator, TokenValue, Tokenizer};
 pub use reader::PositionTag;
-pub use state::JState;
+pub use state::{JState, TbFrame};
+pub use types::{JPair, JVal, JValRef};
+
+pub type JException = (PositionTag, JError, Vec<TbFrame>);
