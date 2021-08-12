@@ -2,7 +2,7 @@ ifeq ($(PREFIX),)
 	PREFIX := /usr/local
 endif
 
-all: build mkdocs/site MANUAL.md
+all: build MANUAL.md gh-pages
 
 build:
 	cargo build --release

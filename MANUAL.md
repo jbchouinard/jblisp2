@@ -1,6 +1,6 @@
 # Jibi Scheme
 
-**version 0.1.1**
+**version 0.1.2**
 
 A homebrew interpreted, non-RnRS compliant dialect of Scheme.
 
@@ -491,7 +491,7 @@ Applies `f` to each value in a list and accumulate results in `init`.
 
 ------------------------------------------------------------------------
 
-### range
+#### range
 
 ``` nohighlight
 (range from:integer to:integer)

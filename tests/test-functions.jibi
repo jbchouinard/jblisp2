@@ -1,0 +1,30 @@
+(import-from "stl/unittest"
+    test
+    test-suite
+    assert-equal
+)
+
+(test-suite "functions"
+    (defn varia-car (x . xs) x)
+
+    (defn varia-cdr (x . xs) xs)
+
+    (defn varia-list (. xs) xs)
+
+    (test "variadic parameters 1"
+        (assert-equal (varia-car 1 2 3) 1))
+
+    (test "variadic parameters 2"
+        (assert-equal (varia-cdr 1 2 3) (list 2 3)))
+
+    (test "variadic parameters 3"
+        (assert-equal (varia-cdr 1) ()))
+
+    (test "variadic parameters 4"
+        (assert-equal (varia-list 1 2 3) (list 1 2 3)))
+
+    (defn varia-let () (let x 12 "no-bueno" x))
+
+    (test "variadic let"
+        (assert-equal (varia-let) 12))
+)

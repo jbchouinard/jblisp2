@@ -3,3 +3,19 @@
 (defn product (lst) (apply * lst))
 
 (defn factorial (n) (fold * 1 (range 1 (+ n 1))))
+
+(defn remainder (x y)
+    (- x (* y (/ x y))))
+
+(defn even? (x)
+    (equal? 0 (remainder x 2)))
+
+(defn odd? (x)
+    (not (even? x)))
+
+(defn pow (x y)
+    (if (equal? y 0)
+        1
+        (if (even? y)
+            (pow (* x x) (/ y 2))
+            (* x (pow x (- y 1))))))

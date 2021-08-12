@@ -1,0 +1,13 @@
+(import-from "stl/unittest"
+    test
+    test-suite
+    assert-equal
+)
+
+(test-suite "eval"
+    (test "eval a quoted sexpr" 
+        (assert (eval (quote (eq? nil nil)))))
+
+    (test "apply"
+        (assert-equal 6 (apply + (list 1 2 3))))
+)

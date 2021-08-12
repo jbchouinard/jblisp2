@@ -1,0 +1,28 @@
+(import "stl/decimal" as decimal)
+(import-from "stl/unittest"
+    test
+    test-suite
+    assert-equal
+)
+
+; 100.55
+(def d1 (decimal::new 10055 2))
+; 0.042
+(def d2 (decimal::new 42 3))
+
+(test-suite "stl/decimal"
+    (test "value"
+        (assert-equal 10055 (decimal::value d1)))
+
+    (test "precision"
+        (assert-equal 2 (decimal::precision d1)))
+
+    (test "whole"
+        (assert-equal 100 (decimal::whole d1)))
+
+    (test "truncate"
+        (assert-equal (decimal::new 1005 1) (decimal::truncate d1 1)))
+
+    (test "expand"
+        (assert-equal (decimal::new 1005500 4) (decimal::expand d1 4)))
+)

@@ -41,8 +41,9 @@ make install
 ```
 
 ## Todo?
+- Builtins: lets, or, and, cond, <
+- STL/Decimal
 - JIBI_PATH for imports
-- Builtins: lets, or, and, cond
 - Reader macro definition
 - Specific error catch
 - Numeric data types: float, complex, arbitrary precision int

@@ -1,0 +1,14 @@
+(import-from "stl/unittest"
+    test
+    test-suite
+    assert-equal
+    assert-type
+)
+
+(test-suite "strings"
+    (test "string concat"
+        (assert-equal "foobar" (concat "foo" "bar")))
+
+    (test "string is string" 
+        (assert-type "foo" string))
+)

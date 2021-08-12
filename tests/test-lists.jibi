@@ -1,0 +1,30 @@
+(import-from "stl/unittest" 
+    test
+    test-suite
+    assert-not
+    assert-equal
+)
+
+(test-suite "lists"
+    (test "list is pair"
+        (assert (pair? (list 1 2 3))))
+
+    (test "pair is pair"
+        (assert (pair? (cons 1 2))))
+
+    (test "list is list"
+        (assert (list? (list 1 2 3))))
+
+    (test "pair is not list"
+        (assert-not (list? (cons 1 2))))
+
+    (test "map"
+        (assert-equal
+            (list 2 4 6)
+            (map (fn (x) (* 2 x)) (list 1 2 3))))
+
+    (test "fold"
+        (assert-equal
+            (list 4 3 2 1)
+            (fold cons () (list 1 2 3 4))))
+)

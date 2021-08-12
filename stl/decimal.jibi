@@ -1,0 +1,31 @@
+(import "stl/math" as math)
+
+(defn new (value precision)
+    (assert (integer? value))
+    (assert (integer? precision))
+    (cons 'decimal (cons value precision)))
+
+(defn value (dec)
+    (assert (eq? 'decimal (car dec)))
+    (car (cdr dec)))
+
+(defn precision (dec)
+    (assert (eq? 'decimal (car dec)))
+    (cdr (cdr dec)))
+
+(defn whole (dec)
+    (value (truncate dec 0)))
+
+(defn truncate (dec to-precision)
+    (new
+        (/
+            (value dec)
+            (math::pow 10 (- (precision dec) to-precision)))
+        to-precision))
+
+(defn expand (dec to-precision)
+    (new
+        (*
+            (value dec)
+            (math::pow 10 (- to-precision (precision dec))))
+        to-precision))
