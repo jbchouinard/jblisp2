@@ -4,7 +4,7 @@
     assert-equal
 )
 
-(test-suite "eval"
+(test-suite "lang/eval"
     (test "eval a quoted sexpr" 
         (assert (eval (quote (eq? nil nil)))))
 

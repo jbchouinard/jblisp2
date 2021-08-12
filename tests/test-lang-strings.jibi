@@ -5,7 +5,7 @@
     assert-type
 )
 
-(test-suite "strings"
+(test-suite "lang/strings"
     (test "string concat"
         (assert-equal "foobar" (concat "foo" "bar")))
 

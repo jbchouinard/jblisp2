@@ -1,0 +1,42 @@
+(import "stl/math" as math)
+(import-from "stl/unittest"
+    test
+    test-suite
+    assert-equal
+    assert-not
+)
+
+(defn test= (name x y)
+    (test name (assert-equal x y)))
+
+(test-suite "stl/math"
+    (test= "sign zero" 0 (math::sign 0))
+
+    (test= "sign pos" 1 (math::sign 12))
+
+    (test= "sign neg" -1 (math::sign -44))
+
+    (test= "abs +" 100 (math::abs 100))
+
+    (test= "abs -" 100 (math::abs -100))
+
+    (test= "sum" 1234 (math::sum (list 1000 200 30 4)))
+
+    (test= "product" (* 1 2 3 4 5) (math::product (list 1 2 3 4 5)))
+
+    (test= "factorial" (* 1 2 3 4 5) (math::factorial 5))
+
+    (test= "remainder" 7 (math::remainder 47 10))
+
+    (test= "remainer" 3 (math::remainder 43 -5))
+
+    (test "even?" (assert (math::even? 1006)))
+
+    (test "not even?" (assert-not (math::even? 1009)))
+
+    (test "odd?" (assert (math::odd? 3)))
+
+    (test "not odd?" (assert-not (math::odd? 2)))
+
+    (test "pow" (assert-equal 1024 (math::pow 2 10)))
+)

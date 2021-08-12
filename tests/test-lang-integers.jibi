@@ -1,0 +1,36 @@
+(import-from "stl/unittest"
+    test
+    test-suite
+    assert-equal
+)
+
+(defn test= (name x y)
+    (test name (assert-equal x y)))
+
+(test-suite "lang/integers"
+    (test= "int-int addition 0" 0 (+))
+
+    (test= "int-int addition 1" 12 (+ 12))
+
+    (test= "int-int addition 2" 39 (+ 12 27))
+
+    (test= "int-int multiplication 0" 1 (*))
+
+    (test= "int-int multiplication 1" 10 (* 10))
+
+    (test= "int-int multiplication 2" 670 (* 10 67))
+
+    (test= "int-int substraction 1" -10 (- 10))
+
+    (test= "int-int substraction 2" -5 (- 10 15))
+
+    (test= "int-int substraction 3" 50 (- 100 20 30))
+
+    (test= "int-int less than" true (< 5 10))
+
+    (test= "int-int not less than" false (< 10 5))
+
+    (test= "int-int greater than" true (> 10 5))
+
+    (test= "int-int not greater than" false (> 5 10))
+)

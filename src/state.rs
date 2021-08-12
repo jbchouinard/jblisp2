@@ -197,21 +197,35 @@ impl JState {
     pub fn error(&self, kind: JErrorKind, reason: &str) -> JValRef {
         JVal::Error(JError::new(kind, reason)).into_ref()
     }
-    pub fn lambda(&mut self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
+    pub fn lambda(
+        &mut self,
+        clos: JEnvRef,
+        params: Vec<String>,
+        code: Vec<JValRef>,
+        name: Option<String>,
+    ) -> JResult {
         Ok(JVal::Lambda(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
             code,
             defpos: Some(self.pos.clone()),
+            name,
         }))
         .into_ref())
     }
-    pub fn procmacro(&mut self, clos: JEnvRef, params: Vec<String>, code: Vec<JValRef>) -> JResult {
+    pub fn procmacro(
+        &mut self,
+        clos: JEnvRef,
+        params: Vec<String>,
+        code: Vec<JValRef>,
+        name: Option<String>,
+    ) -> JResult {
         Ok(JVal::ProcMacro(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
             code,
             defpos: Some(self.pos.clone()),
+            name,
         }))
         .into_ref())
     }

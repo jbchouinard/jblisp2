@@ -5,7 +5,22 @@
     assert-equal
 )
 
-(test-suite "lists"
+(test-suite "lang/lists"
+    (test "cons list"
+        (assert-equal (cons 1 (cons 2 (cons 3 ()))) (list 1 2 3)))
+
+    (test "lcons"
+        (assert-equal (list 1 2 3 4) (lcons 1 2 (list 3 4))))
+
+    (test "nth 0"
+        (assert-equal 0 (nth 0 (list 0 1 2 3 4))))
+
+    (test "nth 1"
+        (assert-equal 1 (nth 1 (list 0 1 2 3 4))))
+
+    (test "nth 4"
+        (assert-equal 4 (nth 4 (list 0 1 2 3 4))))
+
     (test "list is pair"
         (assert (pair? (list 1 2 3))))
 

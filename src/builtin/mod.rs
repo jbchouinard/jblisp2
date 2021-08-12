@@ -39,6 +39,20 @@ fn jbuiltin_not(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     Ok(state.bool(!x))
 }
 
+fn jbuiltin_and(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [x, y] = get_n_args(args)?;
+    let x = x.to_bool()?;
+    let y = y.to_bool()?;
+    Ok(state.bool(x && y))
+}
+
+fn jbuiltin_or(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [x, y] = get_n_args(args)?;
+    let x = x.to_bool()?;
+    let y = y.to_bool()?;
+    Ok(state.bool(x || y))
+}
+
 fn jbuiltin_print(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [s] = get_n_args(args)?;
     let s = s.to_str()?;
@@ -73,7 +87,17 @@ fn jspecial_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     for val in pvals.iter_list()? {
         params.push(val.to_symbol()?.to_owned())
     }
-    state.lambda(env, params, exprs)
+    state.lambda(env, params, exprs, None)
+}
+
+fn jspecial_named_lambda(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
+    let ([name, pvals], exprs) = get_n_plus_args(args)?;
+    let name = name.to_str()?;
+    let mut params = vec![];
+    for val in pvals.iter_list()? {
+        params.push(val.to_symbol()?.to_owned())
+    }
+    state.lambda(env, params, exprs, Some(name.to_string()))
 }
 
 fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -82,17 +106,41 @@ fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     for val in pvals.iter_list()? {
         params.push(val.to_symbol()?.to_owned())
     }
-    state.procmacro(env, params, exprs)
+    state.procmacro(env, params, exprs, None)
 }
 
-fn jspecial_if(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
-    let [pred, thencode, elsecode] = get_n_args(args)?;
-    let pred = eval(pred, Rc::clone(&env), state)?.to_bool()?;
-    if pred {
-        eval(thencode, env, state)
-    } else {
-        eval(elsecode, env, state)
+fn jspecial_named_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
+    let ([name, pvals], exprs) = get_n_plus_args(args)?;
+    let name = name.to_str()?;
+    let mut params = vec![];
+    for val in pvals.iter_list()? {
+        params.push(val.to_symbol()?.to_owned())
     }
+    state.procmacro(env, params, exprs, Some(name.to_string()))
+}
+
+fn jspecial_cond(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
+    let ([], clauses) = get_n_plus_args(args)?;
+    let mut conds: Vec<(JValRef, Vec<JValRef>)> = vec![];
+    // Parse all clauses first to error out immediately if the cond form is ill-formed
+    for clause in clauses {
+        let clause = clause.to_pair()?;
+        let pred = clause.car();
+        let exprs: Vec<JValRef> = clause.cdr().iter_list()?.collect();
+        conds.push((pred, exprs));
+    }
+    for (pred, exprs) in conds {
+        let pred = eval(pred, Rc::clone(&env), state)?.to_bool()?;
+        if pred {
+            let mut last_res = state.nil();
+            for expr in exprs {
+                last_res = eval(expr, Rc::clone(&env), state)?;
+            }
+            return Ok(last_res);
+        }
+    }
+    // In case there are zero clauses
+    Ok(state.nil())
 }
 
 fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
@@ -170,7 +218,7 @@ where
 pub fn add_builtins(env: &JEnv, state: &mut JState) {
     // Program flow
     add_builtin("begin", jbuiltin_begin, env, state);
-    add_special_form("if", jspecial_if, env, state);
+    add_special_form("cond", jspecial_cond, env, state);
 
     // Comparison
     add_builtin("eq?", jbuiltin_eq, env, state);
@@ -193,9 +241,15 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("-", jbuiltin_sub, env, state);
     add_builtin("*", jbuiltin_mul, env, state);
     add_builtin("/", jbuiltin_div, env, state);
+    add_builtin("<", jbuiltin_lt, env, state);
+    add_builtin("<=", jbuiltin_lte, env, state);
+    add_builtin(">", jbuiltin_gt, env, state);
+    add_builtin(">=", jbuiltin_gte, env, state);
 
     // Logical operators
     add_builtin("not", jbuiltin_not, env, state);
+    add_builtin("or", jbuiltin_or, env, state);
+    add_builtin("and", jbuiltin_and, env, state);
 
     // List
     add_builtin("list", jbuiltin_list, env, state);
@@ -211,6 +265,7 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_special_form("def", jspecial_def, env, state);
     add_special_form("set!", jspecial_set, env, state);
     add_special_form("fn", jspecial_lambda, env, state);
+    add_special_form("nfn", jspecial_named_lambda, env, state);
 
     // Exceptions
     add_builtin("error", jbuiltin_error, env, state);
@@ -226,6 +281,7 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("evalfile", jbuiltin_evalfile, env, state);
     add_special_form("quote", jspecial_quote, env, state);
     add_special_form("macro", jspecial_macro, env, state);
+    add_special_form("nmacro", jspecial_named_macro, env, state);
 
     // Env
     add_builtin("env", jbuiltin_env, env, state);
@@ -235,6 +291,6 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("env-parent", jbuiltin_env_parent, env, state);
 
     // Sys
-    add_builtin("environment-variable", jbuiltin_get_env_var, env, state);
+    add_builtin("getenv", jbuiltin_get_env_var, env, state);
     add_builtin("exit", jbuiltin_exit, env, state);
 }

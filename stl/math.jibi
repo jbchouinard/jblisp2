@@ -1,3 +1,10 @@
+(defn sign (x) (cond
+    ((> x 0) 1)
+    ((< x 0) -1)
+    (else 0)))
+
+(defn abs (x) (* x (sign x)))
+
 (defn sum (lst) (apply + lst))
 
 (defn product (lst) (apply * lst))
@@ -14,8 +21,7 @@
     (not (even? x)))
 
 (defn pow (x y)
-    (if (equal? y 0)
-        1
-        (if (even? y)
-            (pow (* x x) (/ y 2))
-            (* x (pow x (- y 1))))))
+    (cond
+        ((equal? y 0) 1)
+        ((even? y) (pow (* x x) (/ y 2)))
+        (true (* x (pow x (- y 1))))))

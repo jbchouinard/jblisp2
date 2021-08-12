@@ -4,40 +4,58 @@ use std::rc::Rc;
 use crate::*;
 
 #[derive(Clone, Debug)]
+pub enum JCallable {
+    Lambda(String, JLambda),
+    Builtin(String, JBuiltin),
+}
+
+impl JCallable {
+    pub fn from_jval(val: JValRef) -> Option<Self> {
+        match &*val {
+            JVal::Lambda(l) => Some(Self::Lambda("lambda".to_string(), l.as_ref().clone())),
+            JVal::ProcMacro(l) => Some(Self::Lambda("macro".to_string(), l.as_ref().clone())),
+            JVal::Builtin(b) => Some(Self::Builtin("builtin".to_string(), b.clone())),
+            JVal::SpecialForm(b) => Some(Self::Builtin("specialform".to_string(), b.clone())),
+            _ => None,
+        }
+    }
+}
+
+impl fmt::Display for JCallable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Lambda(t, l) => match &l.name {
+                Some(name) => write!(f, "{} {}", t, name),
+                None => write!(f, "unnamed {}", t),
+            },
+            Self::Builtin(t, b) => write!(f, "{} {}", t, b.name),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct TracebackFrame {
     pos: Option<PositionTag>,
     env: JEnvRef,
-    proc: JValRef,
+    proc: JCallable,
 }
 
 impl TracebackFrame {
-    pub fn from_lambda(val: JValRef) -> Option<Self> {
-        let (pos, env, proc) = match &*val {
-            JVal::Lambda(l) => (l.defpos.clone(), Rc::clone(&l.closure), Rc::clone(&val)),
-            JVal::ProcMacro(l) => (l.defpos.clone(), Rc::clone(&l.closure), Rc::clone(&val)),
-            _ => return None,
-        };
-        Some(Self { pos, env, proc })
-    }
-    pub fn from_builtin(val: JValRef, env: JEnvRef) -> Option<Self> {
-        let proc = match &*val {
-            JVal::Builtin(_) => val,
-            JVal::SpecialForm(_) => val,
-            _ => return None,
-        };
-        Some(Self {
-            pos: None,
-            proc,
-            env,
-        })
-    }
-    pub fn from_any(val: JValRef, env: JEnvRef) -> Option<Self> {
-        match &*val {
-            JVal::Lambda(_) => Self::from_lambda(val),
-            JVal::ProcMacro(_) => Self::from_lambda(val),
-            JVal::Builtin(_) => Self::from_builtin(val, env),
-            JVal::SpecialForm(_) => Self::from_builtin(val, env),
-            _ => None,
+    pub fn from_jval(val: JValRef, env: JEnvRef) -> Option<Self> {
+        use JCallable::*;
+        let proc = JCallable::from_jval(val);
+        match proc {
+            Some(Lambda(_, ref l)) => Some(Self {
+                pos: l.defpos.clone(),
+                env: Rc::clone(&l.closure),
+                proc: proc.unwrap(),
+            }),
+            Some(Builtin(_, _)) => Some(Self {
+                pos: None,
+                env: Rc::clone(&env),
+                proc: proc.unwrap(),
+            }),
+            None => None,
         }
     }
 }

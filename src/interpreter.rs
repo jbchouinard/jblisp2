@@ -160,11 +160,13 @@ impl Interpreter {
     }
     /// Construct a `jibi` `lambda`.
     pub fn lambda(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
-        self.state.lambda(Rc::clone(&self.globals), params, body)
+        self.state
+            .lambda(Rc::clone(&self.globals), params, body, None)
     }
     /// Construct a `jibi` `procmacro`.
     pub fn procmacro(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
-        self.state.procmacro(Rc::clone(&self.globals), params, body)
+        self.state
+            .procmacro(Rc::clone(&self.globals), params, body, None)
     }
     /// Define a `jibi` builtin procedure.
     pub fn builtin<F>(&mut self, name: String, f: F) -> JValRef

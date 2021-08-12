@@ -1,0 +1,56 @@
+(import-from "stl/unittest"
+    test
+    test-suite
+    assert-raise
+    assert-equal
+    assert-eq
+)
+
+(test-suite "lang/base"
+    (test "asserting false things raises"
+        (assert-raise (assert false)))
+
+    (test "not true is false"
+        (assert-equal true (not false)))
+
+    (test "nil is nil"
+        (assert-eq () (list)))
+
+    (test "true is true"
+        (assert-eq (not false) (not false)))
+
+    (test "cond 1"
+        (assert-eq 0 (cond
+            (true 0)
+            (false 1)
+            (else 2))))
+
+    (test "cond 2"
+        (assert-eq 1 (cond
+            (false 0)
+            (true 1)
+            (else 2))))
+
+    (test "cond else"
+        (assert-eq 2 (cond
+            (false 0)
+            (false 1)
+            (else 2))))
+
+    (test "cond short-circuit"
+        (cond
+            (false (assert false))
+            (else nil)))
+
+    (test "if then"
+        (assert-eq 0 (if true 0 1)))
+
+    (test "if else"
+        (assert-eq 1 (if false 0 1)))
+
+    (test "if then short-circuit"
+        (if true nil (assert false)))
+
+    (test "if else short-circuit"
+        (if false (assert false) nil))
+)

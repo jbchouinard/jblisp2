@@ -1,4 +1,4 @@
-use crate::builtin::get_n_plus_args;
+use crate::builtin::{get_n_args, get_n_plus_args};
 use crate::*;
 
 pub fn jbuiltin_add(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
@@ -41,4 +41,32 @@ pub fn jbuiltin_div(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult
         }
         Ok(state.int(acc))
     }
+}
+
+pub fn jbuiltin_lt(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [x, y] = get_n_args(args)?;
+    let x = x.to_int()?;
+    let y = y.to_int()?;
+    Ok(state.bool(x < y))
+}
+
+pub fn jbuiltin_lte(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [x, y] = get_n_args(args)?;
+    let x = x.to_int()?;
+    let y = y.to_int()?;
+    Ok(state.bool(x <= y))
+}
+
+pub fn jbuiltin_gt(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [x, y] = get_n_args(args)?;
+    let x = x.to_int()?;
+    let y = y.to_int()?;
+    Ok(state.bool(x > y))
+}
+
+pub fn jbuiltin_gte(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [x, y] = get_n_args(args)?;
+    let x = x.to_int()?;
+    let y = y.to_int()?;
+    Ok(state.bool(x >= y))
 }

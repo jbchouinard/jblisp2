@@ -86,7 +86,7 @@ impl JBuiltin {
 
 impl fmt::Display for JBuiltin {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "builtin {} \"{}\"", self.id, &self.name)
+        write!(f, "builtin<{}> \"{}\"", self.id, &self.name)
     }
 }
 
@@ -143,7 +143,13 @@ impl JParams {
             None => Self::Fixed(names),
         })
     }
-    fn nargs(&self) -> String {
+    fn nargs_short(&self) -> String {
+        match self {
+            Self::Variadic(params, _) => format!("{}+", params.len()),
+            Self::Fixed(params) => format!("{}", params.len()),
+        }
+    }
+    fn nargs_long(&self) -> String {
         match self {
             Self::Variadic(params, _) => format!("at least {}", params.len()),
             Self::Fixed(params) => format!("{}", params.len()),
@@ -159,7 +165,7 @@ impl JParams {
             let pair: &JPair = head.to_pair().map_err(|_| {
                 JError::new(
                     ApplyError,
-                    &format!("expected {} argument(s)", self.nargs()),
+                    &format!("expected {} argument(s)", self.nargs_long()),
                 )
             })?;
             env.define(p, pair.car());
@@ -172,7 +178,7 @@ impl JParams {
                 _ => {
                     return Err(JError::new(
                         ApplyError,
-                        &format!("expected {} argument(s)", self.nargs()),
+                        &format!("expected {} argument(s)", self.nargs_long()),
                     ))
                 }
             },
@@ -187,12 +193,22 @@ pub struct JLambda {
     pub params: JParams,
     pub code: Vec<JValRef>,
     pub defpos: Option<PositionTag>,
+    pub name: Option<String>,
+}
+
+impl fmt::Display for JLambda {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.name {
+            Some(name) => write!(f, "({}) \"{}\"", self.params.nargs_short(), name),
+            None => write!(f, "({})", self.params.nargs_short()),
+        }
+    }
 }
 
 // Implement manually because of cyclical references from the closure's parent Envs
 // back to the JVal
 impl fmt::Debug for JLambda {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("JLambda")
             .field("closure", &format_args!("<JEnvRef {:p}>", &self.closure))
             .field("params", &self.params)

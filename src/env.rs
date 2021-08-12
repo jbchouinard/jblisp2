@@ -75,7 +75,7 @@ impl PartialEq for JEnv {
 
 impl fmt::Display for JEnv {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "#[env {}]", self.id)
+        write!(f, "#[env<{}>]", self.id)
     }
 }
 

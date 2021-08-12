@@ -5,19 +5,17 @@
     assert-equal
 )
 
-(test-suite "functions"
+(test-suite "lang/bindings"
     (test "let bindings"
         (assert-equal 110
-            (let x 100
-            (let y 10
-                (+ x y)))))
+            (let ((x 100) (y 10))
+                (+ x y))))
 
     (test "set! unbound raises error"
         (assert-raise (set! unbound)))
 
+    (def x 10)
     (test "set! changes local binding"
-        (assert-equal 7 (
-            let x 0
-                (set! x 7)
-                x)))
+        (let ((x 0)) (set! x 7))
+        (assert-equal 10 x))
 )

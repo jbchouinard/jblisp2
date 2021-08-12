@@ -4,7 +4,7 @@
     assert-equal
 )
 
-(test-suite "functions"
+(test-suite "lang/functions"
     (defn varia-car (x . xs) x)
 
     (defn varia-cdr (x . xs) xs)
@@ -23,7 +23,7 @@
     (test "variadic parameters 4"
         (assert-equal (varia-list 1 2 3) (list 1 2 3)))
 
-    (defn varia-let () (let x 12 "no-bueno" x))
+    (defn varia-let () (let ((x 12)) "no-bueno" x))
 
     (test "variadic let"
         (assert-equal (varia-let) 12))

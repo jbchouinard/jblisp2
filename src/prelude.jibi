@@ -1,13 +1,14 @@
 (def nil ())
 (def true (eq? nil nil))
 (def false (not true))
+(def else true)
 
 (def defmacro
     (macro (name params . exprs)
-        (list def name (cons macro (cons params exprs)))))
+        (list def name (cons nmacro (cons (repr name) (cons params exprs))))))
 
 (defmacro defn (name params . exprs)
-    (list def name (cons fn (cons params exprs))))
+    (list def name (cons nfn (cons (repr name) (cons params exprs)))))
 
 (defmacro type? (val t) (list equal? (list type val) (list quote t)))
 
@@ -27,6 +28,16 @@
 
 (def empty? nil?)
 
+(defn nth (idx lst)
+    (if (<= idx 0)
+        (car lst)
+        (nth (- idx 1) (cdr lst))))
+
+(defn lcons (. items)
+    (if (nil? (cdr items))
+        (car items)
+        (cons (car items) (apply lcons (cdr items)))))
+
 (defn display (x)
     (print (repr x)))
 
@@ -39,10 +50,21 @@
 (defmacro deferror (name)
     (list defn name (list 'reason) (list error (list quote name) 'reason)))
 
-(defn apply (op args) (eval (cons op args)))
+(defn apply (op args)
+    ((macro ()
+        (cons op (map (fn (arg) (list quote arg)) args)))))
 
-(defmacro let (sym val . exprs)
-    (list (list fn (list sym) (cons begin exprs)) val))
+(defmacro let (bindings . exprs)
+    (if (empty? bindings)
+        (list (lcons fn () exprs))
+        (list
+            (list fn
+                (list (nth 0 (car bindings)))
+                (lcons let (cdr bindings) exprs))
+            (nth 1 (car bindings)))))
+
+(defmacro if (pred then-clause else-clause) ()
+    (list cond (list pred then-clause) (list else else-clause)))
 
 (defn map (f lst)
     (if (nil? lst)
@@ -58,14 +80,14 @@
 
 (defn range (start end)
     (defn range-rec (n)
-        (if (eq? 0 (- n end))
+        (if (>= n end)
             nil
             (cons n (range-rec (+ n 1)))))
     (range-rec start))
 
 (defn env-globals ()
     (defn globals-rec (e)
-        (let pe (env-parent e)
+        (let ((pe (env-parent e)))
             (if (nil? pe) e (globals-rec pe))))
     (globals-rec (env)))
 
@@ -90,5 +112,5 @@
 
 (defmacro import-from (mod . names)
     (import mod as some-module)
-    (list let 'some-module some-module
+    (list let (list (list 'some-module some-module))
         (cons use (cons 'some-module names))))

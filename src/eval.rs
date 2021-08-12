@@ -25,7 +25,7 @@ fn apply(list: &JPair, env: JEnvRef, state: &mut JState) -> JResult {
     match res {
         Ok(val) => Ok(val),
         Err(err) => {
-            state.traceback_push(TracebackFrame::from_any(func, envclone));
+            state.traceback_push(TracebackFrame::from_jval(func, envclone));
             Err(err)
         }
     }

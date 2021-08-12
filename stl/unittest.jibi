@@ -6,7 +6,7 @@
 
 (def test-verbose
     (try
-        (equal? "1" (environment-variable "TEST_VERBOSE"))
+        (equal? "1" (getenv "TEST_VERBOSE"))
         false))
 
 (defn assert-not (x) (assert (not x)))
@@ -24,7 +24,7 @@
         (list concat (list repr val) " is not of type " (repr t))))
 
 (defmacro assert-raise (code)
-    (let errnoraise (exception "did not raise an error")
+    (let ((errnoraise (exception "did not raise an error")))
         (list try
             (list begin
                 code
@@ -37,10 +37,10 @@
             (cons begin exprs)
             (list inc-ok)
             (list if test-verbose
-                (list print (list concat name ": ok")) ()))
+                (list print (list concat "Test " name ": ok")) ()))
         (list begin
             (list inc-failed)
-            (list print (list concat name ": failed (" (list repr 'err) ")")) ())))
+            (list print (list concat "Test " name ": failed (" (list repr 'err) ")")) ())))
 
 (defn test-start (name)
     (print (concat "Testing " name "..."))

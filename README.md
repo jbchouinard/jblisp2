@@ -41,16 +41,20 @@ make install
 ```
 
 ## Todo?
-- Builtins: lets, or, and, cond, <
+- Builtins: slice, split, contains?
 - STL/Decimal
 - JIBI_PATH for imports
+- Lazy values
+_ Lazy lists
 - Reader macro definition
 - Specific error catch
 - Numeric data types: float, complex, arbitrary precision int
 - Mutable data structures: mutpair, vector, table
+- Compiled libs
+- FFI
+- Continuations
 - Standard libraries: io, sockets, math
 - Debugger
-- Continuations
 - Reference cycle detection
 - Tail call optimization
 - JIT compilation
