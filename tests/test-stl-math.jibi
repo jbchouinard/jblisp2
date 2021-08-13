@@ -2,12 +2,13 @@
 (import-from "stl/unittest"
     test
     test-suite
-    assert-equal
     assert-not
 )
 
+(defn assert= (x y) (assert (= x y)))
+
 (defn test= (name x y)
-    (test name (assert-equal x y)))
+    (test name (assert= x y)))
 
 (test-suite "stl/math"
     (test= "sign zero" 0 (math::sign 0))
@@ -38,5 +39,5 @@
 
     (test "not odd?" (assert-not (math::odd? 2)))
 
-    (test "pow" (assert-equal 1024 (math::pow 2 10)))
+    (test "pow" (assert= 1024 (math::pow 2 10)))
 )

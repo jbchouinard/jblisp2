@@ -66,6 +66,7 @@ impl<'a> Parser<'a> {
             TokenValue::Int(n) => Ok(self.state.int(n)),
             TokenValue::Ident(s) => Ok(self.state.symbol(s)),
             TokenValue::String(s) => Ok(self.state.string(s)),
+            TokenValue::Float(x) => Ok(self.state.float(x)),
             _ => Err(self.error(next.pos, &format!("unexpected token {:?}", next.value))),
         }
     }
@@ -174,5 +175,24 @@ mod tests {
             '(1 2 3))",
             expected,
         )
+    }
+
+    #[test]
+    fn test_parser_6() {
+        let mut state = JState::default();
+        let lst = vec![
+            state.symbol("+".to_string()),
+            state.float(12.0),
+            state.float(-0.5),
+        ];
+        let expected = state.list(lst);
+        test_parser(&mut state, "(+ 12.0 -0.5)", expected);
+    }
+
+    #[test]
+    fn test_parser_7() {
+        let mut state = JState::default();
+        let expected = state.float(2.025);
+        test_parser(&mut state, "2.025", expected);
     }
 }

@@ -2,7 +2,7 @@
 
 ; Re-bind original definitions for symbols re-defined later
 (def grepr repr)
-(def gequal? equal?)
+(def g= =)
 (def g+ +)
 (def g- -)
 (def g* *)
@@ -115,7 +115,7 @@
     (let ((v (coef d)) (p (expn d)))
         (cond
             ((g<= p min-precision) d)
-            ((gequal? 0 (math::remainder v 10))
+            ((g= 0 (math::remainder v 10))
                 (truncate-zeros (new (g/ v 10) (g- p 1)) min-precision))
             (else d))))
 
@@ -129,7 +129,7 @@
               (v2 (coef d2)))
             (let ((rem (math::remainder v1 v2))
                   (res (new (g/ v1 v2) MAXPRECISION)))
-                (if (equal? 0 rem)
+                (if (= 0 rem)
                     (truncate-zeros res 0)
                     res)))))
 
@@ -139,10 +139,10 @@
         ((decimal? x1) (d/int x1 x2))
         (else (g/ x1 x2))))
 
-(defn dequal? (x1 x2)
+(defn d= (x1 x2)
     (let ((d1 (decimal x1)) (d2 (decimal x2)))
         (let ((p (math::max (expn d1) (expn d2))))
-            (gequal? (coef (expand d1 p)) (coef (expand d2 p))))))
+            (g= (coef (expand d1 p)) (coef (expand d2 p))))))
 
 (defn d< (x1 x2)
     (let ((d1 (decimal x1)) (d2 (decimal x2)))
@@ -151,19 +151,19 @@
 
 (defn d> (x1 x2) (not (d< x1 x2)))
 
-(defn d<= (x1 x2) (or (dequal? x1 x2) (d< x1 x2)))
+(defn d<= (x1 x2) (or (d= x1 x2) (d< x1 x2)))
 
-(defn d>= (x1 x2) (or (dequal? x1 x2) (d> x1 x2)))
+(defn d>= (x1 x2) (or (d= x1 x2) (d> x1 x2)))
 
 
 ; Define replacements for builtins with support for decimal types
 
-(defnglobal equal? (x1 x2)
-    (if (or (decimal? x1) (decimal? x2))
-        (dequal? x1 x2)
-        (gequal? x1 x2)))
-
 (defnglobal repr (v) (if (decimal? v) (drepr v) (grepr v)))
+
+(defnglobal = (x1 x2)
+    (if (or (decimal? x1) (decimal? x2))
+        (d= x1 x2)
+        (g= x1 x2)))
 
 (defnglobal + (. xs) 
     (if (apply any (map decimal? xs))

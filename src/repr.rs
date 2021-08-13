@@ -4,6 +4,7 @@ pub fn repr(expr: &JVal) -> String {
     match &*expr {
         JVal::Nil => "()".to_string(),
         JVal::Int(n) => format!("{}", n),
+        JVal::Float(x) => format!("{}", x),
         JVal::Bool(b) => (if *b { "true" } else { "false" }).to_string(),
         JVal::Symbol(s) => s.to_string(),
         JVal::String(s) => format!("\"{}\"", s),

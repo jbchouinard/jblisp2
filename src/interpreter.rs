@@ -128,8 +128,13 @@ impl Interpreter {
     pub fn bool(&mut self, b: bool) -> JValRef {
         self.state.bool(b)
     }
+    /// Construct a `jibi` `integer` (may be interned).
     pub fn int(&mut self, n: JTInt) -> JValRef {
         self.state.int(n)
+    }
+    /// Construct a `jibi` `float`.
+    pub fn float(&mut self, v: JTFloat) -> JValRef {
+        self.state.float(v)
     }
     /// Construct a `jibi` `symbol` (always interned).
     pub fn symbol(&mut self, s: String) -> JValRef {

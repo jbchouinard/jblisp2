@@ -170,6 +170,9 @@ impl JState {
             self.interned_int.get_or_insert(val)
         }
     }
+    pub fn float(&mut self, val: JTFloat) -> JValRef {
+        JVal::Float(val).into_ref()
+    }
     pub fn symbol(&mut self, val: String) -> JValRef {
         self.interned_sym.get_or_insert(val)
     }

@@ -157,6 +157,7 @@ fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
             JVal::Pair { .. } => "pair",
             JVal::Quote(_) => "quote",
             JVal::Int(_) => "integer",
+            JVal::Float(_) => "float",
             JVal::Bool(_) => "bool",
             JVal::Symbol { .. } => "symbol",
             JVal::String(_) => "string",
@@ -251,6 +252,7 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("-", jbuiltin_sub, env, state);
     add_builtin("*", jbuiltin_mul, env, state);
     add_builtin("/", jbuiltin_div, env, state);
+    add_builtin("=", jbuiltin_num_eq, env, state);
     add_builtin("<", jbuiltin_lt, env, state);
     add_builtin("<=", jbuiltin_lte, env, state);
     add_builtin(">", jbuiltin_gt, env, state);

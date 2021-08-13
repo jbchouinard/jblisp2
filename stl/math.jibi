@@ -19,7 +19,7 @@
     (- x (* y (/ x y))))
 
 (defn even? (x)
-    (equal? 0 (remainder (/ x 1) 2)))
+    (= 0 (remainder (/ x 1) 2)))
 
 (defn odd? (x)
     (not (even? x)))

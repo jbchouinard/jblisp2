@@ -10,50 +10,51 @@
 (import-from "stl/unittest"
     test
     test-suite
-    assert-equal
 )
+
+(defn assert= (x y) (assert (= x y)))
 
 (test-suite "stl/decimal"
     (test "coef"
-        (assert-equal 10055 (coef (decimal "100.55"))))
+        (assert= 10055 (coef (decimal "100.55"))))
 
     (test "expn"
-        (assert-equal 2 (expn (decimal "100.55"))))
+        (assert= 2 (expn (decimal "100.55"))))
 
     (test "truncate"
-        (assert-equal (decimal "100.5") (truncate (decimal "100.55") 1)))
+        (assert= (decimal "100.5") (truncate (decimal "100.55") 1)))
 
     (test "expand"
-        (assert-equal (decimal "100.5500") (expand (decimal "100.55") 4)))
+        (assert= (decimal "100.5500") (expand (decimal "100.55") 4)))
 
     (test "round"
-        (assert-equal (decimal "100.6") (round (decimal "100.55") 1)))
+        (assert= (decimal "100.6") (round (decimal "100.55") 1)))
 
     (test "round more"
-        (assert-equal (decimal 101) (round (decimal "100.55") 0)))
+        (assert= (decimal 101) (round (decimal "100.55") 0)))
 
     (test "round expand"
-        (assert-equal (decimal "100.55") (round (decimal "100.55") 3)))
+        (assert= (decimal "100.55") (round (decimal "100.55") 3)))
 
     (test "add"
-        (assert-equal (decimal "100.75") (+ (decimal "100.5") (decimal "0.25"))))
+        (assert= (decimal "100.75") (+ (decimal "100.5") (decimal "0.25"))))
 
     (test "sub"
-        (assert-equal (decimal "100.25") (- (decimal "100.5") (decimal "0.25"))))
+        (assert= (decimal "100.25") (- (decimal "100.5") (decimal "0.25"))))
 
     (test "mul"
-        (assert-equal (decimal "36.75") (* (decimal "10.5") (decimal "3.5"))))
+        (assert= (decimal "36.75") (* (decimal "10.5") (decimal "3.5"))))
 
     (test "mul trunc"
-        (assert-equal (decimal "36.750") (* (decimal "10.5") (decimal "3.500"))))
+        (assert= (decimal "36.750") (* (decimal "10.5") (decimal "3.500"))))
 
     (test "div exact"
-        (assert-equal (decimal "0.25") (/ (decimal "1.0") (decimal "4.0"))))
+        (assert= (decimal "0.25") (/ (decimal "1.0") (decimal "4.0"))))
 
     (test "div inexact"
-        (assert-equal (decimal "0.1428571428") (/ (decimal "1.0") (decimal "7.0"))))
+        (assert= (decimal "0.1428571428") (/ (decimal "1.0") (decimal "7.0"))))
 
     (test "set-precision"
         (set-precision 4)
-        (assert-equal (decimal "0.1428") (/ (decimal "1.0") (decimal "7.0"))))
+        (assert= (decimal "0.1428") (/ (decimal "1.0") (decimal "7.0"))))
 )

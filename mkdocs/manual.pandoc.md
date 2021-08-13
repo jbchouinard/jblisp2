@@ -38,10 +38,21 @@ An error is raised if `symbol` is not bound in any enclosing scope.
 ```nohighlight
 100
 ```
-The underlying type for `integer` is `i128`. Integer overflow terminates the program.
+The underlying type for `integer` is `i128`. Integer overflow raises an exception.
 
 *Evaluation Rule:*
 An `integer` value evaluates to itself.
+
+---
+
+#### float
+```nohighlight
+1.5
+```
+The underlying type for `float` is `f64`.
+
+*Evaluation Rule:*
+A `float` value evaluates to itself.
 
 ---
 
@@ -504,9 +515,9 @@ Applies `f` to each value in a list and accumulate results in `init`.
 
 #### range
 ```nohighlight
-(range from:integer to:integer)
+(range from:number to:number [step:number])
 ```
-Produce list of integers for range [`from`, `to`), where `to` >= `from`.
+Produce list of numbers for range [`from`, `to`], with an optional step size.
 
 ---
 
@@ -623,42 +634,46 @@ Pad string to `width` characters.
 ---
 
 \newpage
-### Integer Operations
+### Numerical Operations
+
+If different number types are mixed, integers get promoted to floats (may raise an error
+if the integer is too large or small to be represented as a float).
 
 #### Add: +
 ```nohighlight
-(+ :integer ...)
+(+ :number ...)
 ```
 Addition.
 
 #### Sub: -
 ```nohighlight
-(- :integer ...)
+(- :number ...)
 ```
 Negation (single argument) or substraction (multiple arguments).
 
 #### Mul: \*
 ```nohighlight
-(* :integer ...)
+(* :number ...)
 ```
 Multiplication.
 
 #### Div: /
 ```nohighlight
-(/ :integer ...)
+(/ :number ...)
 ```
 Reciprocal (single argument) or division (multiple arguments).
 
 ---
 
-#### Comparisons: >, >=, <, <=
+#### Numeric Comparison: =, >, >=, <, <=
 ```nohighlight
-(> :integer :integer)
-(> :integer :integer)
-(> :integer :integer)
-(> :integer :integer)
+(= :number :number)
+(> :number :number)
+(>= :number :number)
+(< :number :number)
+(<= :number :number)
 ```
-Comparisons.
+Compare numerical values.
 
 ---
 
@@ -1109,9 +1124,10 @@ Returns absolute value of number
 
 #### remainder
 ```nohighlight
-(remainder :integer :integer)
+(remainder :number :number)
 ```
-Returns the least positive remainder for integer division.
+Returns the least positive remainder for integer floor division. (Returns zero for
+floating point division, or very close to zero, because of floating point errors.)
 
 ```nohighlight
 >>> ; Example
@@ -1233,7 +1249,7 @@ multiplication and division to overflow, in which case an error will be raised.
 Importing the decimal module overloads the following functions:
 
 *   Arithemic operators: `+`, `-`, `*`, `/`
-*   Comparison operators: `equal?`, `<`, `<=`, `>`, `>=`
+*   Comparison operators: `=`, `<`, `<=`, `>`, `>=`
 *   Display: `repr`, `display`
 
 Note that division is defined as floor division when the divisor is an integer:

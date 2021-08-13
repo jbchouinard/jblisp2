@@ -18,6 +18,7 @@ Features:
 - Exception handling
 - Namespaced modules
 - Automatic reference counting
+- Decimal floating point arithmetic
 
 ## Documentation
 - [Crate Docs](https://jbchouinard.github.io/jibi/crate/jibi/index.html)
@@ -42,12 +43,12 @@ make install
 
 ## Todo?
 - JIBI_PATH for imports
+- Reader macro definition
 - Lazy values
 _ Lazy lists
-- Reader macro definition
 - User-defined types, operator overloading
 - Specific error catch
-- Numeric data types: float, complex, arbitrary precision int
+- Numeric data types: complex, arbitrary precision int
 - Mutable data structures: mutpair, vector, table
 - Compiled libs
 - FFI

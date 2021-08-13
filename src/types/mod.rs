@@ -9,6 +9,7 @@ use crate::*;
 pub mod intern;
 
 pub type JTInt = i128;
+pub type JTFloat = f64;
 
 static BUILTIN_COUNTER: AtomicUsize = AtomicUsize::new(1);
 
@@ -224,6 +225,7 @@ pub enum JVal {
     Pair(JPair),
     Quote(JValRef),
     Int(JTInt),
+    Float(JTFloat),
     Bool(bool),
     Symbol(String),
     String(String),
@@ -252,6 +254,12 @@ impl JVal {
         match self {
             Self::Int(n) => Ok(*n),
             _ => Err(JError::new(TypeError, "expected an int")),
+        }
+    }
+    pub fn to_float(&self) -> Result<JTFloat, JError> {
+        match self {
+            Self::Float(x) => Ok(*x),
+            _ => Err(JError::new(TypeError, "expected a float")),
         }
     }
     pub fn to_bool(&self) -> Result<bool, JError> {

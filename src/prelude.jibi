@@ -3,6 +3,10 @@
 (def false (not true))
 (def else true)
 
+(def inf (/ 0.0))
+(def -inf (/ -0.0))
+(def nan (/ 0.0 0.0))
+
 (def defmacro
     (macro (name params . exprs)
         (list def name (cons nmacro (cons (repr name) (cons params exprs))))))

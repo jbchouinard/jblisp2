@@ -3,7 +3,7 @@ use std::fmt;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-use crate::types::JTInt;
+use crate::types::{JTFloat, JTInt};
 use crate::PositionTag;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -12,6 +12,7 @@ pub enum TokenValue {
     RParen,
     Quote,
     Int(JTInt),
+    Float(JTFloat),
     Ident(String),
     String(String),
     Eof,
@@ -35,7 +36,6 @@ lazy_static! {
     static ref RE_LPAREN: Regex = Regex::new(r"^\(").unwrap();
     static ref RE_RPAREN: Regex = Regex::new(r"^\)").unwrap();
     static ref RE_QUOTE: Regex = Regex::new(r"^'").unwrap();
-    static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_IDENT: Regex = Regex::new(
         r"(?x)
             ^
@@ -45,6 +45,8 @@ lazy_static! {
     )
     .unwrap();
     static ref RE_STRING: Regex = Regex::new(r#"^"([^"]|\\")*""#).unwrap();
+    static ref RE_FLOAT: Regex = Regex::new(r"^-?([.][0-9]+|[0-9]+[.][0-9]*)").unwrap();
+    static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_COMMENT: Regex = Regex::new(r"^;[^\n]*").unwrap();
     static ref RE_ANYCHAR: Regex = Regex::new(r"^.").unwrap();
 }
@@ -67,6 +69,13 @@ fn t_int(val: &str) -> TResult {
     match val.parse::<JTInt>() {
         Ok(n) => Ok(TokenValue::Int(n)),
         Err(e) => Err(format!("int error: {}", e)),
+    }
+}
+
+fn t_float(val: &str) -> TResult {
+    match val.parse::<JTFloat>() {
+        Ok(n) => Ok(TokenValue::Float(n)),
+        Err(e) => Err(format!("float error: {}", e)),
     }
 }
 
@@ -187,6 +196,9 @@ impl TokenIter for Tokenizer {
             return Ok(token);
         }
         if let Some(token) = self.try_token(&RE_QUOTE, t_quote)? {
+            return Ok(token);
+        }
+        if let Some(token) = self.try_token(&RE_FLOAT, t_float)? {
             return Ok(token);
         }
         if let Some(token) = self.try_token(&RE_INT, t_int)? {
@@ -363,5 +375,25 @@ mod tests {
                 TokenValue::Eof,
             ],
         );
+    }
+
+    #[test]
+    fn test_tokenizer_5() {
+        test_tokenizer(
+            "(* 12.0 -0.5)",
+            vec![
+                TokenValue::LParen,
+                TokenValue::Ident("*".to_string()),
+                TokenValue::Float(12.0),
+                TokenValue::Float(-0.5),
+                TokenValue::RParen,
+                TokenValue::Eof,
+            ],
+        );
+    }
+
+    #[test]
+    fn test_tokenizer_6() {
+        test_tokenizer("2.025", vec![TokenValue::Float(2.025), TokenValue::Eof]);
     }
 }
