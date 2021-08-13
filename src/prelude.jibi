@@ -34,7 +34,7 @@
 (defn error? (val) (type? val error))
 (defn bool? (val) (type? val bool))
 (defn lambda? (val) (type? val lambda))
-(defn procmacro? (val) (type? val procmacro))
+(defn macro? (val) (type? val macro))
 (defn builtin? (val) (type? val builtin))
 (defn specialform? (val) (type? val specialform))
 (defn quote? (val) (type? val quote))

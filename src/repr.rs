@@ -12,7 +12,7 @@ pub fn repr(expr: &JVal) -> String {
         JVal::Builtin(b) => format!("#[function {}]", b),
         JVal::SpecialForm(b) => format!("#[specialform {}]", b),
         JVal::Lambda(l) => format!("#[lambda {}]", l),
-        JVal::ProcMacro(l) => format!("#[macro {}]", l),
+        JVal::Macro(l) => format!("#[macro {}]", l),
         JVal::Pair(c) => repr_cell(c),
         JVal::Quote(val) => format!("'{}", repr(&*val)),
         JVal::Env(env) => format!("{}", env),

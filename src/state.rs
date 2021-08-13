@@ -216,14 +216,14 @@ impl JState {
         }))
         .into_ref())
     }
-    pub fn procmacro(
+    pub fn r#macro(
         &mut self,
         clos: JEnvRef,
         params: Vec<String>,
         code: Vec<JValRef>,
         name: Option<String>,
     ) -> JResult {
-        Ok(JVal::ProcMacro(Box::new(JLambda {
+        Ok(JVal::Macro(Box::new(JLambda {
             closure: clos,
             params: JParams::new(params)?,
             code,

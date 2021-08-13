@@ -231,7 +231,7 @@ pub enum JVal {
     String(String),
     Error(JError),
     Lambda(Box<JLambda>),
-    ProcMacro(Box<JLambda>),
+    Macro(Box<JLambda>),
     Builtin(JBuiltin),
     SpecialForm(JBuiltin),
     Env(JEnvRef),

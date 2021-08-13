@@ -170,10 +170,10 @@ impl Interpreter {
         self.state
             .lambda(Rc::clone(&self.globals), params, body, None)
     }
-    /// Construct a `jibi` `procmacro`.
-    pub fn procmacro(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
+    /// Construct a `jibi` `macro`.
+    pub fn r#macro(&mut self, params: Vec<String>, body: Vec<JValRef>) -> JResult {
         self.state
-            .procmacro(Rc::clone(&self.globals), params, body, None)
+            .r#macro(Rc::clone(&self.globals), params, body, None)
     }
     /// Define a `jibi` builtin procedure.
     pub fn builtin<F>(&mut self, name: String, f: F) -> JValRef

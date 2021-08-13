@@ -26,7 +26,7 @@ pub fn jspecial_display_debug_macro(args: JValRef, env: JEnvRef, state: &mut JSt
     let first = eval(args.car(), env, state)?;
     let args = args.cdr();
     let lambda = match &*first {
-        JVal::ProcMacro(l) => l.clone(),
+        JVal::Macro(l) => l.clone(),
         _ => return Err(JError::new(TypeError, "expected a macro")),
     };
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
@@ -43,7 +43,7 @@ pub fn jbuiltin_display_code(args: JValRef, _env: JEnvRef, state: &mut JState) -
     let [val] = get_n_args(args)?;
     let (t, params, code) = match &*val {
         JVal::Lambda(jl) => ("fn".to_string(), &jl.params, &jl.code),
-        JVal::ProcMacro(jl) => ("fn".to_string(), &jl.params, &jl.code),
+        JVal::Macro(jl) => ("fn".to_string(), &jl.params, &jl.code),
         _ => {
             return Err(JError::new(
                 TypeError,

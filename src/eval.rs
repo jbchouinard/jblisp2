@@ -19,7 +19,7 @@ fn apply(list: &JPair, env: JEnvRef, state: &mut JState) -> JResult {
         JVal::Builtin(b) => apply_builtin(b, args, env, state),
         JVal::SpecialForm(b) => apply_special_form(b, args, env, state),
         JVal::Lambda(l) => apply_lambda(l, args, env, state),
-        JVal::ProcMacro(l) => apply_proc_macro(l, args, env, state),
+        JVal::Macro(l) => apply_proc_macro(l, args, env, state),
         _ => return Err(JError::new(TypeError, "expected a callable")),
     };
     match res {

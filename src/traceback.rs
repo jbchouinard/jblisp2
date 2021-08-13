@@ -13,7 +13,7 @@ impl JCallable {
     pub fn from_jval(val: JValRef) -> Option<Self> {
         match &*val {
             JVal::Lambda(l) => Some(Self::Lambda("lambda".to_string(), l.as_ref().clone())),
-            JVal::ProcMacro(l) => Some(Self::Lambda("macro".to_string(), l.as_ref().clone())),
+            JVal::Macro(l) => Some(Self::Lambda("macro".to_string(), l.as_ref().clone())),
             JVal::Builtin(b) => Some(Self::Builtin("builtin".to_string(), b.clone())),
             JVal::SpecialForm(b) => Some(Self::Builtin("specialform".to_string(), b.clone())),
             _ => None,

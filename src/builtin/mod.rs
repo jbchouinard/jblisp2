@@ -112,7 +112,7 @@ fn jspecial_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     for val in pvals.iter_list()? {
         params.push(val.to_symbol()?.to_owned())
     }
-    state.procmacro(env, params, exprs, None)
+    state.r#macro(env, params, exprs, None)
 }
 
 fn jspecial_named_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -122,7 +122,7 @@ fn jspecial_named_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JRes
     for val in pvals.iter_list()? {
         params.push(val.to_symbol()?.to_owned())
     }
-    state.procmacro(env, params, exprs, Some(name.to_string()))
+    state.r#macro(env, params, exprs, Some(name.to_string()))
 }
 
 fn jspecial_cond(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
@@ -163,7 +163,7 @@ fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
             JVal::String(_) => "string",
             JVal::Error(_) => "error",
             JVal::Lambda(_) => "lambda",
-            JVal::ProcMacro(_) => "procmacro",
+            JVal::Macro(_) => "macro",
             JVal::Builtin(_) => "builtin",
             JVal::SpecialForm(_) => "specialform",
             JVal::Env(_) => "env",
