@@ -1,28 +1,59 @@
-(import "stl/decimal" as decimal)
+(import-from "stl/decimal"
+    decimal
+    expn
+    coef
+    truncate
+    expand
+    round
+    set-precision
+)
 (import-from "stl/unittest"
     test
     test-suite
     assert-equal
 )
 
-; 100.55
-(def d1 (decimal::new 10055 2))
-; 0.042
-(def d2 (decimal::new 42 3))
-
 (test-suite "stl/decimal"
-    (test "value"
-        (assert-equal 10055 (decimal::value d1)))
+    (test "coef"
+        (assert-equal 10055 (coef (decimal "100.55"))))
 
-    (test "precision"
-        (assert-equal 2 (decimal::precision d1)))
-
-    (test "whole"
-        (assert-equal 100 (decimal::whole d1)))
+    (test "expn"
+        (assert-equal 2 (expn (decimal "100.55"))))
 
     (test "truncate"
-        (assert-equal (decimal::new 1005 1) (decimal::truncate d1 1)))
+        (assert-equal (decimal "100.5") (truncate (decimal "100.55") 1)))
 
     (test "expand"
-        (assert-equal (decimal::new 1005500 4) (decimal::expand d1 4)))
+        (assert-equal (decimal "100.5500") (expand (decimal "100.55") 4)))
+
+    (test "round"
+        (assert-equal (decimal "100.6") (round (decimal "100.55") 1)))
+
+    (test "round more"
+        (assert-equal (decimal 101) (round (decimal "100.55") 0)))
+
+    (test "round expand"
+        (assert-equal (decimal "100.55") (round (decimal "100.55") 3)))
+
+    (test "add"
+        (assert-equal (decimal "100.75") (+ (decimal "100.5") (decimal "0.25"))))
+
+    (test "sub"
+        (assert-equal (decimal "100.25") (- (decimal "100.5") (decimal "0.25"))))
+
+    (test "mul"
+        (assert-equal (decimal "36.75") (* (decimal "10.5") (decimal "3.5"))))
+
+    (test "mul trunc"
+        (assert-equal (decimal "36.750") (* (decimal "10.5") (decimal "3.500"))))
+
+    (test "div exact"
+        (assert-equal (decimal "0.25") (/ (decimal "1.0") (decimal "4.0"))))
+
+    (test "div inexact"
+        (assert-equal (decimal "0.1428571428") (/ (decimal "1.0") (decimal "7.0"))))
+
+    (test "set-precision"
+        (set-precision 4)
+        (assert-equal (decimal "0.1428") (/ (decimal "1.0") (decimal "7.0"))))
 )

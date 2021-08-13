@@ -88,7 +88,9 @@ impl Interpreter {
     pub fn call(&mut self, name: &str, args: Vec<JValRef>) -> JResult {
         let proc = self.globals.try_lookup(name)?;
         let mut sexpr = vec![proc];
-        sexpr.extend(args);
+        for arg in args {
+            sexpr.push(self.state.quote(arg));
+        }
         let sexpr = self.state.list(sexpr);
         eval(sexpr, Rc::clone(&self.globals), &mut self.state)
     }

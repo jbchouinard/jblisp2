@@ -41,12 +41,11 @@ make install
 ```
 
 ## Todo?
-- Builtins: slice, split, contains?
-- STL/Decimal
 - JIBI_PATH for imports
 - Lazy values
 _ Lazy lists
 - Reader macro definition
+- User-defined types, operator overloading
 - Specific error catch
 - Numeric data types: float, complex, arbitrary precision int
 - Mutable data structures: mutpair, vector, table

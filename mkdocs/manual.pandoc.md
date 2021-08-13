@@ -1,5 +1,5 @@
 # Jibi Scheme
-**version 0.1.3**
+**version 0.1.4**
 
 ## Overview
 
@@ -220,7 +220,7 @@ Change existing binding. Raises error if a binding does not already exists.
 Create bindings in a new local scopes.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (let ((x 5) (y 7))
 ...    (display x)
 ...    (display y))
@@ -260,7 +260,7 @@ be a single parameter after `.`, which will be a list containing zero or more
 arguments depending on the number of arguments passed.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (defn increment (x) (+ x 1))
 >>> (increment 1)
 2
@@ -309,7 +309,7 @@ Evaluates only `then` or `else` conditonally on the value of `predicate`.
 Evaluates body of the first clause which has a true predicate.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (cond
 ...   (false (assert false))
 ...   ((not true) (assert false))
@@ -320,6 +320,23 @@ bar
 
 ---
 
+#### or
+```nohighlight
+(or expr expr)
+```
+Logical or. Short-circuiting; if the first expression evaluates to true, the second
+expression is not evaluated.
+
+---
+
+#### and
+```nohighlight
+(and expr expr)
+```
+Logical and. Short-circuiting; if the first expression evaluates to false, the
+second expression is not evaluated.
+
+---
 
 \newpage
 ### Comparison
@@ -341,29 +358,29 @@ Value comparison. Check if two values are equal.
 ---
 
 \newpage
-### Boolean Operations
+### Logical Operators
 
 #### not
 ```nohighlight
 (not :bool)
 ```
-Boolean not.
+Logical not.
 
 ---
 
-#### or
+#### any
 ```nohighlight
-(or :bool :bool)
+(any :bool ...)
 ```
-Boolean or.
+Returns true if any argument is true.
 
 ---
 
-#### and
+#### all
 ```nohighlight
-(and :bool :bool)
+(all :bool ..)
 ```
-Boolean and.
+Returns true if all arguments are true.
 
 ---
 
@@ -402,7 +419,7 @@ Get second item of a pair (rest of list).
 Construct a list, which is a linked list made from pairs and terminated by `nil`.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (equal? (list 1 2 3) (cons 1 (cons 2 (cons 3 nil))))
 true
 >>> (equal? (list 1 2 3) (cons 1 (list 2 3)))
@@ -418,7 +435,7 @@ true
 Prepend values to a list.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (lcons 1 2 3 (list 4 5))
 (1 2 3 4 5)
 ```
@@ -432,7 +449,7 @@ Prepend values to a list.
 Get nth item from a list (zero-indexed).
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (nth 3 (list 0 1 2 3 4))
 3
 ```
@@ -462,7 +479,7 @@ Check if value is a nil-terminated list of ordered pairs.
 Applies `f` to each value in a list and return results in list.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (map (fn (x) (* 2 x)) (list 1 2 3))
 (2 4 6)
 ```
@@ -476,7 +493,7 @@ Applies `f` to each value in a list and return results in list.
 Applies `f` to each value in a list and accumulate results in `init`.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (fold + 0 (list 1 2 3))
 6
 >>> (fold cons () (list 1 2 3))
@@ -496,6 +513,14 @@ Produce list of integers for range [`from`, `to`), where `to` >= `from`.
 \newpage
 ### String Operations
 
+#### len
+```nohighlight
+(len :string)
+```
+Get length of string (number of UTF-8 scalar values).
+
+---
+
 #### concat
 ```nohighlight
 (concat :string ...)
@@ -503,9 +528,96 @@ Produce list of integers for range [`from`, `to`), where `to` >= `from`.
 Concatenate multiple strings.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (concat "foo" "bar" "baz")
 "foobarbaz"
+```
+
+---
+
+#### replace
+```nohighlight
+(replace :string :string :string)
+```
+Description.
+
+```nohighlight
+>>> ; Example
+>>> (replace "fuzzy bears are fuzzy" "fuzzy" "long")
+"long bears are long"
+```
+
+---
+
+#### substring
+```nohighlight
+(substring :string start:integer end:integer)
+```
+Get a substring. Negative indices count from the end of the string. If start > end,
+the substring is reversed.
+
+```nohighlight
+>>> ; Example
+>>> (substring "foobar" 1 -1)
+"ooba"
+>>> (substring "foobar" 6 0)
+"raboof"
+```
+
+---
+
+#### split
+```nohighlight
+(split :string separator:string)
+```
+Split a string by separator.
+
+```nohighlight
+>>> ; Example
+>>> (split "12.34.56" ".")
+("12" "34" "56")
+```
+
+---
+
+#### contains?
+```nohighlight
+(contains? str:string substr:string)
+```
+Check if `str` contains `substr`.
+
+```nohighlight
+>>> ; Example
+>>> (contains? "foobar" "foo")
+true
+```
+
+---
+
+#### parse-integer
+```nohighlight
+(parse-integer :string)
+```
+Parse an integer from a string.
+
+```nohighlight
+>>> ; Example
+>>> (parse-integer "12")
+12
+```
+
+---
+
+#### left-pad
+```nohighlight
+(left-pad string:string char:string width:integer)
+```
+Pad string to `width` characters.
+
+```nohighlight
+>>> ; Example
+>>> (left-pad "34" "0" 4)
+0034
 ```
 
 ---
@@ -598,7 +710,7 @@ thus importing "stl/unittest" looks for the file `./stl/unittest.jibi'.`
 Import module and bind it to `name`. 
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (import "stl/math" as math)
 >>> (math::product (list 2 3 4))
 24
@@ -613,7 +725,7 @@ Import module and bind it to `name`.
 Bind a name from a module into the global scope.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (import "stl/math" as math)
 >>> (use math product sum)
 >>> (product (list 2 3 4))
@@ -629,7 +741,7 @@ Bind a name from a module into the global scope.
 Import specific names from a module.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (import-from "stl/math" product sum)
 >>> (sum (list 2 3 4))
 9
@@ -649,7 +761,7 @@ Import specific names from a module.
 Inspect type of a value.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (type "foo")
 string
 ```
@@ -666,7 +778,7 @@ string
 Test type of a value. There are also convenience functions for every type.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (type? "foo" string)
 true
 >>> (integer? "foo")
@@ -685,7 +797,7 @@ false
 A quoted expression evaluates to the expression.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (def a 100)
 >>> a
 100
@@ -706,7 +818,7 @@ a
 Evaluate an expression.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (def expr (quote (+ 5 5)))
 >>> expr
 (+ 5 5)
@@ -731,7 +843,7 @@ Evaluate file in the global environment.
 Apply a procedure to a list of arguments.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (apply + (list 1 2 3))
 6
 ```
@@ -817,7 +929,7 @@ Try evaluating `body`. If an error is raised, evaluate `catch`; the raised error
 is bound to `err` when `catch` is evaluated.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (defn errored ()
 ...		(raise (exception "oh no!"))
 ...		(print "never evaluated"))
@@ -970,7 +1082,7 @@ Some mathematical functions.
 Returns sign of number.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (sign -12)
 -1
 >>> (sign 100)
@@ -988,7 +1100,7 @@ Returns sign of number.
 Returns absolute value of number
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (abs -12)
 12
 ```
@@ -1002,7 +1114,7 @@ Returns absolute value of number
 Returns the least positive remainder for integer division.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (remainder 42 5)
 2
 >> (remainder 42 -5)
@@ -1018,7 +1130,7 @@ Returns the least positive remainder for integer division.
 Perform exponentiation.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (pow 10 3)
 1000
 >>> (pow 2 10)
@@ -1034,7 +1146,7 @@ Perform exponentiation.
 Returns sum of list.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (sum (list 1 2 3 4))
 10
 ```
@@ -1048,26 +1160,35 @@ Returns sum of list.
 Returns product of list.
 
 ```nohighlight
-; Example
+>>> ; Example
 >>> (product (list 1 2 3 4))
 24
 ```
 
 ---
 
-#### factorial
+#### min
 ```nohighlight
-(factorial :number)
+(min :number :number)
 ```
-Compute factorial.
+Returns smallest of 2 values.
 
 ```nohighlight
-; Example
->>> (factorial 4)
-24
+>>> ; Example
+>>> (fold min INTMAX (list 21 321 421 -12))
+421
 ```
 
 ---
+
+#### max
+```nohighlight
+(max :number :number)
+```
+Returns largest of 2 values.
+
+---
+
 
 #### even?
 ```nohighlight
@@ -1082,6 +1203,132 @@ Check if even.
 (odd? :number)
 ```
 Check if odd.
+
+---
+
+#### factorial
+```nohighlight
+(factorial :number)
+```
+Compute factorial.
+
+```nohighlight
+>>> ; Example
+>>> (factorial 4)
+24
+```
+
+---
+
+\newpage
+### stl/decimal
+
+The `decimal` module implements floating point decimal arithmetic.
+
+By default, multiplication and division produce results with a maximum
+precision of 10 decimal places. This can be changed with `set-precision`, but
+since decimals are implemented with `i128`, a high precision can cause
+multiplication and division to overflow, in which case an error will be raised.
+
+Importing the decimal module overloads the following functions:
+
+*   Arithemic operators: `+`, `-`, `*`, `/`
+*   Comparison operators: `equal?`, `<`, `<=`, `>`, `>=`
+*   Display: `repr`, `display`
+
+Note that division is defined as floor division when the divisor is an integer:
+
+```nohighlight
+>>> ; Example
+>>> (import-from "stl/decimal" decimal)
+>>> (/ (decimal 5) (decimal 2))
+2.5
+>>> (/ (decimal 5) 2)
+2.
+```
+
+Other functions defined in terms of arithmetic operations will work with decimal values
+once `stl/decimal` is imported. These include  `range`, and all functions from `stl/math`
+- with the caveat that some math functions are only defined for whole numbers:
+
+```nohighlight
+>>> ; Example
+>>> (import-from "stl/decimal" decimal)
+>>> (import-from "stl/math" remainder pow even?)
+>>> ; pow truncates the exponent (but not the base)
+>>> (pow (decimal "2.5") 3)
+15.625
+>>> (pow (decimal "2.5") (decimal "3.5"))
+15.625
+>>> ; even? and odd? only check the whole number part
+>>> (even? (decimal "2.5"))
+true
+>>> ; floor division, and remainder
+>>> (/ (decimal "4.5") 2)
+2
+>>> (remainder (decimal "4.5") 2)
+.5
+>>> ; (2 * 2) + 0.5 = 4.5, makes sense
+>>> ;
+>>> ; true division and remainder
+>>> (/ (decimal "4.5") (decimal 2))
+2.25
+>>> (remainder (decimal "4.5") (decimal 2))
+.000
+>>> ; (2.0 * 2.25) + 0.0 = 4.5, so that also makes sense, but not very useful
+```
+
+Decimal numbers are represented as a an integer coefficient and an implicitly negated
+integer exponent, with base 10. The exponent encodes the number of significant
+digits, so for example 2.5 is represented as `(25 . 1)`, which is 25x10^-1^,
+while 2.50 is represented as `(250 . 2)`, which is 250x10^-2^.
+
+#### decimal
+```nohighlight
+(decimal :integer|:string|:decimal)
+```
+Convert value to a decimal. Raises an error if an unsupported type is given.
+
+```
+>>> ; Example
+>>> (import-from "stl/decimal" decimal)
+>>> (+ 1 2 3)
+6
+>>> (+ (decimal "12.5") (decimal "0.25") 1)
+13.75
+```
+
+---
+
+#### round
+```nohighlight
+(round :decimal n:integer)
+```
+Round to n decimal places. Rounds up if the next digit is >= 5.
+
+---
+
+#### set-precision
+```nohighlight
+(set-precision :integer)
+```
+Change maximum precision of decimals returned by multiplication and division operations.
+
+---
+
+#### coef
+```nohighlight
+(coef)
+```
+Get the coefficient
+
+---
+
+#### expn
+```nohighlight
+(expn)
+```
+Description.
 
 ---
 

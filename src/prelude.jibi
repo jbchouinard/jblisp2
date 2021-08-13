@@ -10,7 +10,16 @@
 (defmacro defn (name params . exprs)
     (list def name (cons nfn (cons (repr name) (cons params exprs)))))
 
-(defmacro type? (val t) (list equal? (list type val) (list quote t)))
+(defmacro setglobal! (name expr)
+    (list env-set! (list env-globals) (list quote name) expr))
+
+(defmacro defglobal (name expr)
+    (list env-def (list env-globals) (list quote name) expr))
+
+(defmacro defnglobal (name params . exprs)
+    (list defglobal name (cons nfn (cons (repr name) (cons params exprs)))))
+
+(defmacro type? (val t) (list eq? (list type val) (list quote t)))
 
 (defn nil? (x) (equal? x nil))
 (defn string? (val) (type? val string))
@@ -78,12 +87,18 @@
         init
         (fold f (f (car lst) init) (cdr lst))))
 
-(defn range (start end)
-    (defn range-rec (n)
-        (if (>= n end)
-            nil
-            (cons n (range-rec (+ n 1)))))
-    (range-rec start))
+(defn in-bounds? (x a b)
+    (let ((min (if (< a b) a b))
+          (max (if (> a b) a b)))
+        (and (<= x max) (>= x min))))
+
+(defn range (start end . step)
+    (let ((step (if (empty? step) 1 (car step))))
+        (defn range-rec (n)
+            (if (in-bounds? n start end)
+                (cons n (range-rec (+ n step)))
+                ()))
+        (range-rec start)))
 
 (defn env-globals ()
     (defn globals-rec (e)
@@ -95,12 +110,6 @@
     (if (empty? syms)
         x
         (cons env-lookup-rec (cons (list env-lookup x (list quote (car syms))) (cdr syms)))))
-
-(defmacro setglobal! (name expr)
-    (list env-set! (list env-globals) (list quote name) expr))
-
-(defmacro defglobal (name expr)
-    (list env-def (list env-globals) (list quote name) expr))
 
 ; TODO
 (def vector list)
@@ -114,3 +123,17 @@
     (import mod as some-module)
     (list let (list (list 'some-module some-module))
         (cons use (cons 'some-module names))))
+
+(defn left-pad (s char n)
+    (assert (equal? 1 (len char)))
+    (if (< (len s) n)
+        (concat
+            (apply concat (map
+                (fn (_) char)
+                (range 0 (- n (len s)))))
+            s)
+        s))
+
+(defn any (. xs) (fold or false xs))
+
+(defn all (. xs) (fold and true xs))

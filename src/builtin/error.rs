@@ -10,7 +10,7 @@ pub fn jbuiltin_error(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResu
     let [etype, emsg] = get_n_args(args)?;
     let etype = etype.to_symbol()?;
     let emsg = emsg.to_str()?;
-    Ok(state.error(UserDefined(etype.to_string()), emsg))
+    Ok(state.error(Other(etype.to_string()), emsg))
 }
 
 pub fn jbuiltin_raise(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {

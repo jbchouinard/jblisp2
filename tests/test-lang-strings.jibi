@@ -3,6 +3,7 @@
     test-suite
     assert-equal
     assert-type
+    assert-not
 )
 
 (test-suite "lang/strings"
@@ -11,4 +12,10 @@
 
     (test "string is string" 
         (assert-type "foo" string))
+
+    (test "contains"
+        (assert (contains? "foobar" "foo")))
+
+    (test "contains not"
+        (assert-not (contains? "foobar" "baz")))
 )

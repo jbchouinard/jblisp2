@@ -18,4 +18,11 @@
     (test "set! changes local binding"
         (let ((x 0)) (set! x 7))
         (assert-equal 10 x))
+
+    (test "nested lets"
+        (assert-equal (list 5 7 12)
+            (let ((x 5))
+                (let ((y (+ x 2)))
+                    (let ((z (+ x y)))
+                        (list x y z))))))
 )

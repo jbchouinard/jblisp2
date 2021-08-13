@@ -12,7 +12,7 @@ pub enum JErrorKind {
     NotDefined,
     OsError,
     SyntaxError,
-    UserDefined(String),
+    Other(String),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -32,7 +32,7 @@ impl fmt::Display for JErrorKind {
             JErrorKind::NotDefined => write!(f, "NotDefined"),
             JErrorKind::OsError => write!(f, "OsError"),
             JErrorKind::SyntaxError => write!(f, "SyntaxError"),
-            JErrorKind::UserDefined(s) => write!(f, "{}", s),
+            JErrorKind::Other(s) => write!(f, "{}", s),
         }
     }
 }

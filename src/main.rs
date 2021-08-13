@@ -78,7 +78,9 @@ fn repl(mut interpreter: Interpreter) {
     loop {
         match get_tokens(&mut rl) {
             Ok(tokens) => match interpreter.eval_tokens(Box::new(tokens.into_iter())) {
-                Ok(Some(val)) => println!("{}", val),
+                Ok(Some(val)) => {
+                    interpreter.call("display", vec![val]).unwrap();
+                }
                 Ok(None) => (),
                 Err(exc) => Interpreter::print_exc(exc),
             },

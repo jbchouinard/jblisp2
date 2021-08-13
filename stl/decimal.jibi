@@ -1,31 +1,210 @@
 (import "stl/math" as math)
 
-(defn new (value precision)
-    (assert (integer? value))
-    (assert (integer? precision))
-    (cons 'decimal (cons value precision)))
+; Re-bind original definitions for symbols re-defined later
+(def grepr repr)
+(def gequal? equal?)
+(def g+ +)
+(def g- -)
+(def g* *)
+(def g/ /)
+(def g> >)
+(def g< <)
+(def g<= <=)
+(def g>= >=)
 
-(defn value (dec)
-    (assert (eq? 'decimal (car dec)))
+(def MAXPRECISION 10)
+
+(defn set-precision (n)
+    (assert (integer? n))
+    (set! MAXPRECISION n))
+
+(defn new (coef expn)
+    (assert (integer? coef))
+    (assert (integer? expn))
+    (cons 'type/stl/decimal/decimal (cons coef expn)))
+
+(defn coef (dec)
+    (assert (decimal? dec))
     (car (cdr dec)))
 
-(defn precision (dec)
-    (assert (eq? 'decimal (car dec)))
+(defn expn (dec)
+    (assert (decimal? dec))
     (cdr (cdr dec)))
 
-(defn whole (dec)
-    (value (truncate dec 0)))
+(defn decimal? (v) (and (pair? v) (eq? 'type/stl/decimal/decimal (car v))))
+
+(defn from-string (s)
+    (let ((expn (string-precision s))
+          (coef (parse-integer (replace s "." ""))))
+        (new coef expn)))
+
+(defn string-precision (s) (if (contains? s ".")
+    (len (nth 1 (split s ".")))
+    0))
+
+(defn from-int (x) (new x 0))
+
+(defn decimal (v) (cond
+    ((integer? v) (from-int v))
+    ((string? v) (from-string v))
+    ((decimal? v) v)
+    (else (raise (error
+        'TypeError (concat "cannot convert " (repr (type v)) " to decimal"))))))
+
+(defn drepr (d)
+    (let ((ds (repr (coef d))))
+        (if (> (len ds) (expn d))
+            (let ((whole (substring ds 0 (g- (len ds) (expn d))))
+                  (decimals (substring ds (g- (len ds) (expn d)) (len ds))))
+                (concat whole "." (left-pad decimals "0" (expn d))))
+            (concat "." (left-pad ds "0" (expn d))))))
 
 (defn truncate (dec to-precision)
-    (new
-        (/
-            (value dec)
-            (math::pow 10 (- (precision dec) to-precision)))
-        to-precision))
+    (if (< to-precision (expn dec))
+        (new
+            (g/
+                (coef dec)
+                (math::pow 10 (g- (expn dec) to-precision)))
+            to-precision)
+        dec))
 
 (defn expand (dec to-precision)
-    (new
-        (*
-            (value dec)
-            (math::pow 10 (- to-precision (precision dec))))
-        to-precision))
+    (if (> to-precision (expn dec))
+        (new
+            (g*
+                (coef dec)
+                (math::pow 10 (g- to-precision (expn dec))))
+            to-precision)
+        dec))
+
+(defn round (d to-precision)
+    (let ((dt (truncate d (+ 1 to-precision))))
+        (let ((pt (expn dt))
+              (vt (coef dt)))
+            (if (>= to-precision pt)
+                dt
+                (let ((quotient (g/ vt 10))
+                      (rem (math::remainder vt 10)))
+                    (if (>= rem 5)
+                        (new (+ quotient 1) to-precision)
+                        (new quotient to-precision)))))))
+
+(defn d+ (x1 x2)
+    (let ((d1 (decimal x1)) (d2 (decimal x2)))
+        (let ((p (math::max (expn d1) (expn d2))))
+            (new (g+ (coef (expand d1 p)) (coef (expand d2 p))) p))))
+
+(defn d- (x1 x2)
+    (let ((d1 (decimal x1)) (d2 (decimal x2)))
+        (let ((p (math::max (expn d1) (expn d2))))
+            (new (g- (coef (expand d1 p)) (coef (expand d2 p))) p))))
+
+(defn d* (x1 x2)
+    (let ((d1 (decimal x1)) (d2 (decimal x2)))
+        (let ((p1 (expn d1))
+              (v1 (coef d1))
+              (p2 (expn d2))
+              (v2 (coef d2)))
+            (truncate
+                (truncate-zeros
+                    (new (g* v1 v2) (g+ p1 p2))
+                    (math::max p1 p2))
+                MAXPRECISION))))
+
+(defn truncate-zeros (d min-precision)
+    (let ((v (coef d)) (p (expn d)))
+        (cond
+            ((g<= p min-precision) d)
+            ((gequal? 0 (math::remainder v 10))
+                (truncate-zeros (new (g/ v 10) (g- p 1)) min-precision))
+            (else d))))
+
+(defn d/int (d n)
+    (truncate (new (g/ (coef d) n) (expn d)) 0))
+
+(defn d/dec (x1 x2)
+    (let ((d1 (expand x1 (g* 2 MAXPRECISION)))
+          (d2 (expand x2 MAXPRECISION)))
+        (let ((v1 (coef d1))
+              (v2 (coef d2)))
+            (let ((rem (math::remainder v1 v2))
+                  (res (new (g/ v1 v2) MAXPRECISION)))
+                (if (equal? 0 rem)
+                    (truncate-zeros res 0)
+                    res)))))
+
+(defn d/ (x1 x2)
+    (cond
+        ((decimal? x2) (d/dec (decimal x1) x2))
+        ((decimal? x1) (d/int x1 x2))
+        (else (g/ x1 x2))))
+
+(defn dequal? (x1 x2)
+    (let ((d1 (decimal x1)) (d2 (decimal x2)))
+        (let ((p (math::max (expn d1) (expn d2))))
+            (gequal? (coef (expand d1 p)) (coef (expand d2 p))))))
+
+(defn d< (x1 x2)
+    (let ((d1 (decimal x1)) (d2 (decimal x2)))
+        (let ((p (math::max (expn d1) (expn d2))))
+            (g< (coef (expand d1 p)) (coef (expand d2 p))))))
+
+(defn d> (x1 x2) (not (d< x1 x2)))
+
+(defn d<= (x1 x2) (or (dequal? x1 x2) (d< x1 x2)))
+
+(defn d>= (x1 x2) (or (dequal? x1 x2) (d> x1 x2)))
+
+
+; Define replacements for builtins with support for decimal types
+
+(defnglobal equal? (x1 x2)
+    (if (or (decimal? x1) (decimal? x2))
+        (dequal? x1 x2)
+        (gequal? x1 x2)))
+
+(defnglobal repr (v) (if (decimal? v) (drepr v) (grepr v)))
+
+(defnglobal + (. xs) 
+    (if (apply any (map decimal? xs))
+        (fold d+ 0 xs)
+        (apply g+ xs)))
+
+(defnglobal - (x . xs) 
+    (if (apply any (map decimal? (cons x xs)))
+        (if (empty? xs)
+            (d- 0 x)
+            (fold (fn (x y) (d- y x)) x xs))
+        (apply g- (cons x xs))))
+
+(defnglobal * (. xs) 
+    (if (apply any (map decimal? xs))
+        (fold d* 1 xs)
+        (apply g* xs)))
+
+(defnglobal / (x . xs) 
+    (if (apply any (map decimal? (cons x xs)))
+        (if (empty? xs)
+            (d/ 1 x)
+            (fold (fn (x y) (d/ y x)) x xs))
+        (apply g/ (cons x xs))))
+
+(defnglobal < (x1 x2)
+    (if (or (decimal? x1) (decimal? x2))
+        (d< x1 x2)
+        (g< x1 x2)))
+
+(defnglobal > (x1 x2)
+    (if (or (decimal? x1) (decimal? x2))
+        (d> x1 x2)
+        (g> x1 x2)))
+
+(defnglobal <= (x1 x2)
+    (if (or (decimal? x1) (decimal? x2))
+        (d<= x1 x2)
+        (g<= x1 x2)))
+
+(defnglobal >= (x1 x2)
+    (if (or (decimal? x1) (decimal? x2))
+        (d>= x1 x2)
+        (g>= x1 x2)))

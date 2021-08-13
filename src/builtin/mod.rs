@@ -39,18 +39,24 @@ fn jbuiltin_not(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     Ok(state.bool(!x))
 }
 
-fn jbuiltin_and(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+fn jspecial_and(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
-    let x = x.to_bool()?;
-    let y = y.to_bool()?;
-    Ok(state.bool(x && y))
+    let x = eval(x, Rc::clone(&env), state)?.to_bool()?;
+    if !x {
+        return Ok(state.bool(false));
+    }
+    let y = eval(y, env, state)?.to_bool()?;
+    Ok(state.bool(y))
 }
 
-fn jbuiltin_or(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+fn jspecial_or(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
-    let x = x.to_bool()?;
-    let y = y.to_bool()?;
-    Ok(state.bool(x || y))
+    let x = eval(x, Rc::clone(&env), state)?.to_bool()?;
+    if x {
+        return Ok(state.bool(true));
+    }
+    let y = eval(y, env, state)?.to_bool()?;
+    Ok(state.bool(y))
 }
 
 fn jbuiltin_print(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
@@ -216,6 +222,10 @@ where
 }
 
 pub fn add_builtins(env: &JEnv, state: &mut JState) {
+    // Constants
+    env.define("INTMIN", state.int(JTInt::MIN));
+    env.define("INTMAX", state.int(JTInt::MAX));
+
     // Program flow
     add_builtin("begin", jbuiltin_begin, env, state);
     add_special_form("cond", jspecial_cond, env, state);
@@ -248,8 +258,8 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
 
     // Logical operators
     add_builtin("not", jbuiltin_not, env, state);
-    add_builtin("or", jbuiltin_or, env, state);
-    add_builtin("and", jbuiltin_and, env, state);
+    add_special_form("or", jspecial_or, env, state);
+    add_special_form("and", jspecial_and, env, state);
 
     // List
     add_builtin("list", jbuiltin_list, env, state);
@@ -259,7 +269,13 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("list?", jbuiltin_is_list, env, state);
 
     // String
+    add_builtin("len", jbuiltin_len, env, state);
     add_builtin("concat", jbuiltin_concat, env, state);
+    add_builtin("contains?", jbuiltin_contains, env, state);
+    add_builtin("split", jbuiltin_split, env, state);
+    add_builtin("substring", jbuiltin_substring, env, state);
+    add_builtin("replace", jbuiltin_replace, env, state);
+    add_builtin("parse-integer", jbuiltin_parse_int, env, state);
 
     // Var, function definition
     add_special_form("def", jspecial_def, env, state);
