@@ -49,7 +49,7 @@
     <span class="kw">let</span> [<span class="ident">etype</span>, <span class="ident">emsg</span>] <span class="op">=</span> <span class="ident">get_n_args</span>(<span class="ident">args</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">etype</span> <span class="op">=</span> <span class="ident">etype</span>.<span class="ident">to_symbol</span>()<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">emsg</span> <span class="op">=</span> <span class="ident">emsg</span>.<span class="ident">to_str</span>()<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">error</span>(<span class="ident">UserDefined</span>(<span class="ident">etype</span>.<span class="ident">to_string</span>()), <span class="ident">emsg</span>))
+    <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">error</span>(<span class="ident">Other</span>(<span class="ident">etype</span>.<span class="ident">to_string</span>()), <span class="ident">emsg</span>))
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">jbuiltin_raise</span>(<span class="ident">args</span>: <span class="ident">JValRef</span>, <span class="ident">_env</span>: <span class="ident">JEnvRef</span>, <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JResult</span> {

@@ -100,7 +100,7 @@
     <span class="kw">match</span> <span class="ident">res</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">val</span>),
         <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="ident">state</span>.<span class="ident">traceback_push</span>(<span class="ident">TracebackFrame::from_any</span>(<span class="ident">func</span>, <span class="ident">envclone</span>));
+            <span class="ident">state</span>.<span class="ident">traceback_push</span>(<span class="ident">TracebackFrame::from_jval</span>(<span class="ident">func</span>, <span class="ident">envclone</span>));
             <span class="prelude-val">Err</span>(<span class="ident">err</span>)
         }
     }

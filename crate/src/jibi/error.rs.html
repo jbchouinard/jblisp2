@@ -73,7 +73,7 @@
     <span class="ident">NotDefined</span>,
     <span class="ident">OsError</span>,
     <span class="ident">SyntaxError</span>,
-    <span class="ident">UserDefined</span>(<span class="ident">String</span>),
+    <span class="ident">Other</span>(<span class="ident">String</span>),
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
@@ -93,7 +93,7 @@
             <span class="ident">JErrorKind::NotDefined</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;NotDefined&quot;</span>),
             <span class="ident">JErrorKind::OsError</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;OsError&quot;</span>),
             <span class="ident">JErrorKind::SyntaxError</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;SyntaxError&quot;</span>),
-            <span class="ident">JErrorKind::UserDefined</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">s</span>),
+            <span class="ident">JErrorKind::Other</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">s</span>),
         }
     }
 }

@@ -49,6 +49,8 @@
                 <ul class="current">
                     <li class="toctree-l1 current"><a class="reference internal current" href=".">Language Reference</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#types">Types</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#primitive-types">Primitive Types</a>
@@ -109,8 +111,6 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#let">let</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#lets">lets</a>
-    </li>
     <li class="toctree-l4"><a class="reference internal" href="#defglobal">defglobal</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#setglobal">setglobal!</a>
@@ -127,9 +127,15 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#control-flow">Control Flow</a>
         <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#begin">begin</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#if">if</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#begin">begin</a>
+    <li class="toctree-l4"><a class="reference internal" href="#cond">cond</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#or">or</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#and">and</a>
     </li>
         </ul>
     </li>
@@ -145,6 +151,10 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#not">not</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#any">any</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#all">all</a>
+    </li>
         </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#pair-and-list-operations">Pair and List Operations</a>
@@ -157,6 +167,10 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#list_1">list</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#lcons">lcons</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#nth">nth</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#empty">empty?</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#list_2">list?</a>
@@ -165,25 +179,41 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#fold">fold</a>
     </li>
-        </ul>
+    <li class="toctree-l4"><a class="reference internal" href="#range">range</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#range">range</a>
+        </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#string-operations">String Operations</a>
         <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#len">len</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#concat">concat</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#replace">replace</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#substring">substring</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#split">split</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#contains">contains?</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#parse-integer">parse-integer</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#left-pad">left-pad</a>
     </li>
         </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#integer-operations">Integer Operations</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_1">+</a>
+    <li class="toctree-l4"><a class="reference internal" href="#add">Add: +</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#-">-</a>
+    <li class="toctree-l4"><a class="reference internal" href="#sub-">Sub: -</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_2">*</a>
+    <li class="toctree-l4"><a class="reference internal" href="#mul">Mul: *</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_3">/</a>
+    <li class="toctree-l4"><a class="reference internal" href="#div">Div: /</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#comparisons">Comparisons: >, >=, \&lt;, \&lt;=</a>
     </li>
         </ul>
     </li>
@@ -267,7 +297,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#system-procedures">System Procedures</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#environment-variable">environment-variable</a>
+    <li class="toctree-l4"><a class="reference internal" href="#getenv">getenv</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#exit">exit</a>
     </li>
@@ -291,6 +321,46 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#standard-library-stl">Standard Library (STL)</a>
         <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#stlmath">stl/math</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#sign">sign</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#abs">abs</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#remainder">remainder</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#pow">pow</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#sum">sum</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#product">product</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#min">min</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#max">max</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#even">even?</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#odd">odd?</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#factorial">factorial</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#stldecimal">stl/decimal</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#decimal">decimal</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#round">round</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#set-precision">set-precision</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#coef">coef</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#expn">expn</a>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#stlunittest">stl/unittest</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#test">test</a>
@@ -360,7 +430,8 @@
             <div class="section">
               
                 <h1 id="jibi-scheme">Jibi Scheme</h1>
-<p><strong>version 0.1.1</strong></p>
+<p><strong>version 0.1.4</strong></p>
+<h2 id="overview">Overview</h2>
 <p>A homebrew interpreted, non-RnRS compliant dialect of Scheme.</p>
 <h2 id="types">Types</h2>
 <h3 id="primitive-types">Primitive Types</h3>
@@ -497,20 +568,11 @@ applied when it is the first element of a <code>list</code>.</p>
 exists.</p>
 <hr />
 <h4 id="let">let</h4>
-<pre><code class="language-nohighlight">(let name value:expr :expr ...)
-</code></pre>
-<p>Create a binding in a new local scope.</p>
-<pre><code class="language-nohighlight">; Example
-&gt;&gt;&gt; (let x 12 (display x))
-12
-</code></pre>
-<hr />
-<h4 id="lets">lets</h4>
 <pre><code class="language-nohighlight">(lets ((name value:expr) ...) :expr ...)
 </code></pre>
-<p>Create multiple bindings in a new local scope.</p>
-<pre><code class="language-nohighlight">; Example
-&gt;&gt;&gt; (lets ((x 5) (y 7))
+<p>Create bindings in a new local scopes.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (let ((x 5) (y 7))
 ...    (display x)
 ...    (display y))
 5
@@ -537,7 +599,7 @@ not already exists.</p>
 there must be a single parameter after <code>.</code>, which will be a list
 containing zero or more arguments depending on the number of arguments
 passed.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (defn increment (x) (+ x 1))
 &gt;&gt;&gt; (increment 1)
 2
@@ -556,16 +618,41 @@ Unhandled ApplyError &quot;expected at least 2 argument(s)&quot;
 <p>Create a lambda (function). See <a href="#defn"><code>defn</code></a>.</p>
 <hr />
 <h3 id="control-flow">Control Flow</h3>
+<h4 id="begin">begin</h4>
+<pre><code class="language-nohighlight">(begin :expr ...)
+</code></pre>
+<p>Evaluate expressions sequentially and return value of last expression.</p>
+<hr />
 <h4 id="if">if</h4>
 <pre><code class="language-nohighlight">(if predicate:bool then:expr else:expr)
 </code></pre>
 <p>Evaluates only <code>then</code> or <code>else</code> conditonally on the value of
 <code>predicate</code>.</p>
 <hr />
-<h4 id="begin">begin</h4>
-<pre><code class="language-nohighlight">(begin :expr ...)
+<h4 id="cond">cond</h4>
+<pre><code class="language-nohighlight">(cond (predicate:bool :expr ...) ...)
 </code></pre>
-<p>Evaluate expressions sequentially and return value of last expression.</p>
+<p>Evaluates body of the first clause which has a true predicate.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (cond
+...   (false (assert false))
+...   ((not true) (assert false))
+...   (else (print &quot;foo&quot;) (print &quot;bar&quot;)))
+foo
+bar
+</code></pre>
+<hr />
+<h4 id="or">or</h4>
+<pre><code class="language-nohighlight">(or expr expr)
+</code></pre>
+<p>Logical or. Short-circuiting; if the first expression evaluates to true,
+the second expression is not evaluated.</p>
+<hr />
+<h4 id="and">and</h4>
+<pre><code class="language-nohighlight">(and expr expr)
+</code></pre>
+<p>Logical and. Short-circuiting; if the first expression evaluates to
+false, the second expression is not evaluated.</p>
 <hr />
 <h3 id="comparison">Comparison</h3>
 <h4 id="eq">eq?</h4>
@@ -582,6 +669,17 @@ Unhandled ApplyError &quot;expected at least 2 argument(s)&quot;
 <h4 id="not">not</h4>
 <pre><code class="language-nohighlight">(not :bool)
 </code></pre>
+<p>Logical not.</p>
+<hr />
+<h4 id="any">any</h4>
+<pre><code class="language-nohighlight">(any :bool ...)
+</code></pre>
+<p>Returns true if any argument is true.</p>
+<hr />
+<h4 id="all">all</h4>
+<pre><code class="language-nohighlight">(all :bool ..)
+</code></pre>
+<p>Returns true if all arguments are true.</p>
 <hr />
 <h3 id="pair-and-list-operations">Pair and List Operations</h3>
 <h4 id="cons">cons</h4>
@@ -604,10 +702,29 @@ Unhandled ApplyError &quot;expected at least 2 argument(s)&quot;
 </code></pre>
 <p>Construct a list, which is a linked list made from pairs and terminated
 by <code>nil</code>.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (equal? (list 1 2 3) (cons 1 (cons 2 (cons 3 nil))))
 true
 &gt;&gt;&gt; (equal? (list 1 2 3) (cons 1 (list 2 3)))
+true
+</code></pre>
+<hr />
+<h4 id="lcons">lcons</h4>
+<pre><code class="language-nohighlight">(lcons :expr ... :list)
+</code></pre>
+<p>Prepend values to a list.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (lcons 1 2 3 (list 4 5))
+(1 2 3 4 5)
+</code></pre>
+<hr />
+<h4 id="nth">nth</h4>
+<pre><code class="language-nohighlight">(nth :integer :list)
+</code></pre>
+<p>Get nth item from a list (zero-indexed).</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (nth 3 (list 0 1 2 3 4))
+3
 </code></pre>
 <hr />
 <h4 id="empty">empty?</h4>
@@ -624,7 +741,7 @@ true
 <pre><code class="language-nohighlight">(map f:procedure vals:list)
 </code></pre>
 <p>Applies <code>f</code> to each value in a list and return results in list.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (map (fn (x) (* 2 x)) (list 1 2 3))
 (2 4 6)
 </code></pre>
@@ -633,47 +750,122 @@ true
 <pre><code class="language-nohighlight">(fold f:procedure init:expr vals:list)
 </code></pre>
 <p>Applies <code>f</code> to each value in a list and accumulate results in <code>init</code>.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (fold + 0 (list 1 2 3))
 6
 &gt;&gt;&gt; (fold cons () (list 1 2 3))
 (3 2 1)
 </code></pre>
 <hr />
-<h3 id="range">range</h3>
+<h4 id="range">range</h4>
 <pre><code class="language-nohighlight">(range from:integer to:integer)
 </code></pre>
 <p>Produce list of integers for range [<code>from</code>, <code>to</code>), where <code>to</code> >=
 <code>from</code>.</p>
 <hr />
 <h3 id="string-operations">String Operations</h3>
+<h4 id="len">len</h4>
+<pre><code class="language-nohighlight">(len :string)
+</code></pre>
+<p>Get length of string (number of UTF-8 scalar values).</p>
+<hr />
 <h4 id="concat">concat</h4>
 <pre><code class="language-nohighlight">(concat :string ...)
 </code></pre>
 <p>Concatenate multiple strings.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (concat &quot;foo&quot; &quot;bar&quot; &quot;baz&quot;)
 &quot;foobarbaz&quot;
 </code></pre>
 <hr />
+<h4 id="replace">replace</h4>
+<pre><code class="language-nohighlight">(replace :string :string :string)
+</code></pre>
+<p>Description.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (replace &quot;fuzzy bears are fuzzy&quot; &quot;fuzzy&quot; &quot;long&quot;)
+&quot;long bears are long&quot;
+</code></pre>
+<hr />
+<h4 id="substring">substring</h4>
+<pre><code class="language-nohighlight">(substring :string start:integer end:integer)
+</code></pre>
+<p>Get a substring. Negative indices count from the end of the string. If
+start > end, the substring is reversed.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (substring &quot;foobar&quot; 1 -1)
+&quot;ooba&quot;
+&gt;&gt;&gt; (substring &quot;foobar&quot; 6 0)
+&quot;raboof&quot;
+</code></pre>
+<hr />
+<h4 id="split">split</h4>
+<pre><code class="language-nohighlight">(split :string separator:string)
+</code></pre>
+<p>Split a string by separator.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (split &quot;12.34.56&quot; &quot;.&quot;)
+(&quot;12&quot; &quot;34&quot; &quot;56&quot;)
+</code></pre>
+<hr />
+<h4 id="contains">contains?</h4>
+<pre><code class="language-nohighlight">(contains? str:string substr:string)
+</code></pre>
+<p>Check if <code>str</code> contains <code>substr</code>.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (contains? &quot;foobar&quot; &quot;foo&quot;)
+true
+</code></pre>
+<hr />
+<h4 id="parse-integer">parse-integer</h4>
+<pre><code class="language-nohighlight">(parse-integer :string)
+</code></pre>
+<p>Parse an integer from a string.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (parse-integer &quot;12&quot;)
+12
+</code></pre>
+<hr />
+<h4 id="left-pad">left-pad</h4>
+<pre><code class="language-nohighlight">(left-pad string:string char:string width:integer)
+</code></pre>
+<p>Pad string to <code>width</code> characters.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (left-pad &quot;34&quot; &quot;0&quot; 4)
+0034
+</code></pre>
+<hr />
 <h3 id="integer-operations">Integer Operations</h3>
-<h4 id="_1">+</h4>
+<h4 id="add">Add: +</h4>
 <pre><code class="language-nohighlight">(+ :integer ...)
 </code></pre>
-<h4 id="-">-</h4>
+<p>Addition.</p>
+<h4 id="sub-">Sub: -</h4>
 <pre><code class="language-nohighlight">(- :integer ...)
 </code></pre>
-<h4 id="_2">*</h4>
+<p>Negation (single argument) or substraction (multiple arguments).</p>
+<h4 id="mul">Mul: *</h4>
 <pre><code class="language-nohighlight">(* :integer ...)
 </code></pre>
-<h4 id="_3">/</h4>
+<p>Multiplication.</p>
+<h4 id="div">Div: /</h4>
 <pre><code class="language-nohighlight">(/ :integer ...)
 </code></pre>
+<p>Reciprocal (single argument) or division (multiple arguments).</p>
+<hr />
+<h4 id="comparisons">Comparisons: >, >=, \&lt;, \&lt;=</h4>
+<pre><code class="language-nohighlight">(&gt; :integer :integer)
+(&gt; :integer :integer)
+(&gt; :integer :integer)
+(&gt; :integer :integer)
+</code></pre>
+<p>Comparisons.</p>
 <hr />
 <h3 id="printing">Printing</h3>
 <h4 id="print">print</h4>
 <pre><code class="language-nohighlight">(print :string)
 </code></pre>
+<p>Print a string.</p>
 <hr />
 <h4 id="repr">repr</h4>
 <pre><code class="language-nohighlight">(repr :expr)
@@ -686,7 +878,6 @@ true
 <p>Print string representation of a value.</p>
 <hr />
 <h3 id="modules">Modules</h3>
-<p>(Work in progress.)</p>
 <p><code>jibi</code> has a basic namespaced module system. A module is simply a
 <code>.jibi</code> file.</p>
 <p>They provide no privacy, all variables defined in the module scope are
@@ -700,7 +891,7 @@ modules, thus importing “stl/unittest” looks for the file
 <pre><code class="language-nohighlight">(import module:string as name)
 </code></pre>
 <p>Import module and bind it to <code>name</code>.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (import &quot;stl/math&quot; as math)
 &gt;&gt;&gt; (math::product (list 2 3 4))
 24
@@ -710,7 +901,7 @@ modules, thus importing “stl/unittest” looks for the file
 <pre><code class="language-nohighlight">(use module:symbol name ...)
 </code></pre>
 <p>Bind a name from a module into the global scope.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (import &quot;stl/math&quot; as math)
 &gt;&gt;&gt; (use math product sum)
 &gt;&gt;&gt; (product (list 2 3 4))
@@ -721,7 +912,7 @@ modules, thus importing “stl/unittest” looks for the file
 <pre><code class="language-nohighlight">(import-from module:string name ...)
 </code></pre>
 <p>Import specific names from a module.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (import-from &quot;stl/math&quot; product sum)
 &gt;&gt;&gt; (sum (list 2 3 4))
 9
@@ -734,7 +925,7 @@ modules, thus importing “stl/unittest” looks for the file
 <pre><code class="language-nohighlight">(type :expr)
 </code></pre>
 <p>Inspect type of a value.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (type &quot;foo&quot;)
 string
 </code></pre>
@@ -747,7 +938,7 @@ string
 </code></pre>
 <p>Test type of a value. There are also convenience functions for every
 type.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (type? &quot;foo&quot; string)
 true
 &gt;&gt;&gt; (integer? &quot;foo&quot;)
@@ -759,7 +950,7 @@ false
 <pre><code class="language-nohighlight">(quote :expr)
 </code></pre>
 <p>A quoted expression evaluates to the expression.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (def a 100)
 &gt;&gt;&gt; a
 100
@@ -775,7 +966,7 @@ a
 <pre><code class="language-nohighlight">(eval :expr)
 </code></pre>
 <p>Evaluate an expression.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (def expr (quote (+ 5 5)))
 &gt;&gt;&gt; expr
 (+ 5 5)
@@ -792,7 +983,7 @@ a
 <pre><code class="language-nohighlight">(apply :procedure :list)
 </code></pre>
 <p>Apply a procedure to a list of arguments.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (apply + (list 1 2 3))
 6
 </code></pre>
@@ -851,7 +1042,7 @@ the <code>try</code> form.</p>
 </code></pre>
 <p>Try evaluating <code>body</code>. If an error is raised, evaluate <code>catch</code>; the
 raised error value is bound to <code>err</code> when <code>catch</code> is evaluated.</p>
-<pre><code class="language-nohighlight">; Example
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (defn errored ()
 ...     (raise (exception &quot;oh no!&quot;))
 ...     (print &quot;never evaluated&quot;))
@@ -900,8 +1091,8 @@ handled #[error Exception &quot;oh no!&quot;]
 <p>Get the global environment.</p>
 <hr />
 <h3 id="system-procedures">System Procedures</h3>
-<h4 id="environment-variable">environment-variable</h4>
-<pre><code class="language-nohighlight">(environment-variable var:string)
+<h4 id="getenv">getenv</h4>
+<pre><code class="language-nohighlight">(getenv var:string)
 </code></pre>
 <p>Get value of environment variable. Raises exception if the variable is
 not set or contains non-UTF8 characters.</p>
@@ -939,7 +1130,194 @@ not set or contains non-UTF8 characters.</p>
 <hr />
 <h2 id="standard-library-stl">Standard Library (STL)</h2>
 <p>I hope you were not expecting a real standard library. You can have some
-unit testing utilities for consolation.</p>
+unit testing and maths as consolation.</p>
+<h3 id="stlmath">stl/math</h3>
+<p>Some mathematical functions.</p>
+<h4 id="sign">sign</h4>
+<pre><code class="language-nohighlight">(sign :number)
+</code></pre>
+<p>Returns sign of number.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (sign -12)
+-1
+&gt;&gt;&gt; (sign 100)
+1
+&gt;&gt;&gt; (sign 0)
+0
+</code></pre>
+<hr />
+<h4 id="abs">abs</h4>
+<pre><code class="language-nohighlight">(abs :number)
+</code></pre>
+<p>Returns absolute value of number</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (abs -12)
+12
+</code></pre>
+<hr />
+<h4 id="remainder">remainder</h4>
+<pre><code class="language-nohighlight">(remainder :integer :integer)
+</code></pre>
+<p>Returns the least positive remainder for integer division.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (remainder 42 5)
+2
+&gt;&gt; (remainder 42 -5)
+2
+</code></pre>
+<hr />
+<h4 id="pow">pow</h4>
+<pre><code class="language-nohighlight">(pow base:number exponent:number)
+</code></pre>
+<p>Perform exponentiation.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (pow 10 3)
+1000
+&gt;&gt;&gt; (pow 2 10)
+1024
+</code></pre>
+<hr />
+<h4 id="sum">sum</h4>
+<pre><code class="language-nohighlight">(sum :list)
+</code></pre>
+<p>Returns sum of list.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (sum (list 1 2 3 4))
+10
+</code></pre>
+<hr />
+<h4 id="product">product</h4>
+<pre><code class="language-nohighlight">(product :list)
+</code></pre>
+<p>Returns product of list.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (product (list 1 2 3 4))
+24
+</code></pre>
+<hr />
+<h4 id="min">min</h4>
+<pre><code class="language-nohighlight">(min :number :number)
+</code></pre>
+<p>Returns smallest of 2 values.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (fold min INTMAX (list 21 321 421 -12))
+421
+</code></pre>
+<hr />
+<h4 id="max">max</h4>
+<pre><code class="language-nohighlight">(max :number :number)
+</code></pre>
+<p>Returns largest of 2 values.</p>
+<hr />
+<h4 id="even">even?</h4>
+<pre><code class="language-nohighlight">(even? :number)
+</code></pre>
+<p>Check if even.</p>
+<hr />
+<h4 id="odd">odd?</h4>
+<pre><code class="language-nohighlight">(odd? :number)
+</code></pre>
+<p>Check if odd.</p>
+<hr />
+<h4 id="factorial">factorial</h4>
+<pre><code class="language-nohighlight">(factorial :number)
+</code></pre>
+<p>Compute factorial.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (factorial 4)
+24
+</code></pre>
+<hr />
+<h3 id="stldecimal">stl/decimal</h3>
+<p>The <code>decimal</code> module implements floating point decimal arithmetic.</p>
+<p>By default, multiplication and division produce results with a maximum
+precision of 10 decimal places. This can be changed with
+<code>set-precision</code>, but since decimals are implemented with <code>i128</code>, a high
+precision can cause multiplication and division to overflow, in which
+case an error will be raised.</p>
+<p>Importing the decimal module overloads the following functions:</p>
+<ul>
+<li>Arithemic operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code></li>
+<li>Comparison operators: <code>equal?</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></li>
+<li>Display: <code>repr</code>, <code>display</code></li>
+</ul>
+<p>Note that division is defined as floor division when the divisor is an
+integer:</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (import-from &quot;stl/decimal&quot; decimal)
+&gt;&gt;&gt; (/ (decimal 5) (decimal 2))
+2.5
+&gt;&gt;&gt; (/ (decimal 5) 2)
+2.
+</code></pre>
+<p>Other functions defined in terms of arithmetic operations will work with
+decimal values once <code>stl/decimal</code> is imported. These include <code>range</code>,
+and all functions from <code>stl/math</code> - with the caveat that some math
+functions are only defined for whole numbers:</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (import-from &quot;stl/decimal&quot; decimal)
+&gt;&gt;&gt; (import-from &quot;stl/math&quot; remainder pow even?)
+&gt;&gt;&gt; ; pow truncates the exponent (but not the base)
+&gt;&gt;&gt; (pow (decimal &quot;2.5&quot;) 3)
+15.625
+&gt;&gt;&gt; (pow (decimal &quot;2.5&quot;) (decimal &quot;3.5&quot;))
+15.625
+&gt;&gt;&gt; ; even? and odd? only check the whole number part
+&gt;&gt;&gt; (even? (decimal &quot;2.5&quot;))
+true
+&gt;&gt;&gt; ; floor division, and remainder
+&gt;&gt;&gt; (/ (decimal &quot;4.5&quot;) 2)
+2
+&gt;&gt;&gt; (remainder (decimal &quot;4.5&quot;) 2)
+.5
+&gt;&gt;&gt; ; (2 * 2) + 0.5 = 4.5, makes sense
+&gt;&gt;&gt; ;
+&gt;&gt;&gt; ; true division and remainder
+&gt;&gt;&gt; (/ (decimal &quot;4.5&quot;) (decimal 2))
+2.25
+&gt;&gt;&gt; (remainder (decimal &quot;4.5&quot;) (decimal 2))
+.000
+&gt;&gt;&gt; ; (2.0 * 2.25) + 0.0 = 4.5, so that also makes sense, but not very useful
+</code></pre>
+<p>Decimal numbers are represented as a an integer coefficient and an
+implicitly negated integer exponent, with base 10. The exponent encodes
+the number of significant digits, so for example 2.5 is represented as
+<code>(25 . 1)</code>, which is 25x10<sup>-1</sup>, while 2.50 is represented as
+<code>(250 . 2)</code>, which is 250x10<sup>-2</sup>.</p>
+<h4 id="decimal">decimal</h4>
+<pre><code class="language-nohighlight">(decimal :integer|:string|:decimal)
+</code></pre>
+<p>Convert value to a decimal. Raises an error if an unsupported type is
+given.</p>
+<pre><code>&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (import-from "stl/decimal" decimal)
+&gt;&gt;&gt; (+ 1 2 3)
+6
+&gt;&gt;&gt; (+ (decimal "12.5") (decimal "0.25") 1)
+13.75
+</code></pre>
+<hr />
+<h4 id="round">round</h4>
+<pre><code class="language-nohighlight">(round :decimal n:integer)
+</code></pre>
+<p>Round to n decimal places. Rounds up if the next digit is >= 5.</p>
+<hr />
+<h4 id="set-precision">set-precision</h4>
+<pre><code class="language-nohighlight">(set-precision :integer)
+</code></pre>
+<p>Change maximum precision of decimals returned by multiplication and
+division operations.</p>
+<hr />
+<h4 id="coef">coef</h4>
+<pre><code class="language-nohighlight">(coef)
+</code></pre>
+<p>Get the coefficient</p>
+<hr />
+<h4 id="expn">expn</h4>
+<pre><code class="language-nohighlight">(expn)
+</code></pre>
+<p>Description.</p>
+<hr />
 <h3 id="stlunittest">stl/unittest</h3>
 <p>Write and run unit tests with assertions.</p>
 <h4 id="test">test</h4>
@@ -961,7 +1339,7 @@ error if any of the tests failed.</p>
 </code></pre>
 <pre><code class="language-nohighlight">$ jibi sometests.jibi
 Testing very useful tests...
-suspicious: failed (#[error Exception: true is not equal to false])
+Test suspicious: failed (#[error Exception: true is not equal to false])
 Test results: 1 ok, 1 failed
 Traceback:
   ...
@@ -1032,5 +1410,5 @@ Exception: Some tests failed.
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-08-11 21:54:20.774925+00:00
+Build Date UTC : 2021-08-13 18:51:11.523088+00:00
 -->
