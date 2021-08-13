@@ -252,6 +252,9 @@
 <span id="250">250</span>
 <span id="251">251</span>
 <span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
@@ -424,6 +427,9 @@
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">interned_int</span>.<span class="ident">get_or_insert</span>(<span class="ident">val</span>)
         }
+    }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">float</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">JTFloat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
+        <span class="ident">JVal::Float</span>(<span class="ident">val</span>).<span class="ident">into_ref</span>()
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">symbol</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JValRef</span> {
         <span class="self">self</span>.<span class="ident">interned_sym</span>.<span class="ident">get_or_insert</span>(<span class="ident">val</span>)

@@ -127,6 +127,10 @@
 <span id="125">125</span>
 <span id="126">126</span>
 <span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::collections::VecDeque</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
@@ -179,7 +183,7 @@
     }
 }
 
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TokenTransformer</span> <span class="op">=</span> <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TokenTransformer</span> <span class="op">=</span> <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>, <span class="ident">JError</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ReaderMacro</span> {
@@ -208,7 +212,7 @@
         }
         <span class="bool-val">true</span>
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">apply_rule</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tokens</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">apply_rule</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tokens</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>, <span class="ident">JError</span><span class="op">&gt;</span> {
         (<span class="self">self</span>.<span class="ident">transformer</span>)(<span class="ident">tokens</span>)
     }
 }
@@ -248,7 +252,11 @@
                     <span class="ident">VecDeque::with_capacity</span>(<span class="self">self</span>.<span class="ident">rm</span>.<span class="ident">rule</span>.<span class="ident">len</span>()),
                 )
                 .<span class="ident">into</span>();
-                <span class="self">self</span>.<span class="ident">buffer_out</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rm</span>.<span class="ident">apply_rule</span>(<span class="ident">toks_in</span>).<span class="ident">into</span>();
+                <span class="kw">let</span> <span class="ident">spos</span> <span class="op">=</span> <span class="ident">toks_in</span>[<span class="number">0</span>].<span class="ident">pos</span>.<span class="ident">clone</span>();
+                <span class="self">self</span>.<span class="ident">buffer_out</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">rm</span>.<span class="ident">apply_rule</span>(<span class="ident">toks_in</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="ident">toks_out</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">toks_out</span>.<span class="ident">into</span>(),
+                    <span class="prelude-val">Err</span>(<span class="ident">je</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TokenError::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">je</span>), <span class="ident">spos</span>)),
+                };
             } <span class="kw">else</span> {
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">buffer_in</span>.<span class="ident">pop_front</span>().<span class="ident">unwrap</span>());
             }

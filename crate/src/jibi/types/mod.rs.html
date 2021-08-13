@@ -308,6 +308,14 @@
 <span id="306">306</span>
 <span id="307">307</span>
 <span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::fmt</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
@@ -320,6 +328,7 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">intern</span>;
 
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">JTInt</span> <span class="op">=</span> <span class="ident">i128</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">JTFloat</span> <span class="op">=</span> <span class="ident">f64</span>;
 
 <span class="kw">static</span> <span class="ident">BUILTIN_COUNTER</span>: <span class="ident">AtomicUsize</span> <span class="op">=</span> <span class="ident">AtomicUsize::new</span>(<span class="number">1</span>);
 
@@ -535,6 +544,7 @@
     <span class="ident">Pair</span>(<span class="ident">JPair</span>),
     <span class="ident">Quote</span>(<span class="ident">JValRef</span>),
     <span class="ident">Int</span>(<span class="ident">JTInt</span>),
+    <span class="ident">Float</span>(<span class="ident">JTFloat</span>),
     <span class="ident">Bool</span>(<span class="ident">bool</span>),
     <span class="ident">Symbol</span>(<span class="ident">String</span>),
     <span class="ident">String</span>(<span class="ident">String</span>),
@@ -563,6 +573,12 @@
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="self">Self</span><span class="ident">::Int</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="ident">n</span>),
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">JError::new</span>(<span class="ident">TypeError</span>, <span class="string">&quot;expected an int&quot;</span>)),
+        }
+    }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_float</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">JTFloat</span>, <span class="ident">JError</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="self">Self</span><span class="ident">::Float</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="ident">x</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">JError::new</span>(<span class="ident">TypeError</span>, <span class="string">&quot;expected a float&quot;</span>)),
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bool</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">JError</span><span class="op">&gt;</span> {

@@ -61,6 +61,8 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#integer">integer</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#float">float</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#bool">bool</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#nil">nil</a>
@@ -197,13 +199,11 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#contains">contains?</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#parse-integer">parse-integer</a>
-    </li>
     <li class="toctree-l4"><a class="reference internal" href="#left-pad">left-pad</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#integer-operations">Integer Operations</a>
+    <li class="toctree-l3"><a class="reference internal" href="#numerical-operations">Numerical Operations</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#add">Add: +</a>
     </li>
@@ -213,7 +213,17 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#div">Div: /</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#comparisons">Comparisons: >, >=, \&lt;, \&lt;=</a>
+    <li class="toctree-l4"><a class="reference internal" href="#numeric-comparison">Numeric Comparison: =, >, >=, \&lt;, \&lt;=</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#type-conversions">Type Conversions</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#string_1">string</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#integer_1">integer</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#float_1">float</a>
     </li>
         </ul>
     </li>
@@ -430,7 +440,7 @@
             <div class="section">
               
                 <h1 id="jibi-scheme">Jibi Scheme</h1>
-<p><strong>version 0.1.4</strong></p>
+<p><strong>version 0.1.6</strong></p>
 <h2 id="overview">Overview</h2>
 <p>A homebrew interpreted, non-RnRS compliant dialect of Scheme.</p>
 <h2 id="types">Types</h2>
@@ -454,9 +464,15 @@ not bound in any enclosing scope.</p>
 <h4 id="integer">integer</h4>
 <pre><code class="language-nohighlight">100
 </code></pre>
-<p>The underlying type for <code>integer</code> is <code>i128</code>. Integer overflow terminates
-the program.</p>
+<p>The underlying type for <code>integer</code> is <code>i128</code>. Integer overflow raises an
+exception.</p>
 <p><em>Evaluation Rule:</em> An <code>integer</code> value evaluates to itself.</p>
+<hr />
+<h4 id="float">float</h4>
+<pre><code class="language-nohighlight">1.5
+</code></pre>
+<p>The underlying type for <code>float</code> is <code>f64</code>.</p>
+<p><em>Evaluation Rule:</em> A <code>float</code> value evaluates to itself.</p>
 <hr />
 <h4 id="bool">bool</h4>
 <pre><code class="language-nohighlight">true
@@ -758,10 +774,10 @@ true
 </code></pre>
 <hr />
 <h4 id="range">range</h4>
-<pre><code class="language-nohighlight">(range from:integer to:integer)
+<pre><code class="language-nohighlight">(range from:number to:number [step:number])
 </code></pre>
-<p>Produce list of integers for range [<code>from</code>, <code>to</code>), where <code>to</code> >=
-<code>from</code>.</p>
+<p>Produce list of numbers for range [<code>from</code>, <code>to</code>], with an optional
+step size.</p>
 <hr />
 <h3 id="string-operations">String Operations</h3>
 <h4 id="len">len</h4>
@@ -817,15 +833,6 @@ start > end, the substring is reversed.</p>
 true
 </code></pre>
 <hr />
-<h4 id="parse-integer">parse-integer</h4>
-<pre><code class="language-nohighlight">(parse-integer :string)
-</code></pre>
-<p>Parse an integer from a string.</p>
-<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
-&gt;&gt;&gt; (parse-integer &quot;12&quot;)
-12
-</code></pre>
-<hr />
 <h4 id="left-pad">left-pad</h4>
 <pre><code class="language-nohighlight">(left-pad string:string char:string width:integer)
 </code></pre>
@@ -835,31 +842,51 @@ true
 0034
 </code></pre>
 <hr />
-<h3 id="integer-operations">Integer Operations</h3>
+<h3 id="numerical-operations">Numerical Operations</h3>
+<p>If different number types are mixed, integers get promoted to floats
+(may raise an error if the integer is too large or small to be
+represented as a float).</p>
 <h4 id="add">Add: +</h4>
-<pre><code class="language-nohighlight">(+ :integer ...)
+<pre><code class="language-nohighlight">(+ :number ...)
 </code></pre>
 <p>Addition.</p>
 <h4 id="sub-">Sub: -</h4>
-<pre><code class="language-nohighlight">(- :integer ...)
+<pre><code class="language-nohighlight">(- :number ...)
 </code></pre>
 <p>Negation (single argument) or substraction (multiple arguments).</p>
 <h4 id="mul">Mul: *</h4>
-<pre><code class="language-nohighlight">(* :integer ...)
+<pre><code class="language-nohighlight">(* :number ...)
 </code></pre>
 <p>Multiplication.</p>
 <h4 id="div">Div: /</h4>
-<pre><code class="language-nohighlight">(/ :integer ...)
+<pre><code class="language-nohighlight">(/ :number ...)
 </code></pre>
 <p>Reciprocal (single argument) or division (multiple arguments).</p>
 <hr />
-<h4 id="comparisons">Comparisons: >, >=, \&lt;, \&lt;=</h4>
-<pre><code class="language-nohighlight">(&gt; :integer :integer)
-(&gt; :integer :integer)
-(&gt; :integer :integer)
-(&gt; :integer :integer)
+<h4 id="numeric-comparison">Numeric Comparison: =, >, >=, \&lt;, \&lt;=</h4>
+<pre><code class="language-nohighlight">(= :number :number)
+(&gt; :number :number)
+(&gt;= :number :number)
+(&lt; :number :number)
+(&lt;= :number :number)
 </code></pre>
-<p>Comparisons.</p>
+<p>Compare numerical values.</p>
+<hr />
+<h3 id="type-conversions">Type Conversions</h3>
+<h4 id="string_1">string</h4>
+<pre><code class="language-nohighlight">(string :expr)
+</code></pre>
+<p>Convert value to string.</p>
+<hr />
+<h4 id="integer_1">integer</h4>
+<pre><code class="language-nohighlight">(integer :float|:string)
+</code></pre>
+<p>Convert value to integer.</p>
+<hr />
+<h4 id="float_1">float</h4>
+<pre><code class="language-nohighlight">(float :integer|:string)
+</code></pre>
+<p>Convert value to float.</p>
 <hr />
 <h3 id="printing">Printing</h3>
 <h4 id="print">print</h4>
@@ -1156,9 +1183,11 @@ unit testing and maths as consolation.</p>
 </code></pre>
 <hr />
 <h4 id="remainder">remainder</h4>
-<pre><code class="language-nohighlight">(remainder :integer :integer)
+<pre><code class="language-nohighlight">(remainder :number :number)
 </code></pre>
-<p>Returns the least positive remainder for integer division.</p>
+<p>Returns the least positive remainder for integer floor division.
+(Returns zero for floating point division, or very close to zero,
+because of floating point errors.)</p>
 <pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (remainder 42 5)
 2
@@ -1233,12 +1262,14 @@ unit testing and maths as consolation.</p>
 <p>By default, multiplication and division produce results with a maximum
 precision of 10 decimal places. This can be changed with
 <code>set-precision</code>, but since decimals are implemented with <code>i128</code>, a high
-precision can cause multiplication and division to overflow, in which
-case an error will be raised.</p>
-<p>Importing the decimal module overloads the following functions:</p>
+precision can cause multiplication and division to raise errors due to
+overflow.</p>
+<p>Importing the decimal module overloads and adds support for decimal
+types to the following builtin functions:</p>
 <ul>
 <li>Arithemic operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code></li>
-<li>Comparison operators: <code>equal?</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></li>
+<li>Comparison operators: <code>=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></li>
+<li>Type conversions: <code>string</code>, <code>float</code>, <code>integer</code></li>
 <li>Display: <code>repr</code>, <code>display</code></li>
 </ul>
 <p>Note that division is defined as floor division when the divisor is an
@@ -1250,50 +1281,53 @@ integer:</p>
 &gt;&gt;&gt; (/ (decimal 5) 2)
 2.
 </code></pre>
-<p>Other functions defined in terms of arithmetic operations will work with
-decimal values once <code>stl/decimal</code> is imported. These include <code>range</code>,
-and all functions from <code>stl/math</code> - with the caveat that some math
-functions are only defined for whole numbers:</p>
+<p>Procedures defined in terms of basic numerical procedures will work with
+decimal values once <code>stl/decimal</code> is imported - such as <code>range</code>, and all
+functions from <code>stl/math</code> - with the caveat that some math functions may
+truncate or apply floor divisions to their arguments:</p>
 <pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (import-from &quot;stl/decimal&quot; decimal)
 &gt;&gt;&gt; (import-from &quot;stl/math&quot; remainder pow even?)
+
 &gt;&gt;&gt; ; pow truncates the exponent (but not the base)
 &gt;&gt;&gt; (pow (decimal &quot;2.5&quot;) 3)
 15.625
 &gt;&gt;&gt; (pow (decimal &quot;2.5&quot;) (decimal &quot;3.5&quot;))
 15.625
-&gt;&gt;&gt; ; even? and odd? only check the whole number part
+
+&gt;&gt;&gt; ; even? and odd? only check the integer part of non-whole numbers
 &gt;&gt;&gt; (even? (decimal &quot;2.5&quot;))
 true
+
 &gt;&gt;&gt; ; floor division, and remainder
 &gt;&gt;&gt; (/ (decimal &quot;4.5&quot;) 2)
 2
 &gt;&gt;&gt; (remainder (decimal &quot;4.5&quot;) 2)
 .5
-&gt;&gt;&gt; ; (2 * 2) + 0.5 = 4.5, makes sense
-&gt;&gt;&gt; ;
+
 &gt;&gt;&gt; ; true division and remainder
 &gt;&gt;&gt; (/ (decimal &quot;4.5&quot;) (decimal 2))
 2.25
+&gt;&gt;&gt; ; it's technically correct that the remainder of true division is always zero,
+&gt;&gt;&gt; ; but not very useful (may return not exactly zero due to rounding errors)
 &gt;&gt;&gt; (remainder (decimal &quot;4.5&quot;) (decimal 2))
 .000
-&gt;&gt;&gt; ; (2.0 * 2.25) + 0.0 = 4.5, so that also makes sense, but not very useful
 </code></pre>
 <p>Decimal numbers are represented as a an integer coefficient and an
-implicitly negated integer exponent, with base 10. The exponent encodes
-the number of significant digits, so for example 2.5 is represented as
-<code>(25 . 1)</code>, which is 25x10<sup>-1</sup>, while 2.50 is represented as
-<code>(250 . 2)</code>, which is 250x10<sup>-2</sup>.</p>
+(implicitly negative) integer exponent, with base 10. The exponent
+encodes the number of significant digits, such that 2.5 is represented
+as <code>(25 . 1)</code>, meaning 25x10<sup>-1</sup>, while 2.50 is represented as
+<code>(250 . 2)</code>, meaning 250x10<sup>-2</sup>.</p>
 <h4 id="decimal">decimal</h4>
-<pre><code class="language-nohighlight">(decimal :integer|:string|:decimal)
+<pre><code class="language-nohighlight">(decimal :integer|:float|:string|:decimal)
 </code></pre>
 <p>Convert value to a decimal. Raises an error if an unsupported type is
 given.</p>
-<pre><code>&gt;&gt;&gt; ; Example
-&gt;&gt;&gt; (import-from "stl/decimal" decimal)
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (import-from &quot;stl/decimal&quot; decimal)
 &gt;&gt;&gt; (+ 1 2 3)
 6
-&gt;&gt;&gt; (+ (decimal "12.5") (decimal "0.25") 1)
+&gt;&gt;&gt; (+ (decimal &quot;12.5&quot;) (decimal &quot;0.25&quot;) 1)
 13.75
 </code></pre>
 <hr />
@@ -1306,17 +1340,18 @@ given.</p>
 <pre><code class="language-nohighlight">(set-precision :integer)
 </code></pre>
 <p>Change maximum precision of decimals returned by multiplication and
-division operations.</p>
+division.</p>
 <hr />
 <h4 id="coef">coef</h4>
-<pre><code class="language-nohighlight">(coef)
+<pre><code class="language-nohighlight">(coef :decimal)
 </code></pre>
-<p>Get the coefficient</p>
+<p>Get the coefficient of a decimal value.</p>
 <hr />
 <h4 id="expn">expn</h4>
-<pre><code class="language-nohighlight">(expn)
+<pre><code class="language-nohighlight">(expn :decimal)
 </code></pre>
-<p>Description.</p>
+<p>Get the exponent of a decimal value. The exponent is implicitly negated,
+i.e. a return value of 3 means 10<sup>-3</sup>.</p>
 <hr />
 <h3 id="stlunittest">stl/unittest</h3>
 <p>Write and run unit tests with assertions.</p>
@@ -1410,5 +1445,5 @@ Exception: Some tests failed.
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-08-13 18:51:11.523088+00:00
+Build Date UTC : 2021-08-13 22:54:24.632534+00:00
 -->

@@ -312,6 +312,11 @@
 <span id="310">310</span>
 <span id="311">311</span>
 <span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
@@ -472,6 +477,7 @@
             <span class="ident">JVal::Pair</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;pair&quot;</span>,
             <span class="ident">JVal::Quote</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;quote&quot;</span>,
             <span class="ident">JVal::Int</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;integer&quot;</span>,
+            <span class="ident">JVal::Float</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;float&quot;</span>,
             <span class="ident">JVal::Bool</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bool&quot;</span>,
             <span class="ident">JVal::Symbol</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;symbol&quot;</span>,
             <span class="ident">JVal::String</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;string&quot;</span>,
@@ -554,22 +560,18 @@
     <span class="ident">add_builtin</span>(<span class="string">&quot;print&quot;</span>, <span class="ident">jbuiltin_print</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;type&quot;</span>, <span class="ident">jbuiltin_type</span>, <span class="ident">env</span>, <span class="ident">state</span>);
 
-    <span class="comment">// Debug</span>
-    <span class="ident">add_builtin</span>(<span class="string">&quot;dd&quot;</span>, <span class="ident">jbuiltin_display_debug</span>, <span class="ident">env</span>, <span class="ident">state</span>);
-    <span class="ident">add_builtin</span>(<span class="string">&quot;ddp&quot;</span>, <span class="ident">jbuiltin_display_debug_pretty</span>, <span class="ident">env</span>, <span class="ident">state</span>);
-    <span class="ident">add_builtin</span>(<span class="string">&quot;dda&quot;</span>, <span class="ident">jbuiltin_display_ptr</span>, <span class="ident">env</span>, <span class="ident">state</span>);
-    <span class="ident">add_builtin</span>(<span class="string">&quot;ddc&quot;</span>, <span class="ident">jbuiltin_display_code</span>, <span class="ident">env</span>, <span class="ident">state</span>);
-    <span class="ident">add_special_form</span>(<span class="string">&quot;ddm&quot;</span>, <span class="ident">jspecial_display_debug_macro</span>, <span class="ident">env</span>, <span class="ident">state</span>);
-
-    <span class="comment">// Arithmetic operators</span>
+    <span class="comment">// Number procedures</span>
     <span class="ident">add_builtin</span>(<span class="string">&quot;+&quot;</span>, <span class="ident">jbuiltin_add</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;-&quot;</span>, <span class="ident">jbuiltin_sub</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;*&quot;</span>, <span class="ident">jbuiltin_mul</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;/&quot;</span>, <span class="ident">jbuiltin_div</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+    <span class="ident">add_builtin</span>(<span class="string">&quot;=&quot;</span>, <span class="ident">jbuiltin_num_eq</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;&lt;&quot;</span>, <span class="ident">jbuiltin_lt</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;&lt;=&quot;</span>, <span class="ident">jbuiltin_lte</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;&gt;&quot;</span>, <span class="ident">jbuiltin_gt</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;&gt;=&quot;</span>, <span class="ident">jbuiltin_gte</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+    <span class="ident">add_builtin</span>(<span class="string">&quot;as-float&quot;</span>, <span class="ident">jbuiltin_as_float</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+    <span class="ident">add_builtin</span>(<span class="string">&quot;as-integer&quot;</span>, <span class="ident">jbuiltin_as_int</span>, <span class="ident">env</span>, <span class="ident">state</span>);
 
     <span class="comment">// Logical operators</span>
     <span class="ident">add_builtin</span>(<span class="string">&quot;not&quot;</span>, <span class="ident">jbuiltin_not</span>, <span class="ident">env</span>, <span class="ident">state</span>);
@@ -591,6 +593,7 @@
     <span class="ident">add_builtin</span>(<span class="string">&quot;substring&quot;</span>, <span class="ident">jbuiltin_substring</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;replace&quot;</span>, <span class="ident">jbuiltin_replace</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;parse-integer&quot;</span>, <span class="ident">jbuiltin_parse_int</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+    <span class="ident">add_builtin</span>(<span class="string">&quot;parse-float&quot;</span>, <span class="ident">jbuiltin_parse_float</span>, <span class="ident">env</span>, <span class="ident">state</span>);
 
     <span class="comment">// Var, function definition</span>
     <span class="ident">add_special_form</span>(<span class="string">&quot;def&quot;</span>, <span class="ident">jspecial_def</span>, <span class="ident">env</span>, <span class="ident">state</span>);
@@ -624,6 +627,13 @@
     <span class="comment">// Sys</span>
     <span class="ident">add_builtin</span>(<span class="string">&quot;getenv&quot;</span>, <span class="ident">jbuiltin_get_env_var</span>, <span class="ident">env</span>, <span class="ident">state</span>);
     <span class="ident">add_builtin</span>(<span class="string">&quot;exit&quot;</span>, <span class="ident">jbuiltin_exit</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+
+    <span class="comment">// Debug</span>
+    <span class="ident">add_builtin</span>(<span class="string">&quot;dd&quot;</span>, <span class="ident">jbuiltin_display_debug</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+    <span class="ident">add_builtin</span>(<span class="string">&quot;ddp&quot;</span>, <span class="ident">jbuiltin_display_debug_pretty</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+    <span class="ident">add_builtin</span>(<span class="string">&quot;dda&quot;</span>, <span class="ident">jbuiltin_display_ptr</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+    <span class="ident">add_builtin</span>(<span class="string">&quot;ddc&quot;</span>, <span class="ident">jbuiltin_display_code</span>, <span class="ident">env</span>, <span class="ident">state</span>);
+    <span class="ident">add_special_form</span>(<span class="string">&quot;ddm&quot;</span>, <span class="ident">jspecial_display_debug_macro</span>, <span class="ident">env</span>, <span class="ident">state</span>);
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="jibi" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script></body></html>
