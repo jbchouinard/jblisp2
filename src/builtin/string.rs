@@ -81,3 +81,12 @@ pub fn jbuiltin_parse_int(args: JValRef, _env: JEnvRef, state: &mut JState) -> J
         .map_err(|e| JError::new(Other("IntError".to_string()), &format!("{}", e)))?;
     Ok(state.int(int))
 }
+
+pub fn jbuiltin_parse_float(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [s] = get_n_args(args)?;
+    let s = s.to_str()?;
+    let float = s
+        .parse::<JTFloat>()
+        .map_err(|e| JError::new(Other("FloatError".to_string()), &format!("{}", e)))?;
+    Ok(state.float(float))
+}

@@ -86,6 +86,16 @@ pub fn jbuiltin_gte(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult
     Ok(state.bool(Number::from_jval(x)?.gte(&Number::from_jval(y)?)?))
 }
 
+pub fn jbuiltin_as_float(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [n] = get_n_args(args)?;
+    Ok(state.float(Number::from_jval(n)?.as_float()?))
+}
+
+pub fn jbuiltin_as_int(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [n] = get_n_args(args)?;
+    Ok(state.int(Number::from_jval(n)?.as_int()?))
+}
+
 enum Number {
     Int(JTInt),
     Float(JTFloat),
@@ -118,6 +128,12 @@ impl Number {
                 }
                 Ok(x)
             }
+        }
+    }
+    fn as_int(&self) -> Result<JTInt, JError> {
+        match self {
+            Self::Int(n) => Ok(*n),
+            Self::Float(x) => Ok(*x as JTInt),
         }
     }
     fn add(&self, other: &Self) -> Result<Self, JError> {

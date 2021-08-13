@@ -49,7 +49,7 @@ impl TokenValueMatcher {
     }
 }
 
-pub type TokenTransformer = Rc<dyn Fn(Vec<Token>) -> Vec<Token>>;
+pub type TokenTransformer = Rc<dyn Fn(Vec<Token>) -> Result<Vec<Token>, JError>>;
 
 #[derive(Clone)]
 pub struct ReaderMacro {
@@ -78,7 +78,7 @@ impl ReaderMacro {
         }
         true
     }
-    pub fn apply_rule(&self, tokens: Vec<Token>) -> Vec<Token> {
+    pub fn apply_rule(&self, tokens: Vec<Token>) -> Result<Vec<Token>, JError> {
         (self.transformer)(tokens)
     }
 }
@@ -118,7 +118,11 @@ impl TokenIter for ReaderMacroIterator {
                     VecDeque::with_capacity(self.rm.rule.len()),
                 )
                 .into();
-                self.buffer_out = self.rm.apply_rule(toks_in).into();
+                let spos = toks_in[0].pos.clone();
+                self.buffer_out = match self.rm.apply_rule(toks_in) {
+                    Ok(toks_out) => toks_out.into(),
+                    Err(je) => return Err(TokenError::new(&format!("{}", je), spos)),
+                };
             } else {
                 return Ok(self.buffer_in.pop_front().unwrap());
             }

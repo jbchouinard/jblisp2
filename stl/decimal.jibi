@@ -1,16 +1,18 @@
 (import "stl/math" as math)
 
-; Re-bind original definitions for symbols re-defined later
-(def grepr repr)
-(def g= =)
+; Save references to builtins re-defined later
 (def g+ +)
 (def g- -)
 (def g* *)
 (def g/ /)
-(def g> >)
+(def g= =)
 (def g< <)
 (def g<= <=)
+(def g> >)
 (def g>= >=)
+(def grepr repr)
+(def ginteger integer)
+(def gfloat float)
 
 (def MAXPRECISION 10)
 
@@ -33,19 +35,30 @@
 
 (defn decimal? (v) (and (pair? v) (eq? 'type/stl/decimal/decimal (car v))))
 
+(defn string-precision (s) (if (contains? s ".")
+    (len (nth 1 (split s ".")))
+    0))
+
 (defn from-string (s)
     (let ((expn (string-precision s))
           (coef (parse-integer (replace s "." ""))))
         (new coef expn)))
 
-(defn string-precision (s) (if (contains? s ".")
-    (len (nth 1 (split s ".")))
-    0))
+(defn from-int (n)
+    (new n 0))
 
-(defn from-int (x) (new x 0))
+(defn from-float (x)
+    (from-string (repr x)))
+
+(defn to-integer (d)
+    (coef (truncate d 0)))
+
+(defn to-float (d)
+    (parse-float (drepr d)))
 
 (defn decimal (v) (cond
     ((integer? v) (from-int v))
+    ((float? v) (from-float v))
     ((string? v) (from-string v))
     ((decimal? v) v)
     (else (raise (error
@@ -158,13 +171,6 @@
 
 ; Define replacements for builtins with support for decimal types
 
-(defnglobal repr (v) (if (decimal? v) (drepr v) (grepr v)))
-
-(defnglobal = (x1 x2)
-    (if (or (decimal? x1) (decimal? x2))
-        (d= x1 x2)
-        (g= x1 x2)))
-
 (defnglobal + (. xs) 
     (if (apply any (map decimal? xs))
         (fold d+ 0 xs)
@@ -189,22 +195,42 @@
             (fold (fn (x y) (d/ y x)) x xs))
         (apply g/ (cons x xs))))
 
+(defnglobal = (x1 x2)
+    (if (or (decimal? x1) (decimal? x2))
+        (d= x1 x2)
+        (g= x1 x2)))
+
 (defnglobal < (x1 x2)
     (if (or (decimal? x1) (decimal? x2))
         (d< x1 x2)
         (g< x1 x2)))
-
-(defnglobal > (x1 x2)
-    (if (or (decimal? x1) (decimal? x2))
-        (d> x1 x2)
-        (g> x1 x2)))
 
 (defnglobal <= (x1 x2)
     (if (or (decimal? x1) (decimal? x2))
         (d<= x1 x2)
         (g<= x1 x2)))
 
+(defnglobal > (x1 x2)
+    (if (or (decimal? x1) (decimal? x2))
+        (d> x1 x2)
+        (g> x1 x2)))
+
 (defnglobal >= (x1 x2)
     (if (or (decimal? x1) (decimal? x2))
         (d>= x1 x2)
         (g>= x1 x2)))
+
+(defnglobal repr (v)
+    (if (decimal? v)
+        (drepr v)
+        (grepr v)))
+
+(defnglobal float (v)
+    (if (decimal? v)
+        (to-float v)
+        (gfloat v)))
+
+(defnglobal integer (v)
+    (if (decimal? v)
+        (to-integer v)
+        (ginteger v)))

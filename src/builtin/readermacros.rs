@@ -8,12 +8,12 @@ pub fn get_n_tokens<const N: usize>(args: Vec<Token>) -> [Token; N] {
     args.try_into().unwrap()
 }
 
-fn transform_vector(tokens: Vec<Token>) -> Vec<Token> {
+fn transform_vector(tokens: Vec<Token>) -> Result<Vec<Token>, JError> {
     let [hash, paren] = get_n_tokens(tokens);
-    vec![
+    Ok(vec![
         Token::new(TokenValue::LParen, hash.pos),
         Token::new(TokenValue::Ident("vector".to_string()), paren.pos),
-    ]
+    ])
 }
 
 fn jreadermacro_vector() -> ReaderMacro {
@@ -23,7 +23,7 @@ fn jreadermacro_vector() -> ReaderMacro {
     )
 }
 
-fn transform_namespace(tokens: Vec<Token>) -> Vec<Token> {
+fn transform_namespace(tokens: Vec<Token>) -> Result<Vec<Token>, JError> {
     let [ident] = get_n_tokens(tokens);
     let sym = match ident.value {
         TokenValue::Ident(ref s) => s.to_string(),
@@ -31,7 +31,7 @@ fn transform_namespace(tokens: Vec<Token>) -> Vec<Token> {
     };
     let subsyms: Vec<&str> = sym.split("::").collect();
     if subsyms.len() == 1 {
-        vec![ident]
+        Ok(vec![ident])
     } else {
         let mut expr = vec![
             Token::new(TokenValue::LParen, ident.pos.clone()),
@@ -47,7 +47,7 @@ fn transform_namespace(tokens: Vec<Token>) -> Vec<Token> {
             ))
         }
         expr.push(Token::new(TokenValue::RParen, ident.pos));
-        expr
+        Ok(expr)
     }
 }
 

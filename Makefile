@@ -2,6 +2,8 @@ ifeq ($(PREFIX),)
 	PREFIX := /usr/local
 endif
 
+LIBSTL=stl/decimal.jibi stl/math.jibi stl/unittest.jibi
+
 all: build MANUAL.md gh-pages
 
 build:
@@ -11,7 +13,10 @@ doc:
 	cargo doc --release --no-deps
 
 install:
+	install -d $(DESTDIR)$(PREFIX)/bin/
 	install -m 755 target/release/jibi $(DESTDIR)$(PREFIX)/bin/
+	install -d $(DESTDIR)$(PREFIX)/lib/jibi/stl
+	install -m 644 $(LIBSTL) $(DESTDIR)$(PREFIX)/lib/jibi/stl
 
 test:
 	cargo test

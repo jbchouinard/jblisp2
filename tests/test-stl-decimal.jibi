@@ -10,6 +10,7 @@
 (import-from "stl/unittest"
     test
     test-suite
+    assert-equal
 )
 
 (defn assert= (x y) (assert (= x y)))
@@ -57,4 +58,13 @@
     (test "set-precision"
         (set-precision 4)
         (assert= (decimal "0.1428") (/ (decimal "1.0") (decimal "7.0"))))
+
+    (test "float conversion"
+        (assert= 0.122 (float (decimal 0.122))))
+
+    (test "integer conversion"
+        (assert= 122 (integer (decimal 122))))
+
+    (test "string conversion"
+        (assert-equal "122.25" (string (decimal "122.25"))))
 )

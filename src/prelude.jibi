@@ -29,6 +29,7 @@
 (defn string? (val) (type? val string))
 (defn symbol? (val) (type? val symbol))
 (defn integer? (val) (type? val integer))
+(defn float? (val) (type? val float))
 (defn pair? (val) (type? val pair))
 (defn error? (val) (type? val error))
 (defn bool? (val) (type? val bool))
@@ -40,6 +41,16 @@
 (defn env? (val) (type? val env))
 
 (def empty? nil?)
+
+(defn string (v) (repr v))
+
+(defn integer (v) (cond
+    ((string? v) (parse-integer v))
+    (else (as-integer v))))
+
+(defn float (v) (cond
+    ((string? v) (parse-float v))
+    (else (as-float v))))
 
 (defn nth (idx lst)
     (if (<= idx 0)

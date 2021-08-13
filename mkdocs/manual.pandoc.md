@@ -1,5 +1,5 @@
 # Jibi Scheme
-**version 0.1.4**
+**version 0.1.6**
 
 ## Overview
 
@@ -605,20 +605,6 @@ true
 
 ---
 
-#### parse-integer
-```nohighlight
-(parse-integer :string)
-```
-Parse an integer from a string.
-
-```nohighlight
->>> ; Example
->>> (parse-integer "12")
-12
-```
-
----
-
 #### left-pad
 ```nohighlight
 (left-pad string:string char:string width:integer)
@@ -674,6 +660,33 @@ Reciprocal (single argument) or division (multiple arguments).
 (<= :number :number)
 ```
 Compare numerical values.
+
+---
+
+\newpage
+### Type Conversions
+
+#### string
+```nohighlight
+(string :expr)
+```
+Convert value to string.
+
+---
+
+#### integer
+```nohighlight
+(integer :float|:string)
+```
+Convert value to integer.
+
+---
+
+#### float
+```nohighlight
+(float :integer|:string)
+```
+Convert value to float.
 
 ---
 
@@ -1244,12 +1257,14 @@ The `decimal` module implements floating point decimal arithmetic.
 By default, multiplication and division produce results with a maximum
 precision of 10 decimal places. This can be changed with `set-precision`, but
 since decimals are implemented with `i128`, a high precision can cause
-multiplication and division to overflow, in which case an error will be raised.
+multiplication and division to raise errors due to overflow.
 
-Importing the decimal module overloads the following functions:
+Importing the decimal module overloads and adds support for decimal types to the
+following builtin functions:
 
 *   Arithemic operators: `+`, `-`, `*`, `/`
 *   Comparison operators: `=`, `<`, `<=`, `>`, `>=`
+*   Type conversions: `string`, `float`, `integer`
 *   Display: `repr`, `display`
 
 Note that division is defined as floor division when the divisor is an integer:
@@ -1263,49 +1278,53 @@ Note that division is defined as floor division when the divisor is an integer:
 2.
 ```
 
-Other functions defined in terms of arithmetic operations will work with decimal values
-once `stl/decimal` is imported. These include  `range`, and all functions from `stl/math`
-- with the caveat that some math functions are only defined for whole numbers:
+Procedures defined in terms of basic numerical procedures will work with decimal values
+once `stl/decimal` is imported - such as  `range`, and all functions from `stl/math`
+- with the caveat that some math functions may truncate or apply floor divisions
+to their arguments:
 
 ```nohighlight
 >>> ; Example
 >>> (import-from "stl/decimal" decimal)
 >>> (import-from "stl/math" remainder pow even?)
+
 >>> ; pow truncates the exponent (but not the base)
 >>> (pow (decimal "2.5") 3)
 15.625
 >>> (pow (decimal "2.5") (decimal "3.5"))
 15.625
->>> ; even? and odd? only check the whole number part
+
+>>> ; even? and odd? only check the integer part of non-whole numbers
 >>> (even? (decimal "2.5"))
 true
+
 >>> ; floor division, and remainder
 >>> (/ (decimal "4.5") 2)
 2
 >>> (remainder (decimal "4.5") 2)
 .5
->>> ; (2 * 2) + 0.5 = 4.5, makes sense
->>> ;
+
 >>> ; true division and remainder
 >>> (/ (decimal "4.5") (decimal 2))
 2.25
+>>> ; it's technically correct that the remainder of true division is always zero,
+>>> ; but not very useful (may return not exactly zero due to rounding errors)
 >>> (remainder (decimal "4.5") (decimal 2))
 .000
->>> ; (2.0 * 2.25) + 0.0 = 4.5, so that also makes sense, but not very useful
 ```
 
-Decimal numbers are represented as a an integer coefficient and an implicitly negated
+Decimal numbers are represented as a an integer coefficient and an (implicitly negative)
 integer exponent, with base 10. The exponent encodes the number of significant
-digits, so for example 2.5 is represented as `(25 . 1)`, which is 25x10^-1^,
-while 2.50 is represented as `(250 . 2)`, which is 250x10^-2^.
+digits, such that 2.5 is represented as `(25 . 1)`, meaning 25x10^-1^,
+while 2.50 is represented as `(250 . 2)`, meaning 250x10^-2^.
 
 #### decimal
 ```nohighlight
-(decimal :integer|:string|:decimal)
+(decimal :integer|:float|:string|:decimal)
 ```
 Convert value to a decimal. Raises an error if an unsupported type is given.
 
-```
+```nohighlight
 >>> ; Example
 >>> (import-from "stl/decimal" decimal)
 >>> (+ 1 2 3)
@@ -1328,23 +1347,24 @@ Round to n decimal places. Rounds up if the next digit is >= 5.
 ```nohighlight
 (set-precision :integer)
 ```
-Change maximum precision of decimals returned by multiplication and division operations.
+Change maximum precision of decimals returned by multiplication and division.
 
 ---
 
 #### coef
 ```nohighlight
-(coef)
+(coef :decimal)
 ```
-Get the coefficient
+Get the coefficient of a decimal value.
 
 ---
 
 #### expn
 ```nohighlight
-(expn)
+(expn :decimal)
 ```
-Description.
+Get the exponent of a decimal value. The exponent is implicitly negated, i.e. a return
+value of 3 means 10^-3^.
 
 ---
 

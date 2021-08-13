@@ -42,8 +42,8 @@ make install
 ```
 
 ## Todo?
+- install-reader-macro
 - JIBI_PATH for imports
-- Reader macro definition
 - Lazy values
 _ Lazy lists
 - User-defined types, operator overloading

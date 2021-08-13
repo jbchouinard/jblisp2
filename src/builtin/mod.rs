@@ -240,14 +240,7 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("print", jbuiltin_print, env, state);
     add_builtin("type", jbuiltin_type, env, state);
 
-    // Debug
-    add_builtin("dd", jbuiltin_display_debug, env, state);
-    add_builtin("ddp", jbuiltin_display_debug_pretty, env, state);
-    add_builtin("dda", jbuiltin_display_ptr, env, state);
-    add_builtin("ddc", jbuiltin_display_code, env, state);
-    add_special_form("ddm", jspecial_display_debug_macro, env, state);
-
-    // Arithmetic operators
+    // Number procedures
     add_builtin("+", jbuiltin_add, env, state);
     add_builtin("-", jbuiltin_sub, env, state);
     add_builtin("*", jbuiltin_mul, env, state);
@@ -257,6 +250,8 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("<=", jbuiltin_lte, env, state);
     add_builtin(">", jbuiltin_gt, env, state);
     add_builtin(">=", jbuiltin_gte, env, state);
+    add_builtin("as-float", jbuiltin_as_float, env, state);
+    add_builtin("as-integer", jbuiltin_as_int, env, state);
 
     // Logical operators
     add_builtin("not", jbuiltin_not, env, state);
@@ -278,6 +273,7 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("substring", jbuiltin_substring, env, state);
     add_builtin("replace", jbuiltin_replace, env, state);
     add_builtin("parse-integer", jbuiltin_parse_int, env, state);
+    add_builtin("parse-float", jbuiltin_parse_float, env, state);
 
     // Var, function definition
     add_special_form("def", jspecial_def, env, state);
@@ -311,4 +307,11 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     // Sys
     add_builtin("getenv", jbuiltin_get_env_var, env, state);
     add_builtin("exit", jbuiltin_exit, env, state);
+
+    // Debug
+    add_builtin("dd", jbuiltin_display_debug, env, state);
+    add_builtin("ddp", jbuiltin_display_debug_pretty, env, state);
+    add_builtin("dda", jbuiltin_display_ptr, env, state);
+    add_builtin("ddc", jbuiltin_display_code, env, state);
+    add_special_form("ddm", jspecial_display_debug_macro, env, state);
 }
