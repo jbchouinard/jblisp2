@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 use std::rc::Rc;
 
-use crate::reader::readermacro::{Matcher, ReaderMacro, TokenValueMatcher};
+use crate::reader::readermacro::{Matcher, ReaderMacro, TokenMatcher};
 use crate::*;
 
 pub fn get_n_tokens<const N: usize>(args: Vec<Token>) -> [Token; N] {
@@ -18,7 +18,7 @@ fn transform_vector(tokens: Vec<Token>) -> Result<Vec<Token>, JError> {
 
 fn jreadermacro_vector() -> ReaderMacro {
     ReaderMacro::new(
-        vec![TokenValueMatcher::Anychar('#'), TokenValueMatcher::LParen],
+        vec![TokenMatcher::Anychar('#'), TokenMatcher::LParen],
         Rc::new(transform_vector),
     )
 }
@@ -53,7 +53,7 @@ fn transform_namespace(tokens: Vec<Token>) -> Result<Vec<Token>, JError> {
 
 fn jreadermacro_namespace() -> ReaderMacro {
     ReaderMacro::new(
-        vec![TokenValueMatcher::Ident(Matcher::Any)],
+        vec![TokenMatcher::Ident(Matcher::Any)],
         Rc::new(transform_namespace),
     )
 }

@@ -10,6 +10,7 @@ use math::*;
 pub use readermacros::add_reader_macros;
 use string::*;
 use sys::*;
+use token::*;
 
 mod args;
 mod debug;
@@ -20,6 +21,7 @@ mod math;
 mod readermacros;
 mod string;
 mod sys;
+mod token;
 
 // TODO: loop, and, or, cond
 
@@ -167,6 +169,8 @@ fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
             JVal::Builtin(_) => "builtin",
             JVal::SpecialForm(_) => "specialform",
             JVal::Env(_) => "env",
+            JVal::Token(_) => "token",
+            JVal::TokenMatcher(_) => "tokenmatcher",
         }
         .to_string(),
     ))
@@ -314,4 +318,8 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("dda", jbuiltin_display_ptr, env, state);
     add_builtin("ddc", jbuiltin_display_code, env, state);
     add_special_form("ddm", jspecial_display_debug_macro, env, state);
+
+    // Reader macros
+    add_special_form("token", jspecial_token, env, state);
+    add_special_form("tokenmatcher", jspecial_tokenmatcher, env, state);
 }

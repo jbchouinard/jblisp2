@@ -43,9 +43,9 @@ make install
 
 ## Todo?
 - install-reader-macro
-- JIBI_PATH for imports
-- Lazy values
-- Lazy lists
+- quasiquote
+- ModuleImporter, JIBI_PATH
+- Lazy values, lazy lists
 - User-defined types, operator overloading
 - Specific error catch
 - Numeric data types: complex, arbitrary precision int

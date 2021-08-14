@@ -1,17 +1,14 @@
-use super::tokenizer::{Token, TokenValue};
-use super::ParserError;
-use crate::reader::tokenizer::TokenIter;
-use crate::reader::PositionTag;
+use crate::reader::ParserError;
 use crate::*;
 
 pub struct Parser<'a> {
-    tokeniter: Box<dyn TokenIter>,
+    tokeniter: Box<dyn TokenProducer>,
     peek: Token,
     state: &'a mut JState,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(tokeniter: Box<dyn TokenIter>, state: &'a mut JState) -> Self {
+    pub fn new(tokeniter: Box<dyn TokenProducer>, state: &'a mut JState) -> Self {
         let mut this = Self {
             tokeniter,
             // Dummy value until we read the first real token
@@ -27,7 +24,7 @@ impl<'a> Parser<'a> {
     }
 
     fn next(&mut self) -> Result<Token, ParserError> {
-        let next = match self.tokeniter.next_token() {
+        let next = match self.tokeniter.next_token(self.state) {
             Ok(tok) => tok,
             Err(te) => return Err(self.error(te.pos, &te.reason)),
         };

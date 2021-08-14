@@ -2,12 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
-use crate::error::JErrorKind;
-use crate::reader::parser::Parser;
-use crate::reader::readermacro::ReaderMacro;
-use crate::reader::tokenizer::{TokenIter, Tokenizer};
-use crate::reader::PositionTag;
-use crate::types::intern::Interned;
+use crate::intern::Interned;
 use crate::*;
 
 const STR_INTERN_MAX_LEN: usize = 1024;
@@ -81,11 +76,8 @@ impl JState {
     pub fn add_reader_macro(&mut self, rm: ReaderMacro) {
         self.reader_macros.push(rm);
     }
-    fn apply_reader_macros(&self, mut t: Box<dyn TokenIter>) -> Box<dyn TokenIter> {
-        for rm in &self.reader_macros {
-            t = Box::new(rm.wrap(t))
-        }
-        t
+    pub fn reader_macros(&self) -> &Vec<ReaderMacro> {
+        &self.reader_macros
     }
 
     pub fn import_module<P: AsRef<Path>>(&mut self, p: P, env: JEnvRef) -> JResult {
@@ -106,10 +98,12 @@ impl JState {
 
     pub fn eval_tokens(
         &mut self,
-        tokeniter: Box<dyn TokenIter>,
+        mut tokeniter: Box<dyn TokenProducer>,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TracebackFrame>)> {
-        let tokeniter = self.apply_reader_macros(tokeniter);
+        for rm in &self.reader_macros {
+            tokeniter = Box::new(rm.apply(tokeniter));
+        }
         let forms = match Parser::new(tokeniter, self).parse_forms() {
             Ok(forms) => forms,
             Err(pe) => return Err((pe.pos.clone(), pe.into(), self.traceback_take())),
@@ -130,8 +124,10 @@ impl JState {
         program: &str,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TracebackFrame>)> {
-        let tokeniter = Box::new(Tokenizer::new(name.to_string(), program.to_string()));
-        self.eval_tokens(tokeniter, env)
+        self.eval_tokens(
+            Box::new(Tokenizer::new(name.to_string(), program.to_string())),
+            env,
+        )
     }
     pub fn eval_file<P: AsRef<Path>>(
         &mut self,
@@ -245,6 +241,9 @@ impl JState {
         f: Rc<dyn Fn(JValRef, JEnvRef, &mut JState) -> JResult>,
     ) -> JValRef {
         JVal::SpecialForm(JBuiltin::new(name, f)).into_ref()
+    }
+    pub fn token(&self, v: TokenValue) -> JResult {
+        Ok(JVal::Token(Token::new(v, self.pos.clone())).into_ref())
     }
 }
 

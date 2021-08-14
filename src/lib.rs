@@ -67,7 +67,10 @@ pub(crate) use error::JErrorKind::*;
 pub use error::{JError, JErrorKind, JResult};
 pub use interpreter::{Interpreter, PRELUDE};
 pub use reader::parser::Parser;
-pub use reader::tokenizer::{Token, TokenError, TokenIter, TokenValidator, TokenValue, Tokenizer};
+pub use reader::readermacro::{ReaderMacro, TokenMatcher, TokenTransformer};
+pub use reader::tokenizer::{
+    Token, TokenError, TokenProducer, TokenValidator, TokenValue, Tokenizer,
+};
 pub use reader::PositionTag;
 pub use state::JState;
 pub use traceback::TracebackFrame;

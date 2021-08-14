@@ -235,6 +235,8 @@ pub enum JVal {
     Builtin(JBuiltin),
     SpecialForm(JBuiltin),
     Env(JEnvRef),
+    Token(Token),
+    TokenMatcher(TokenMatcher),
 }
 
 pub type JValRef = Rc<JVal>;

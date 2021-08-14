@@ -3,6 +3,7 @@ use std::fmt;
 use lazy_static::lazy_static;
 use regex::Regex;
 
+use crate::state::JState;
 use crate::types::{JTFloat, JTInt};
 use crate::PositionTag;
 
@@ -19,7 +20,7 @@ pub enum TokenValue {
     Anychar(char),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub value: TokenValue,
     pub pos: PositionTag,
@@ -28,6 +29,29 @@ pub struct Token {
 impl Token {
     pub fn new(value: TokenValue, pos: PositionTag) -> Self {
         Self { value, pos }
+    }
+}
+
+impl PartialEq for Token {
+    fn eq(&self, other: &Token) -> bool {
+        self.value == other.value
+    }
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use TokenValue::*;
+        match &self.value {
+            LParen => write!(f, "LPAREN"),
+            RParen => write!(f, "RPAREN"),
+            Quote => write!(f, "QUOTE"),
+            Int(n) => write!(f, "INT({})", n),
+            Float(x) => write!(f, "FLOAT({})", x),
+            Ident(s) => write!(f, "IDENT({})", s),
+            String(s) => write!(f, "STRING(\"{}\")", s),
+            Eof => write!(f, "EOF"),
+            Anychar(c) => write!(f, "CHAR('{}')", c),
+        }
     }
 }
 
@@ -89,10 +113,6 @@ fn t_string(val: &str) -> TResult {
 
 fn t_anychar(s: &str) -> TResult {
     Ok(TokenValue::Anychar(s.chars().into_iter().next().unwrap()))
-}
-
-pub trait TokenIter {
-    fn next_token(&mut self) -> Result<Token, TokenError>;
 }
 
 pub struct Tokenizer {
@@ -169,21 +189,47 @@ impl Tokenizer {
             None => Ok(None),
         }
     }
+}
 
-    pub fn tokenize(&mut self) -> Result<Vec<Token>, TokenError> {
-        let mut tokens = vec![];
-        let mut next = self.next_token()?;
-        while next.value != TokenValue::Eof {
-            tokens.push(next);
-            next = self.next_token()?;
+pub struct TokenIterator<'a, 'b, T: TokenProducer + ?Sized> {
+    tokeniter: &'a mut T,
+    state: &'b mut JState,
+}
+
+impl<'a, 'b, T: TokenProducer> Iterator for TokenIterator<'a, 'b, T> {
+    type Item = Result<Token, TokenError>;
+    fn next(self: &mut TokenIterator<'a, 'b, T>) -> Option<Result<Token, TokenError>> {
+        match self.tokeniter.next_token(self.state) {
+            Ok(tok) => match tok.value {
+                TokenValue::Eof => None,
+                _ => Some(Ok(tok)),
+            },
+            Err(e) => Some(Err(e)),
         }
-        tokens.push(next);
-        Ok(tokens)
     }
 }
 
-impl TokenIter for Tokenizer {
-    fn next_token(&mut self) -> Result<Token, TokenError> {
+pub trait TokenProducer {
+    fn next_token(&mut self, state: &mut JState) -> Result<Token, TokenError>;
+}
+
+pub trait TokenToIter {
+    fn to_iter<'a, 'b>(&'a mut self, state: &'b mut JState) -> TokenIterator<'a, 'b, Self>
+    where
+        Self: TokenProducer;
+}
+
+impl<T: TokenProducer> TokenToIter for T {
+    fn to_iter<'a, 'b>(&'a mut self, state: &'b mut JState) -> TokenIterator<'a, 'b, Self> {
+        TokenIterator {
+            tokeniter: self,
+            state,
+        }
+    }
+}
+
+impl TokenProducer for Tokenizer {
+    fn next_token(&mut self, _state: &mut JState) -> Result<Token, TokenError> {
         while self.eat_whitespace() || self.eat_comment() {}
 
         if self.pos >= self.input.len() {
@@ -223,8 +269,8 @@ impl TokenIter for Tokenizer {
     }
 }
 
-impl TokenIter for std::vec::IntoIter<Token> {
-    fn next_token(&mut self) -> Result<Token, TokenError> {
+impl TokenProducer for std::vec::IntoIter<Token> {
+    fn next_token(&mut self, _: &mut JState) -> Result<Token, TokenError> {
         match self.next() {
             Some(tok) => Ok(tok),
             None => Ok(Token::new(TokenValue::Eof, PositionTag::new("", 0, 0))),
@@ -232,30 +278,34 @@ impl TokenIter for std::vec::IntoIter<Token> {
     }
 }
 
-#[derive(Default)]
-pub struct TokenValidator {
+pub struct TokenValidator<'a> {
     filename: String,
     balance: Vec<TokenValue>,
     tokens: Vec<Token>,
     lineno: usize,
+    state: &'a mut JState,
 }
 
 /// Balanced parens validation for multi-line input.
-impl TokenValidator {
-    pub fn new(filename: &str) -> Self {
+impl<'a> TokenValidator<'a> {
+    pub fn new(filename: &str, state: &'a mut JState) -> Self {
         Self {
             filename: filename.to_string(),
             balance: vec![],
             tokens: vec![],
             lineno: 0,
+            state,
         }
     }
     /// Returns None when more input is expected based on counting parens.
     /// Returns tokens when it looks like it may form a complete expression.
     pub fn input(&mut self, s: String) -> Result<Option<Vec<Token>>, TokenError> {
         self.lineno += 1;
-        let new_toks = Tokenizer::with_lineno(self.filename.clone(), s, self.lineno).tokenize()?;
-        for tok in new_toks.into_iter() {
+        let mut tokenizer = Tokenizer::with_lineno(self.filename.clone(), s, self.lineno);
+        let new_toks: Vec<Token> = tokenizer
+            .to_iter(self.state)
+            .collect::<Result<Vec<Token>, TokenError>>()?;
+        for tok in new_toks {
             match tok.value {
                 TokenValue::LParen => self.balance.push(TokenValue::LParen),
                 TokenValue::RParen => match self.balance.pop() {
@@ -303,7 +353,11 @@ mod tests {
 
     fn test_tokenizer(input: &str, expected: Vec<TokenValue>) {
         let mut tokenizer = Tokenizer::new("test".to_string(), input.to_string());
-        let tokens = tokenizer.tokenize().unwrap();
+        let mut state = JState::new();
+        let tokens = tokenizer
+            .to_iter(&mut state)
+            .collect::<Result<Vec<Token>, TokenError>>()
+            .unwrap();
         let tokvalues: Vec<TokenValue> = tokens.into_iter().map(|t| t.value).collect();
         assert_eq!(expected, tokvalues);
     }
@@ -318,7 +372,6 @@ mod tests {
                 TokenValue::Int(12),
                 TokenValue::Int(-15),
                 TokenValue::RParen,
-                TokenValue::Eof,
             ],
         );
     }
@@ -333,7 +386,6 @@ mod tests {
                 TokenValue::String("foo".to_string()),
                 TokenValue::String("bar".to_string()),
                 TokenValue::RParen,
-                TokenValue::Eof,
             ],
         );
     }
@@ -352,7 +404,6 @@ mod tests {
                 TokenValue::Int(3),
                 TokenValue::RParen,
                 TokenValue::RParen,
-                TokenValue::Eof,
             ],
         );
     }
@@ -372,7 +423,6 @@ mod tests {
                 TokenValue::Int(3),
                 TokenValue::RParen,
                 TokenValue::RParen,
-                TokenValue::Eof,
             ],
         );
     }
@@ -387,13 +437,12 @@ mod tests {
                 TokenValue::Float(12.0),
                 TokenValue::Float(-0.5),
                 TokenValue::RParen,
-                TokenValue::Eof,
             ],
         );
     }
 
     #[test]
     fn test_tokenizer_6() {
-        test_tokenizer("2.025", vec![TokenValue::Float(2.025), TokenValue::Eof]);
+        test_tokenizer("2.025", vec![TokenValue::Float(2.025)]);
     }
 }

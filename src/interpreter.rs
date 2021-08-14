@@ -3,13 +3,12 @@ use std::rc::Rc;
 
 use crate::builtin::add_builtins;
 use crate::builtin::add_reader_macros;
-use crate::state::JState;
 use crate::*;
 
 pub const PRELUDE: &str = include_str!("prelude.jibi");
 
 pub struct Interpreter {
-    state: JState,
+    pub state: JState,
     globals: JEnvRef,
 }
 
@@ -56,7 +55,7 @@ impl Interpreter {
     /// (or None if the program contains no expressions).
     pub fn eval_tokens(
         &mut self,
-        tokens: Box<dyn TokenIter>,
+        tokens: Box<dyn TokenProducer>,
     ) -> Result<Option<JValRef>, JException> {
         self.state.eval_tokens(tokens, Rc::clone(&self.globals))
     }
