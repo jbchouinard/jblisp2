@@ -1,4 +1,7 @@
-use crate::reader::readermacro::{Matcher, TokenMatcher};
+use std::rc::Rc;
+
+use crate::builtin::get_n_args;
+use crate::reader::readermacro::{LambdaTokenTransformer, Matcher, ReaderMacro, TokenMatcher};
 use crate::*;
 
 fn str_to_char(s: &str) -> Result<char, JError> {
@@ -9,7 +12,7 @@ fn str_to_char(s: &str) -> Result<char, JError> {
     }
 }
 
-pub fn jspecial_token(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+pub fn jbuiltin_token(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let mut args: Vec<JValRef> = args.iter_list()?.collect();
     let (v1, v2) = if args.len() == 1 {
         (args.pop().unwrap(), state.nil())
@@ -28,6 +31,7 @@ pub fn jspecial_token(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResu
         ("eof", JVal::Nil) => state.token(TokenValue::Eof),
         ("string", JVal::String(s)) => state.token(TokenValue::String(s.clone())),
         ("ident", JVal::Symbol(s)) => state.token(TokenValue::Ident(s.clone())),
+        ("ident", JVal::String(s)) => state.token(TokenValue::Ident(s.clone())),
         ("int", JVal::Int(n)) => state.token(TokenValue::Int(*n)),
         ("float", JVal::Float(x)) => state.token(TokenValue::Float(*x)),
         ("char", JVal::String(c)) => state.token(TokenValue::Anychar(str_to_char(c)?)),
@@ -35,7 +39,7 @@ pub fn jspecial_token(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResu
     }
 }
 
-pub fn jspecial_tokenmatcher(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+pub fn jbuiltin_tokenmatcher(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let mut args: Vec<JValRef> = args.iter_list()?.collect();
     let (v1, v2) = if args.len() == 1 {
         (args.pop().unwrap(), state.nil())
@@ -56,6 +60,7 @@ pub fn jspecial_tokenmatcher(args: JValRef, _env: JEnvRef, state: &mut JState) -
         ("string", JVal::String(s)) => TokenMatcher::String(Matcher::Exact(s.clone())),
         ("string", JVal::Nil) => TokenMatcher::String(Matcher::Any),
         ("ident", JVal::Symbol(s)) => TokenMatcher::Ident(Matcher::Exact(s.clone())),
+        ("ident", JVal::String(s)) => TokenMatcher::Ident(Matcher::Exact(s.clone())),
         ("ident", JVal::Nil) => TokenMatcher::Ident(Matcher::Any),
         ("int", JVal::Int(n)) => TokenMatcher::Int(Matcher::Exact(*n)),
         ("int", JVal::Nil) => TokenMatcher::Int(Matcher::Any),
@@ -65,4 +70,54 @@ pub fn jspecial_tokenmatcher(args: JValRef, _env: JEnvRef, state: &mut JState) -
         _ => return Err(JError::new(TypeError, "invalid token matcher definition")),
     })
     .into_ref())
+}
+
+pub fn jbuiltin_token_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [tok] = get_n_args(args)?;
+    let tok = tok.to_token()?;
+    Ok(state.symbol(
+        match &tok.value {
+            TokenValue::LParen => "lparen",
+            TokenValue::RParen => "rparen",
+            TokenValue::Quote => "quote",
+            TokenValue::Eof => "eof",
+            TokenValue::String(_) => "string",
+            TokenValue::Ident(_) => "ident",
+            TokenValue::Int(_) => "int",
+            TokenValue::Float(_) => "float",
+            TokenValue::Anychar(_) => "char",
+        }
+        .to_string(),
+    ))
+}
+
+pub fn jbuiltin_token_value(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [tok] = get_n_args(args)?;
+    let tok = tok.to_token()?;
+    Ok(match &tok.value {
+        TokenValue::String(s) => state.string(s.clone()),
+        TokenValue::Ident(s) => state.symbol(s.clone()),
+        TokenValue::Int(n) => state.int(*n),
+        TokenValue::Float(x) => state.float(*x),
+        TokenValue::Anychar(c) => state.string(c.to_string()),
+        _ => state.nil(),
+    })
+}
+
+pub fn jbuiltin_install_reader_macro(args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
+    let mut matchers: Vec<JValRef> = args.iter_list()?.collect();
+    if matchers.len() < 2 {
+        return Err(JError::new(ApplyError, "expected at least 2 arguments"));
+    }
+    let transformer = matchers.pop().unwrap().to_lambda()?.clone();
+    let matchers = matchers
+        .iter()
+        .map(|v| v.to_tokenmatcher().map(|t| t.clone()))
+        .collect::<Result<Vec<TokenMatcher>, JError>>()?;
+
+    state.add_reader_macro(ReaderMacro::new(
+        matchers,
+        Rc::new(LambdaTokenTransformer::new(transformer, env)),
+    ));
+    Ok(state.nil())
 }

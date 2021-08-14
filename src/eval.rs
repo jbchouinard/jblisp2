@@ -41,7 +41,7 @@ fn apply_special_form(b: &JBuiltin, args: JValRef, env: JEnvRef, state: &mut JSt
 }
 
 // TODO: currying?
-fn apply_lambda(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
+pub fn apply_lambda(lambda: &JLambda, args: JValRef, env: JEnvRef, state: &mut JState) -> JResult {
     let invoke_env = JEnv::new(Some(Rc::clone(&lambda.closure))).into_ref();
     let args = eval_args(args, env, state)?;
     lambda.params.bind(args, Rc::clone(&invoke_env))?;

@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use std::fmt;
 use std::rc::Rc;
 
+use crate::eval::apply_lambda;
 use crate::*;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -84,10 +85,35 @@ impl<T: Fn(Vec<Token>) -> Result<Vec<Token>, JError>> TokenTransformer for T {
     }
 }
 
-// pub struct LambdaTokenTransformer {
-//     lambda: JLambda,
-//     env: JEnvRef,
-// }
+pub struct LambdaTokenTransformer {
+    lambda: JLambda,
+    env: JEnvRef,
+}
+
+impl LambdaTokenTransformer {
+    pub fn new(lambda: JLambda, env: JEnvRef) -> Self {
+        Self { lambda, env }
+    }
+}
+
+impl TokenTransformer for LambdaTokenTransformer {
+    fn transform(&self, tokens: Vec<Token>, state: &mut JState) -> Result<Vec<Token>, JError> {
+        apply_lambda(
+            &self.lambda,
+            state.list(
+                tokens
+                    .into_iter()
+                    .map(|t| JVal::Token(t).into_ref())
+                    .collect(),
+            ),
+            Rc::clone(&self.env),
+            state,
+        )?
+        .iter_list()?
+        .map(|v| v.to_token().map(|t| t.clone()))
+        .collect()
+    }
+}
 
 #[derive(Clone)]
 pub struct ReaderMacro {
@@ -102,8 +128,8 @@ impl ReaderMacro {
     pub fn rule_len(&self) -> usize {
         self.rule.len()
     }
-    pub fn apply(&self, tokeniter: Box<dyn TokenProducer>) -> ReaderMacroIterator {
-        ReaderMacroIterator::new(tokeniter, self.clone())
+    pub fn apply(&self, tokens: Box<dyn TokenProducer>) -> ReaderMacroProducer {
+        ReaderMacroProducer::new(tokens, self.clone())
     }
     pub fn matches_rule(&self, tokens: &[Token]) -> bool {
         if tokens.len() != self.rule.len() {
@@ -121,16 +147,16 @@ impl ReaderMacro {
     }
 }
 
-pub struct ReaderMacroIterator {
+pub struct ReaderMacroProducer {
     tokens: Box<dyn TokenProducer>,
     rm: ReaderMacro,
     buffer_in: VecDeque<Token>,
     buffer_out: VecDeque<Token>,
 }
 
-impl ReaderMacroIterator {
+impl ReaderMacroProducer {
     pub fn new(tokens: Box<dyn TokenProducer>, rm: ReaderMacro) -> Self {
-        let rl = rm.rule.len();
+        let rl = rm.rule_len();
         Self {
             tokens,
             rm,
@@ -140,7 +166,7 @@ impl ReaderMacroIterator {
     }
 }
 
-impl TokenProducer for ReaderMacroIterator {
+impl TokenProducer for ReaderMacroProducer {
     fn next_token(&mut self, state: &mut JState) -> Result<Token, TokenError> {
         loop {
             if !self.buffer_out.is_empty() {

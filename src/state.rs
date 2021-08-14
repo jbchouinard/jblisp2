@@ -98,13 +98,13 @@ impl JState {
 
     pub fn eval_tokens(
         &mut self,
-        mut tokeniter: Box<dyn TokenProducer>,
+        mut tokens: Box<dyn TokenProducer>,
         env: JEnvRef,
     ) -> Result<Option<JValRef>, (PositionTag, JError, Vec<TracebackFrame>)> {
         for rm in &self.reader_macros {
-            tokeniter = Box::new(rm.apply(tokeniter));
+            tokens = Box::new(rm.apply(tokens));
         }
-        let forms = match Parser::new(tokeniter, self).parse_forms() {
+        let forms = match Parser::new(tokens, self).parse_forms() {
             Ok(forms) => forms,
             Err(pe) => return Err((pe.pos.clone(), pe.into(), self.traceback_take())),
         };

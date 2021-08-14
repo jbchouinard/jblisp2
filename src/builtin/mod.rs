@@ -7,10 +7,9 @@ use env::*;
 use error::*;
 use list::*;
 use math::*;
-pub use readermacros::add_reader_macros;
+use readermacro::*;
 use string::*;
 use sys::*;
-use token::*;
 
 mod args;
 mod debug;
@@ -18,10 +17,9 @@ mod env;
 mod error;
 mod list;
 mod math;
-mod readermacros;
+mod readermacro;
 mod string;
 mod sys;
-mod token;
 
 // TODO: loop, and, or, cond
 
@@ -320,6 +318,9 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_special_form("ddm", jspecial_display_debug_macro, env, state);
 
     // Reader macros
-    add_special_form("token", jspecial_token, env, state);
-    add_special_form("tokenmatcher", jspecial_tokenmatcher, env, state);
+    add_builtin("token", jbuiltin_token, env, state);
+    add_builtin("token-match", jbuiltin_tokenmatcher, env, state);
+    add_builtin("token-value", jbuiltin_token_value, env, state);
+    add_builtin("token-type", jbuiltin_token_type, env, state);
+    add_builtin("reader-macro!", jbuiltin_install_reader_macro, env, state);
 }

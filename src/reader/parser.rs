@@ -2,15 +2,15 @@ use crate::reader::ParserError;
 use crate::*;
 
 pub struct Parser<'a> {
-    tokeniter: Box<dyn TokenProducer>,
+    tokens: Box<dyn TokenProducer>,
     peek: Token,
     state: &'a mut JState,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(tokeniter: Box<dyn TokenProducer>, state: &'a mut JState) -> Self {
+    pub fn new(tokens: Box<dyn TokenProducer>, state: &'a mut JState) -> Self {
         let mut this = Self {
-            tokeniter,
+            tokens,
             // Dummy value until we read the first real token
             peek: Token::new(TokenValue::Eof, PositionTag::new("", 0, 0)),
             state,
@@ -24,7 +24,7 @@ impl<'a> Parser<'a> {
     }
 
     fn next(&mut self) -> Result<Token, ParserError> {
-        let next = match self.tokeniter.next_token(self.state) {
+        let next = match self.tokens.next_token(self.state) {
             Ok(tok) => tok,
             Err(te) => return Err(self.error(te.pos, &te.reason)),
         };

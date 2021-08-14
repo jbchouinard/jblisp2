@@ -15,6 +15,7 @@ Features:
 - First class functions
 - Lexical scoping and closures
 - Procedural macros
+- Reader macros
 - Exception handling
 - Namespaced modules
 - Automatic reference counting

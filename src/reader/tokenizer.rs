@@ -191,6 +191,10 @@ impl Tokenizer {
     }
 }
 
+pub trait TokenProducer {
+    fn next_token(&mut self, state: &mut JState) -> Result<Token, TokenError>;
+}
+
 pub struct TokenIterator<'a, 'b, T: TokenProducer + ?Sized> {
     tokeniter: &'a mut T,
     state: &'b mut JState,
@@ -207,10 +211,6 @@ impl<'a, 'b, T: TokenProducer> Iterator for TokenIterator<'a, 'b, T> {
             Err(e) => Some(Err(e)),
         }
     }
-}
-
-pub trait TokenProducer {
-    fn next_token(&mut self, state: &mut JState) -> Result<Token, TokenError>;
 }
 
 pub trait TokenToIter {

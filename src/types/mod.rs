@@ -300,6 +300,24 @@ impl JVal {
             _ => Err(JError::new(TypeError, "expected an error")),
         }
     }
+    pub fn to_lambda(&self) -> Result<&JLambda, JError> {
+        match self {
+            Self::Lambda(l) => Ok(l.as_ref()),
+            _ => Err(JError::new(TypeError, "expected a token")),
+        }
+    }
+    pub fn to_token(&self) -> Result<&Token, JError> {
+        match self {
+            Self::Token(t) => Ok(t),
+            _ => Err(JError::new(TypeError, "expected a token")),
+        }
+    }
+    pub fn to_tokenmatcher(&self) -> Result<&TokenMatcher, JError> {
+        match self {
+            Self::TokenMatcher(t) => Ok(t),
+            _ => Err(JError::new(TypeError, "expected a tokenmatcher")),
+        }
+    }
 
     pub fn is_list(&self) -> bool {
         match self {
