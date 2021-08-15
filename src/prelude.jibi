@@ -126,7 +126,6 @@
         x
         (cons env-lookup-rec (cons (list env-lookup x (list quote (car syms))) (cdr syms)))))
 
-
 (defmacro use (mod . names)
     (cons begin (map (fn (name)
         (list defglobal name (list env-lookup mod (list quote name))))
@@ -158,9 +157,9 @@
 (reader-macro!
     (token-match 'char "#")
     (token-match 'lparen)
-    (fn (_ _)
-        (list (token 'lparen) (token 'ident 'vector))))
-
+    (fn (. _) (list
+        (token 'lparen)
+        (token 'ident 'vector))))
 
 ; foo::bar::baz -> (env-lookup-rec foo bar baz)
 (defn env-lookup-rec-toks (syms)

@@ -32,12 +32,18 @@ pub enum TokenMatcher {
     String(Matcher<String>),
     Eof,
     Anychar(char),
+    Or(Box<TokenMatcher>, Box<TokenMatcher>),
 }
 
 impl TokenMatcher {
+    pub fn or(self, other: TokenMatcher) -> Self {
+        TokenMatcher::Or(Box::new(self), Box::new(other))
+    }
     pub fn matches(&self, tv: &TokenValue) -> bool {
         use TokenMatcher::*;
         match (self, tv) {
+            (Or(tm1, tm2), _) => tm1.matches(tv) || tm2.matches(tv),
+            (Any, TokenValue::Eof) => false,
             (Any, _) => true,
             (LParen, TokenValue::LParen) => true,
             (RParen, TokenValue::RParen) => true,
@@ -71,6 +77,7 @@ impl fmt::Display for TokenMatcher {
             String(Matcher::Any) => write!(f, "String(#ANY)"),
             Eof => write!(f, "EOF"),
             Anychar(c) => write!(f, "CHAR('{}')", c),
+            Or(tm1, tm2) => write!(f, "{}|{}", tm1, tm2),
         }
     }
 }

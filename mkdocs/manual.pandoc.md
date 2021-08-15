@@ -1051,6 +1051,100 @@ Exit program with a status code.
 ---
 
 \newpage
+### Reader Macros
+
+Reader macros are macros that operate on lexical tokens, before parsing. They allow
+extending the syntax of the language.
+
+A reader macro consists of a rule, and a transformer. The rule specifies a pattern
+of tokens to which the macro applies. Whenever the reader encounters a sequence of
+tokens that matches the pattern, the transformer is applied.
+
+The transformer is a lambda which takes the matching token sequence as input,
+and returns a list of tokens to replace them.
+
+Reader macros are applied in the order in which they were installed (with the
+`reader-macro!` procedure).
+
+```nohighlight
+>>> ; Example
+>>> ;
+```
+
+#### token
+```nohighlight
+(token type [value])
+```
+Used to produce tokens in reader macro transformer functions.
+
+```nohighlight
+>>> ; Example
+>>> (token 'lparen)
+#[token LPAREN]
+>>> (token 'string "foo")
+#[token STRING("foo")]
+```
+
+---
+
+#### token-match
+```nohighlight
+(token-match type [value])
+```
+A matcher for lexical tokens. A reader macro rule consists of a list of token matchers.
+
+```nohighlight
+>>> ; Example
+>>> (token-match 'string)
+#[tokenmatcher String(#ANY)]
+>>> (token-match 'any)
+#[tokenmatcher #ANY]
+```
+
+---
+
+#### token-value
+```nohighlight
+(token-value :token)
+```
+Get value of token (or nil for tokens that have no value).
+
+```nohighlight
+>>> ; Example
+>>> (token-value (token 'string "foo"))
+foo
+```
+
+---
+
+#### token-type
+```nohighlight
+(token-type :token)
+```
+Get type of token (symbol).
+
+```nohighlight
+>>> ; Example
+>>> (token-type (token 'lparen))
+lparen
+```
+
+---
+
+#### reader-macro!
+```nohighlight
+(reader-macro! tokenmatcher [... tokenmatcher] transformer)
+```
+Install a new reader macro with the provided rule and transformer.
+
+The first n arguments are token matchers to match sequences of 1 or more tokens.
+
+The last argument is the token transfomer function to apply to (non-overlapping) sequences
+of tokens that match the rule.
+
+---
+
+\newpage
 ### Debugging
 
 #### dd
