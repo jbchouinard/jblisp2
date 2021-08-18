@@ -38,8 +38,13 @@
             (list 2 4 6)
             (map (fn (x) (* 2 x)) (list 1 2 3))))
 
-    (test "fold"
+    (test "foldl"
         (assert-equal
             (list 4 3 2 1)
-            (fold cons () (list 1 2 3 4))))
+            (foldl cons () (list 1 2 3 4))))
+
+    (test "foldr"
+        (assert-equal
+            (list 1 2 3 4)
+            (foldr cons () (list 1 2 3 4))))
 )

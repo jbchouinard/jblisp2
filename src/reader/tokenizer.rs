@@ -9,15 +9,12 @@ use crate::PositionTag;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenValue {
-    LParen,
-    RParen,
-    Quote,
+    Char(char),
     Int(JTInt),
     Float(JTFloat),
     Ident(String),
     String(String),
     Eof,
-    Anychar(char),
 }
 
 #[derive(Debug, Clone)]
@@ -42,24 +39,18 @@ impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use TokenValue::*;
         match &self.value {
-            LParen => write!(f, "LPAREN"),
-            RParen => write!(f, "RPAREN"),
-            Quote => write!(f, "QUOTE"),
             Int(n) => write!(f, "INT({})", n),
             Float(x) => write!(f, "FLOAT({})", x),
             Ident(s) => write!(f, "IDENT({})", s),
             String(s) => write!(f, "STRING(\"{}\")", s),
             Eof => write!(f, "EOF"),
-            Anychar(c) => write!(f, "CHAR('{}')", c),
+            Char(c) => write!(f, "CHAR('{}')", c),
         }
     }
 }
 
 lazy_static! {
     static ref RE_WS: Regex = Regex::new(r"^\s+").unwrap();
-    static ref RE_LPAREN: Regex = Regex::new(r"^\(").unwrap();
-    static ref RE_RPAREN: Regex = Regex::new(r"^\)").unwrap();
-    static ref RE_QUOTE: Regex = Regex::new(r"^'").unwrap();
     static ref RE_IDENT: Regex = Regex::new(
         r"(?x)
             ^
@@ -72,22 +63,10 @@ lazy_static! {
     static ref RE_FLOAT: Regex = Regex::new(r"^-?([.][0-9]+|[0-9]+[.][0-9]*)").unwrap();
     static ref RE_INT: Regex = Regex::new(r"^-?[0-9]+").unwrap();
     static ref RE_COMMENT: Regex = Regex::new(r"^;[^\n]*").unwrap();
-    static ref RE_ANYCHAR: Regex = Regex::new(r"^.").unwrap();
+    static ref RE_CHAR: Regex = Regex::new(r"^.").unwrap();
 }
 
 type TResult = std::result::Result<TokenValue, String>;
-
-fn t_lparen(_: &str) -> TResult {
-    Ok(TokenValue::LParen)
-}
-
-fn t_rparen(_: &str) -> TResult {
-    Ok(TokenValue::RParen)
-}
-
-fn t_quote(_: &str) -> TResult {
-    Ok(TokenValue::Quote)
-}
 
 fn t_int(val: &str) -> TResult {
     match val.parse::<JTInt>() {
@@ -111,8 +90,8 @@ fn t_string(val: &str) -> TResult {
     Ok(TokenValue::String(val[1..val.len() - 1].to_string()))
 }
 
-fn t_anychar(s: &str) -> TResult {
-    Ok(TokenValue::Anychar(s.chars().into_iter().next().unwrap()))
+fn t_char(s: &str) -> TResult {
+    Ok(TokenValue::Char(s.chars().into_iter().next().unwrap()))
 }
 
 pub struct Tokenizer {
@@ -235,15 +214,6 @@ impl TokenProducer for Tokenizer {
         if self.pos >= self.input.len() {
             return Ok(Token::new(TokenValue::Eof, self.ptag(self.pos)));
         }
-        if let Some(token) = self.try_token(&RE_LPAREN, t_lparen)? {
-            return Ok(token);
-        }
-        if let Some(token) = self.try_token(&RE_RPAREN, t_rparen)? {
-            return Ok(token);
-        }
-        if let Some(token) = self.try_token(&RE_QUOTE, t_quote)? {
-            return Ok(token);
-        }
         if let Some(token) = self.try_token(&RE_FLOAT, t_float)? {
             return Ok(token);
         }
@@ -256,7 +226,7 @@ impl TokenProducer for Tokenizer {
         if let Some(token) = self.try_token(&RE_STRING, t_string)? {
             return Ok(token);
         }
-        if let Some(token) = self.try_token(&RE_ANYCHAR, t_anychar)? {
+        if let Some(token) = self.try_token(&RE_CHAR, t_char)? {
             return Ok(token);
         }
         Err(TokenError::new(
@@ -307,9 +277,9 @@ impl<'a> TokenValidator<'a> {
             .collect::<Result<Vec<Token>, TokenError>>()?;
         for tok in new_toks {
             match tok.value {
-                TokenValue::LParen => self.balance.push(TokenValue::LParen),
-                TokenValue::RParen => match self.balance.pop() {
-                    Some(TokenValue::LParen) => (),
+                TokenValue::Char('(') => self.balance.push(TokenValue::Char('(')),
+                TokenValue::Char(')') => match self.balance.pop() {
+                    Some(TokenValue::Char('(')) => (),
                     _ => return Err(TokenError::new("unexpected closing parens", tok.pos)),
                 },
                 _ => (),
@@ -367,11 +337,11 @@ mod tests {
         test_tokenizer(
             "(* 12 -15)",
             vec![
-                TokenValue::LParen,
+                TokenValue::Char('('),
                 TokenValue::Ident("*".to_string()),
                 TokenValue::Int(12),
                 TokenValue::Int(-15),
-                TokenValue::RParen,
+                TokenValue::Char(')'),
             ],
         );
     }
@@ -381,11 +351,11 @@ mod tests {
         test_tokenizer(
             "(concat \"foo\" \"bar\")",
             vec![
-                TokenValue::LParen,
+                TokenValue::Char('('),
                 TokenValue::Ident("concat".to_string()),
                 TokenValue::String("foo".to_string()),
                 TokenValue::String("bar".to_string()),
-                TokenValue::RParen,
+                TokenValue::Char(')'),
             ],
         );
     }
@@ -395,15 +365,15 @@ mod tests {
         test_tokenizer(
             "(quote '(1 2 3))",
             vec![
-                TokenValue::LParen,
+                TokenValue::Char('('),
                 TokenValue::Ident("quote".to_string()),
-                TokenValue::Quote,
-                TokenValue::LParen,
+                TokenValue::Char('\''),
+                TokenValue::Char('('),
                 TokenValue::Int(1),
                 TokenValue::Int(2),
                 TokenValue::Int(3),
-                TokenValue::RParen,
-                TokenValue::RParen,
+                TokenValue::Char(')'),
+                TokenValue::Char(')'),
             ],
         );
     }
@@ -414,15 +384,15 @@ mod tests {
             "(quote ; this is a comment!
                 '(1 2 3))",
             vec![
-                TokenValue::LParen,
+                TokenValue::Char('('),
                 TokenValue::Ident("quote".to_string()),
-                TokenValue::Quote,
-                TokenValue::LParen,
+                TokenValue::Char('\''),
+                TokenValue::Char('('),
                 TokenValue::Int(1),
                 TokenValue::Int(2),
                 TokenValue::Int(3),
-                TokenValue::RParen,
-                TokenValue::RParen,
+                TokenValue::Char(')'),
+                TokenValue::Char(')'),
             ],
         );
     }
@@ -432,11 +402,11 @@ mod tests {
         test_tokenizer(
             "(* 12.0 -0.5)",
             vec![
-                TokenValue::LParen,
+                TokenValue::Char('('),
                 TokenValue::Ident("*".to_string()),
                 TokenValue::Float(12.0),
                 TokenValue::Float(-0.5),
-                TokenValue::RParen,
+                TokenValue::Char(')'),
             ],
         );
     }
@@ -444,5 +414,20 @@ mod tests {
     #[test]
     fn test_tokenizer_6() {
         test_tokenizer("2.025", vec![TokenValue::Float(2.025)]);
+    }
+
+    #[test]
+    fn test_tokenizer_7() {
+        test_tokenizer(
+            "(token 'char \")\")",
+            vec![
+                TokenValue::Char('('),
+                TokenValue::Ident("token".to_string()),
+                TokenValue::Char('\''),
+                TokenValue::Ident("char".to_string()),
+                TokenValue::String(")".to_string()),
+                TokenValue::Char(')'),
+            ],
+        );
     }
 }

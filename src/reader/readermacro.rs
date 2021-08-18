@@ -23,15 +23,12 @@ impl<T: PartialEq> Matcher<T> {
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenMatcher {
     Any,
-    LParen,
-    RParen,
-    Quote,
+    Char(char),
     Int(Matcher<JTInt>),
     Float(Matcher<JTFloat>),
     Ident(Matcher<String>),
     String(Matcher<String>),
     Eof,
-    Anychar(char),
     Or(Box<TokenMatcher>, Box<TokenMatcher>),
 }
 
@@ -45,11 +42,8 @@ impl TokenMatcher {
             (Or(tm1, tm2), _) => tm1.matches(tv) || tm2.matches(tv),
             (Any, TokenValue::Eof) => false,
             (Any, _) => true,
-            (LParen, TokenValue::LParen) => true,
-            (RParen, TokenValue::RParen) => true,
-            (Quote, TokenValue::Quote) => true,
             (Eof, TokenValue::Eof) => true,
-            (Anychar(c1), TokenValue::Anychar(c2)) => c1 == c2,
+            (Char(c1), TokenValue::Char(c2)) => c1 == c2,
             (Int(m), TokenValue::Int(n)) => m.matches(n),
             (Float(m), TokenValue::Float(n)) => m.matches(n),
             (Ident(m), TokenValue::Ident(s)) => m.matches(s),
@@ -64,9 +58,6 @@ impl fmt::Display for TokenMatcher {
         use TokenMatcher::*;
         match &self {
             Any => write!(f, "#ANY"),
-            LParen => write!(f, "LPAREN"),
-            RParen => write!(f, "RPAREN"),
-            Quote => write!(f, "QUOTE"),
             Int(Matcher::Any) => write!(f, "INT(#ANY)"),
             Int(Matcher::Exact(n)) => write!(f, "INT({})", n),
             Float(Matcher::Any) => write!(f, "FLOAT(#ANY)"),
@@ -76,7 +67,7 @@ impl fmt::Display for TokenMatcher {
             String(Matcher::Exact(s)) => write!(f, "STRING(\"{}\")", s),
             String(Matcher::Any) => write!(f, "String(#ANY)"),
             Eof => write!(f, "EOF"),
-            Anychar(c) => write!(f, "CHAR('{}')", c),
+            Char(c) => write!(f, "CHAR('{}')", c),
             Or(tm1, tm2) => write!(f, "{}|{}", tm1, tm2),
         }
     }

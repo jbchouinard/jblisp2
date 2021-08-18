@@ -46,14 +46,14 @@ impl<'a> Parser<'a> {
 
     fn expr(&mut self) -> Result<JValRef, ParserError> {
         match self.peek.value {
-            TokenValue::LParen => self.sexpr(),
-            TokenValue::Quote => self.quote(),
+            TokenValue::Char('(') => self.sexpr(),
+            TokenValue::Char('\'') => self.quote(),
             _ => self.atom(),
         }
     }
 
     fn quote(&mut self) -> Result<JValRef, ParserError> {
-        self.expect(TokenValue::Quote)?;
+        self.expect(TokenValue::Char('\''))?;
         Ok(JVal::Quote(self.expr()?).into_ref())
     }
 
@@ -69,12 +69,12 @@ impl<'a> Parser<'a> {
     }
 
     fn sexpr(&mut self) -> Result<JValRef, ParserError> {
-        self.expect(TokenValue::LParen)?;
+        self.expect(TokenValue::Char('('))?;
         let mut list = vec![];
-        while self.peek.value != TokenValue::RParen {
+        while self.peek.value != TokenValue::Char(')') {
             list.push(self.expr()?);
         }
-        self.expect(TokenValue::RParen)?;
+        self.expect(TokenValue::Char(')'))?;
         Ok(self.state.list(list))
     }
 

@@ -21,6 +21,11 @@ pub fn jbuiltin_list(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResu
     Ok(args)
 }
 
+pub fn jbuiltin_unquote_splice(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResult {
+    let vals = args.to_pair()?.clone();
+    Ok(JVal::UnquoteSplice(vals).into_ref())
+}
+
 pub fn jbuiltin_is_list(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [pair] = get_n_args(args)?;
     let pair = pair.to_pair()?;

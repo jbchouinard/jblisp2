@@ -173,26 +173,26 @@
 
 (defnglobal + (. xs) 
     (if (apply any (map decimal? xs))
-        (fold d+ 0 xs)
+        (foldl d+ 0 xs)
         (apply g+ xs)))
 
 (defnglobal - (x . xs) 
     (if (apply any (map decimal? (cons x xs)))
         (if (empty? xs)
             (d- 0 x)
-            (fold (fn (x y) (d- y x)) x xs))
+            (foldl (fn (x y) (d- y x)) x xs))
         (apply g- (cons x xs))))
 
 (defnglobal * (. xs) 
     (if (apply any (map decimal? xs))
-        (fold d* 1 xs)
+        (foldl d* 1 xs)
         (apply g* xs)))
 
 (defnglobal / (x . xs) 
     (if (apply any (map decimal? (cons x xs)))
         (if (empty? xs)
             (d/ 1 x)
-            (fold (fn (x y) (d/ y x)) x xs))
+            (foldl (fn (x y) (d/ y x)) x xs))
         (apply g/ (cons x xs))))
 
 (defnglobal = (x1 x2)

@@ -52,10 +52,10 @@ make install
 - Lazy values, lazy lists
 - User-defined types, operator overloading
 - Specific error catch
-- Numeric data types: complex, arbitrary precision int
-- Mutable data structures: mutpair, vector, table
-- Compiled libs
-- FFI
+- Numeric data types: complex numbers, arbitrary precision int
+- Mutable data structures: vector, table, mutpair
+- Compiled modules
+- C FFI
 - Continuations
 - Standard libraries: io, sockets, math
 - Debugger

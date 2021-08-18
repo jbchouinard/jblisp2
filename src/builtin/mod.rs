@@ -154,8 +154,11 @@ fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     Ok(state.symbol(
         match *val {
             JVal::Nil => "nil",
-            JVal::Pair { .. } => "pair",
+            JVal::Pair(_) => "pair",
+            JVal::UnquoteSplice(_) => "unquote-splice",
             JVal::Quote(_) => "quote",
+            JVal::Quasiquote(_) => "quasiquote",
+            JVal::Unquote(_) => "unquote",
             JVal::Int(_) => "integer",
             JVal::Float(_) => "float",
             JVal::Bool(_) => "bool",
@@ -266,6 +269,7 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("car", jbuiltin_car, env, state);
     add_builtin("cdr", jbuiltin_cdr, env, state);
     add_builtin("list?", jbuiltin_is_list, env, state);
+    add_builtin("unquote-splice", jbuiltin_unquote_splice, env, state);
 
     // String
     add_builtin("len", jbuiltin_len, env, state);
