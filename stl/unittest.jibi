@@ -20,27 +20,28 @@
         (concat (repr x) " is not equal to " (repr y))))
 
 (defmacro assert-type (val t)
-    (list assert-msg (list type? val t)
-        (list concat (list repr val) " is not of type " (repr t))))
+    `(assert-msg (type? ,val ,t)
+        ,(concat (repr val) " is not of type " (repr t))))
 
 (defmacro assert-raise (code)
     (let ((errnoraise (exception "did not raise an error")))
-        (list try
-            (list begin
-                code
-                (list raise errnoraise))
-            (list if (list equal? 'err errnoraise) (list raise errnoraise) ()))))
+        `(try
+            (begin
+                ,code
+                (raise errnoraise))
+            (and (equal? err ,errnoraise)
+                (raise errnoraise)))))
 
 (defmacro test (name . exprs)
-    (list try
-        (list begin
-            (cons begin exprs)
-            (list inc-ok)
-            (list if test-verbose
-                (list print (list concat "Test " name ": ok")) ()))
-        (list begin
-            (list inc-failed)
-            (list print (list concat "Test " name ": failed (" (list repr 'err) ")")) ())))
+    `(try
+        (begin
+            ,@exprs
+            (,inc-ok)
+            (and ,test-verbose
+                (print (concat "Test " ,name ": ok"))))
+        (begin
+            (,inc-failed)
+            (print (concat "Test " ,name ": failed " (repr err))))))
 
 (defn test-start (name)
     (print (concat "Testing " name "..."))
@@ -57,7 +58,7 @@
     (if (equal? failed-count 0) () (raise (exception "Some tests failed."))))
 
 (defmacro test-suite (name . tests)
-    (list begin
-        (list test-start name)
-        (cons begin tests)
-        (list test-exit)))
+    `(begin
+        (,test-start ,name)
+        ,@tests
+        (,test-exit)))
