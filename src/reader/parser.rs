@@ -46,15 +46,12 @@ impl<'a> Parser<'a> {
 
     fn expr(&mut self) -> Result<JValRef, ParserError> {
         match self.peek.value {
-            TokenValue::Char('(') => self.sexpr(),
+            TokenValue::Char('(') => self.list(),
             TokenValue::Char('\'') => self.quote(),
+            TokenValue::Char('`') => self.quasiquote(),
+            TokenValue::Char(',') => self.unquote(),
             _ => self.atom(),
         }
-    }
-
-    fn quote(&mut self) -> Result<JValRef, ParserError> {
-        self.expect(TokenValue::Char('\''))?;
-        Ok(JVal::Quote(self.expr()?).into_ref())
     }
 
     fn atom(&mut self) -> Result<JValRef, ParserError> {
@@ -68,7 +65,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn sexpr(&mut self) -> Result<JValRef, ParserError> {
+    fn list(&mut self) -> Result<JValRef, ParserError> {
         self.expect(TokenValue::Char('('))?;
         let mut list = vec![];
         while self.peek.value != TokenValue::Char(')') {
@@ -76,6 +73,27 @@ impl<'a> Parser<'a> {
         }
         self.expect(TokenValue::Char(')'))?;
         Ok(self.state.list(list))
+    }
+
+    fn quote(&mut self) -> Result<JValRef, ParserError> {
+        self.expect(TokenValue::Char('\''))?;
+        Ok(JVal::Quote(self.expr()?).into_ref())
+    }
+
+    fn quasiquote(&mut self) -> Result<JValRef, ParserError> {
+        self.expect(TokenValue::Char('`'))?;
+        Ok(JVal::Quasiquote(self.expr()?).into_ref())
+    }
+
+    fn unquote(&mut self) -> Result<JValRef, ParserError> {
+        self.expect(TokenValue::Char(','))?;
+        match self.peek.value {
+            TokenValue::Char('@') => {
+                self.next()?;
+                Ok(JVal::UnquoteSplice(self.expr()?).into_ref())
+            }
+            _ => Ok(JVal::Unquote(self.expr()?).into_ref()),
+        }
     }
 
     pub fn parse_form(&mut self) -> Result<Option<(PositionTag, JValRef)>, ParserError> {

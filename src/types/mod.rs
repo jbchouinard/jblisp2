@@ -44,32 +44,6 @@ impl JPair {
         }
         Ok(JListIterator { head: Some(self) })
     }
-
-    pub(crate) fn extend(&self, other: JValRef) -> JPair {
-        let car = &self.0;
-        let cdr = &self.1;
-        match &**cdr {
-            JVal::Nil => Self::cons(Rc::clone(car), other),
-            JVal::Pair(p) => {
-                Self::cons(Rc::clone(car), JVal::Pair(p.extend(cdr.clone())).into_ref())
-            }
-            _ => panic!("not a list"),
-        }
-    }
-
-    pub(crate) fn merge_splices(&self) -> JPair {
-        let car = self.0.clone();
-        let mut cdr = self.1.clone();
-        if let JVal::Pair(p) = &*cdr {
-            cdr = JVal::Pair(p.merge_splices()).into_ref();
-        };
-
-        if let JVal::UnquoteSplice(p) = &*car {
-            p.extend(cdr)
-        } else {
-            JPair(car, cdr)
-        }
-    }
 }
 
 pub struct JListIterator<'a> {
@@ -252,7 +226,7 @@ pub enum JVal {
     Quote(JValRef),
     Quasiquote(JValRef),
     Unquote(JValRef),
-    UnquoteSplice(JPair),
+    UnquoteSplice(JValRef),
     Int(JTInt),
     Float(JTFloat),
     Bool(bool),

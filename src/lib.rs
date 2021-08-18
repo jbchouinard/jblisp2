@@ -67,7 +67,7 @@ pub(crate) use error::JErrorKind::*;
 pub use error::{JError, JErrorKind, JResult};
 pub use interpreter::{Interpreter, PRELUDE};
 pub use reader::parser::Parser;
-pub use reader::readermacro::{ReaderMacro, TokenMatcher, TokenTransformer};
+pub use reader::readermacro::{ReaderMacro, TokenMatcher};
 pub use reader::tokenizer::*;
 pub use reader::PositionTag;
 pub use state::JState;

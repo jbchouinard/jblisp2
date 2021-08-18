@@ -73,55 +73,16 @@ impl fmt::Display for TokenMatcher {
     }
 }
 
-pub trait TokenTransformer {
-    fn transform(&self, tokens: Vec<Token>, state: &mut JState) -> Result<Vec<Token>, JError>;
-}
-
-impl<T: Fn(Vec<Token>) -> Result<Vec<Token>, JError>> TokenTransformer for T {
-    fn transform(&self, tokens: Vec<Token>, _: &mut JState) -> Result<Vec<Token>, JError> {
-        (self)(tokens)
-    }
-}
-
-pub struct LambdaTokenTransformer {
+#[derive(Clone)]
+pub struct ReaderMacro {
+    rule: Vec<TokenMatcher>,
     lambda: JLambda,
     env: JEnvRef,
 }
 
-impl LambdaTokenTransformer {
-    pub fn new(lambda: JLambda, env: JEnvRef) -> Self {
-        Self { lambda, env }
-    }
-}
-
-impl TokenTransformer for LambdaTokenTransformer {
-    fn transform(&self, tokens: Vec<Token>, state: &mut JState) -> Result<Vec<Token>, JError> {
-        apply_lambda(
-            &self.lambda,
-            state.list(
-                tokens
-                    .into_iter()
-                    .map(|t| JVal::Token(t).into_ref())
-                    .collect(),
-            ),
-            Rc::clone(&self.env),
-            state,
-        )?
-        .iter_list()?
-        .map(|v| v.to_token().map(|t| t.clone()))
-        .collect()
-    }
-}
-
-#[derive(Clone)]
-pub struct ReaderMacro {
-    rule: Vec<TokenMatcher>,
-    transformer: Rc<dyn TokenTransformer>,
-}
-
 impl ReaderMacro {
-    pub fn new(rule: Vec<TokenMatcher>, transformer: Rc<dyn TokenTransformer>) -> Self {
-        Self { rule, transformer }
+    pub fn new(rule: Vec<TokenMatcher>, lambda: JLambda, env: JEnvRef) -> Self {
+        Self { rule, lambda, env }
     }
     pub fn rule_len(&self) -> usize {
         self.rule.len()
@@ -141,7 +102,20 @@ impl ReaderMacro {
         true
     }
     pub fn apply_rule(&self, tokens: Vec<Token>, state: &mut JState) -> Result<Vec<Token>, JError> {
-        self.transformer.transform(tokens, state)
+        apply_lambda(
+            &self.lambda,
+            state.list(
+                tokens
+                    .into_iter()
+                    .map(|t| JVal::Token(t).into_ref())
+                    .collect(),
+            ),
+            Rc::clone(&self.env),
+            state,
+        )?
+        .iter_list()?
+        .map(|v| v.to_token().map(|t| t.clone()))
+        .collect()
     }
 }
 

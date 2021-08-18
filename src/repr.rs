@@ -17,7 +17,7 @@ pub fn repr(expr: &JVal) -> String {
         JVal::Quote(val) => format!("'{}", repr(&*val)),
         JVal::Quasiquote(val) => format!("`{}", repr(&*val)),
         JVal::Unquote(val) => format!(",{}", repr(&*val)),
-        JVal::UnquoteSplice(c) => format!("@{}", repr_cell(c)),
+        JVal::UnquoteSplice(val) => format!(",@{}", repr(&*val)),
         JVal::Env(env) => format!("{}", env),
         JVal::Token(t) => format!("#[token {}]", t),
         JVal::TokenMatcher(tm) => format!("#[tokenmatcher {}]", tm),

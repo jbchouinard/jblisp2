@@ -1,7 +1,5 @@
-use std::rc::Rc;
-
 use crate::builtin::get_n_args;
-use crate::reader::readermacro::{LambdaTokenTransformer, Matcher, ReaderMacro, TokenMatcher};
+use crate::reader::readermacro::{Matcher, ReaderMacro, TokenMatcher};
 use crate::*;
 
 fn str_to_char(s: &str) -> Result<char, JError> {
@@ -106,9 +104,6 @@ pub fn jbuiltin_install_reader_macro(args: JValRef, env: JEnvRef, state: &mut JS
         .map(|v| v.to_tokenmatcher().map(|t| t.clone()))
         .collect::<Result<Vec<TokenMatcher>, JError>>()?;
 
-    state.add_reader_macro(ReaderMacro::new(
-        matchers,
-        Rc::new(LambdaTokenTransformer::new(transformer, env)),
-    ));
+    state.add_reader_macro(ReaderMacro::new(matchers, transformer, env));
     Ok(state.nil())
 }

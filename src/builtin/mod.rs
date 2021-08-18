@@ -269,7 +269,6 @@ pub fn add_builtins(env: &JEnv, state: &mut JState) {
     add_builtin("car", jbuiltin_car, env, state);
     add_builtin("cdr", jbuiltin_cdr, env, state);
     add_builtin("list?", jbuiltin_is_list, env, state);
-    add_builtin("unquote-splice", jbuiltin_unquote_splice, env, state);
 
     // String
     add_builtin("len", jbuiltin_len, env, state);

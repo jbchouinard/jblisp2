@@ -9,21 +9,21 @@
 
 (def defmacro
     (macro (name params . exprs)
-        (list def name (cons nmacro (cons (repr name) (cons params exprs))))))
+        `(def ,name (nmacro ,(repr name) ,params ,@exprs))))
 
 (defmacro defn (name params . exprs)
-    (list def name (cons nfn (cons (repr name) (cons params exprs)))))
+    `(def ,name (nfn ,(repr name) ,params ,@exprs)))
 
 (defmacro setglobal! (name expr)
-    (list env-set! (list env-globals) (list quote name) expr))
+    `(env-set! (env-globals) (quote ,name) ,expr))
 
 (defmacro defglobal (name expr)
-    (list env-def (list env-globals) (list quote name) expr))
+    `(env-def (env-globals) (quote ,name) ,expr))
 
 (defmacro defnglobal (name params . exprs)
-    (list defglobal name (cons nfn (cons (repr name) (cons params exprs)))))
+    `(defglobal ,name (nfn ,(repr name) ,params ,@exprs)))
 
-(defmacro type? (val t) (list eq? (list type val) (list quote t)))
+(defmacro type? (val t) `(eq? (type ,val) (quote ,t)))
 
 (defn nil? (x) (equal? x nil))
 (defn string? (val) (type? val string))
@@ -72,7 +72,7 @@
     (assert-msg pred "assertion failed"))
 
 (defmacro deferror (name)
-    (list defn name (list 'reason) (list error (list quote name) 'reason)))
+    `(defn ,name (reason) (error (quote ,name) reason)))
 
 (defn apply (op args)
     ((macro ()
@@ -80,15 +80,15 @@
 
 (defmacro let (bindings . exprs)
     (if (empty? bindings)
-        (list (lcons fn () exprs))
-        (list
-            (list fn
-                (list (nth 0 (car bindings)))
-                (lcons let (cdr bindings) exprs))
-            (nth 1 (car bindings)))))
+        `((fn () ,@exprs))
+        `((fn (,(nth 0 (car bindings)))
+            (let ,(cdr bindings) ,@exprs))
+        ,(nth 1 (car bindings)))))
 
 (defmacro if (pred then-clause else-clause) ()
-    (list cond (list pred then-clause) (list else else-clause)))
+    `(cond
+        (,pred ,then-clause)
+        (else ,else-clause)))
 
 (defn map (f lst)
     (if (nil? lst)
@@ -129,17 +129,19 @@
 (defmacro env-lookup-rec (x . syms)
     (if (empty? syms)
         x
-        (cons env-lookup-rec (cons (list env-lookup x (list quote (car syms))) (cdr syms)))))
+        `(env-lookup-rec (env-lookup ,x (quote ,(car syms))) ,@(cdr syms))))
 
 (defmacro use (mod . names)
-    (cons begin (map (fn (name)
-        (list defglobal name (list env-lookup mod (list quote name))))
-        names)))
+    `(begin
+        ,@(map
+            (fn (name)
+                `(defglobal ,name (env-lookup ,mod (quote ,name))))
+            names)))
 
 (defmacro import-from (mod . names)
     (import mod as some-module)
-    (list let (list (list 'some-module some-module))
-        (cons use (cons 'some-module names))))
+    `(let ((some-module ,some-module))
+        (use some-module ,@names)))
 
 (defn left-pad (s char n)
     (assert (equal? 1 (len char)))
