@@ -1,4 +1,5 @@
-[![Rust](https://github.com/jbchouinard/jblisp2/actions/workflows/rust.yml/badge.svg)](https://github.com/jbchouinard/jblisp2/actions/workflows/rust.yml)
+[![Rust](https://github.com/jbchouinard/jibi/actions/workflows/rust.yml/badge.svg)](https://github.com/jbchouinard/jibi/actions/workflows/rust.yml)
+
 # Jibi Scheme
 
 A small tree-walk interpreter for a homebrew dialect of Scheme, implemented in Rust,
