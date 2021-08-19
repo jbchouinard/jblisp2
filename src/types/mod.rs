@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -218,21 +219,24 @@ impl fmt::Debug for JLambda {
     }
 }
 
+pub type JVector = RefCell<Vec<JValRef>>;
+
 // JVal's should only be constructed by JState, which manages interned values
 #[derive(Debug, PartialEq, Clone)]
 pub enum JVal {
-    Nil,
-    Pair(JPair),
-    Quote(JValRef),
-    Quasiquote(JValRef),
-    Unquote(JValRef),
-    UnquoteSplice(JValRef),
     Int(JTInt),
     Float(JTFloat),
     Bool(bool),
     Symbol(String),
     String(String),
+    Vector(JVector),
+    Nil,
+    Pair(JPair),
     Error(JError),
+    Quote(JValRef),
+    Quasiquote(JValRef),
+    Unquote(JValRef),
+    UnquoteSplice(JValRef),
     Lambda(Box<JLambda>),
     Macro(Box<JLambda>),
     Builtin(JBuiltin),
@@ -277,6 +281,12 @@ impl JVal {
         match self {
             Self::Pair(p) => Ok(p),
             _ => Err(JError::new(TypeError, "expected a pair")),
+        }
+    }
+    pub fn to_vector(&self) -> Result<&JVector, JError> {
+        match self {
+            Self::Vector(v) => Ok(v),
+            _ => Err(JError::new(TypeError, "expected a vector")),
         }
     }
     pub fn to_str(&self) -> Result<&str, JError> {

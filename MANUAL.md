@@ -34,7 +34,7 @@ All `symbol` values are interned, therefore
 *Evaluation Rule:* `symbol` values are variable names. When evaluated, a
 `symbol` is replaced by the value of its binding in the nearest
 enclosing scope where it is defined. An error is raised if `symbol` is
-not bound in any enclosing scope.
+not defined in any enclosing scope.
 
 ------------------------------------------------------------------------
 
@@ -158,7 +158,8 @@ is useful to prevent `symbol` binding and procedure application. See
 #### error
 
 ``` nohighlight
-(error type "some-message")
+(exception "some reason")
+(error type "some reason")
 ```
 
 Error values do no inherently do anything, until they are
@@ -234,7 +235,7 @@ applied when it is the first element of a `list`.
 (def name :expr)
 ```
 
-Create and assign binding in local scope.
+Define `name` in the current local scope.
 
 ------------------------------------------------------------------------
 
@@ -244,8 +245,9 @@ Create and assign binding in local scope.
 (set! name :expr)
 ```
 
-Change existing binding. Raises error if a binding does not already
-exists.
+Change value of `name` in the nearest enclosing scope where it is
+defined. Raises an error if `name` is not defined in any enclosing
+scope.
 
 ------------------------------------------------------------------------
 
@@ -255,7 +257,7 @@ exists.
 (lets ((name value:expr) ...) :expr ...)
 ```
 
-Create bindings in a new local scopes.
+Define variables in a new local scopes.
 
 ``` nohighlight
 >>> ; Example
@@ -264,6 +266,8 @@ Create bindings in a new local scopes.
 ...    (display y))
 5
 7
+>>> x
+NotDefined: x
 ```
 
 ------------------------------------------------------------------------
@@ -274,7 +278,7 @@ Create bindings in a new local scopes.
 (defglobal name :expr)
 ```
 
-Create and assign binding in global env.
+Define a global variable.
 
 ------------------------------------------------------------------------
 
@@ -284,8 +288,8 @@ Create and assign binding in global env.
 (setglobal! name :expr)
 ```
 
-Change existing binding in global env. Raises error if a binding does
-not already exists.
+Change value of global variable. Raises error if the global variable is
+not defined.
 
 ------------------------------------------------------------------------
 
@@ -297,7 +301,7 @@ not already exists.
 (defn name parameters :expr ...)
 ```
 
-Create lambda function and bind it to `name`.
+Creaet and define a lambda function as `name`.
 
 Variadic lambdas can be defined with formal parameters like `(x . xs)` -
 there must be a single parameter after `.`, which will be a list
@@ -568,19 +572,39 @@ Applies `f` to each value in a list and return results in list.
 
 ------------------------------------------------------------------------
 
-#### fold
+#### foldr
 
 ``` nohighlight
-(fold f:procedure init:expr vals:list)
+(foldr f:procedure init:expr vals:list)
 ```
 
-Applies `f` to each value in a list and accumulate results in `init`.
+Applies `f` to each value in list (right first) and accumulate results
+in `init`.
 
 ``` nohighlight
 >>> ; Example
->>> (fold + 0 (list 1 2 3))
+>>> (foldr + 0 (list 1 2 3))
 6
->>> (fold cons () (list 1 2 3))
+>>> (foldr cons () (list 1 2 3))
+(1 2 3)
+```
+
+------------------------------------------------------------------------
+
+#### foldl
+
+``` nohighlight
+(foldl f:procedure init:expr vals:list)
+```
+
+Applies `f` to each value in list (left first) and accumulate results in
+`init`.
+
+``` nohighlight
+>>> ; Example
+>>> (foldl + 0 (list 1 2 3))
+6
+>>> (foldl cons () (list 1 2 3))
 (3 2 1)
 ```
 
@@ -837,9 +861,12 @@ accessible to importers.
 Module files are only evaluated once, re-importing gets a reference to
 the existing module.
 
-At the moment only the current working directory is searched to find
-modules, thus importing “stl/unittest” looks for the file
-`./stl/unittest.jibi'.`
+Importing looks for module files in the following locations in order:
+
+-   Paths in the `JIBI_PATH` environment variable (separated by `:`)
+-   The jibi system library path (dependent on PREFIX environment
+    variable at build time, default: /usr/local/lib/jibi)
+-   The current working directory when the interpreter was launched
 
 #### import
 
@@ -1203,6 +1230,122 @@ not set or contains non-UTF8 characters.
 ```
 
 Exit program with a status code.
+
+------------------------------------------------------------------------
+
+#### paths
+
+``` nohighlight
+(paths)
+```
+
+Print modules import paths.
+
+------------------------------------------------------------------------
+
+### Reader Macros
+
+Reader macros are macros that operate on lexical tokens, before parsing.
+They allow extending the syntax of the language.
+
+A reader macro consists of a rule, and a transformer. The rule specifies
+a pattern of tokens to which the macro applies. Whenever the reader
+encounters a sequence of tokens that matches the pattern, the
+transformer is applied.
+
+The transformer is a lambda which takes the matching token sequence as
+input, and returns a list of tokens to replace them.
+
+Reader macros are applied in the order in which they were installed
+(with the `reader-macro!` procedure).
+
+``` nohighlight
+>>> ; Example
+>>> ;
+```
+
+#### token
+
+``` nohighlight
+(token type [value])
+```
+
+Used to produce tokens in reader macro transformer functions.
+
+``` nohighlight
+>>> ; Example
+>>> (token 'lparen)
+#[token LPAREN]
+>>> (token 'string "foo")
+#[token STRING("foo")]
+```
+
+------------------------------------------------------------------------
+
+#### token-match
+
+``` nohighlight
+(token-match type [value])
+```
+
+A matcher for lexical tokens. A reader macro rule consists of a list of
+token matchers.
+
+``` nohighlight
+>>> ; Example
+>>> (token-match 'string)
+#[tokenmatcher String(#ANY)]
+>>> (token-match 'any)
+#[tokenmatcher #ANY]
+```
+
+------------------------------------------------------------------------
+
+#### token-value
+
+``` nohighlight
+(token-value :token)
+```
+
+Get value of token (or nil for tokens that have no value).
+
+``` nohighlight
+>>> ; Example
+>>> (token-value (token 'string "foo"))
+foo
+```
+
+------------------------------------------------------------------------
+
+#### token-type
+
+``` nohighlight
+(token-type :token)
+```
+
+Get type of token (symbol).
+
+``` nohighlight
+>>> ; Example
+>>> (token-type (token 'lparen))
+lparen
+```
+
+------------------------------------------------------------------------
+
+#### reader-macro!
+
+``` nohighlight
+(reader-macro! tokenmatcher [... tokenmatcher] transformer)
+```
+
+Install a new reader macro with the provided rule and transformer.
+
+The first n arguments are token matchers to match sequences of 1 or more
+tokens.
+
+The last argument is the token transfomer function to apply to
+(non-overlapping) sequences of tokens that match the rule.
 
 ------------------------------------------------------------------------
 

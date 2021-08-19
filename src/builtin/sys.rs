@@ -16,3 +16,11 @@ pub fn jbuiltin_exit(args: JValRef, _env: JEnvRef, _state: &mut JState) -> JResu
     let [exitcode] = get_n_args(args)?;
     std::process::exit(exitcode.to_int()?.try_into().unwrap());
 }
+
+pub fn jbuiltin_paths(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
+    let [] = get_n_args(args)?;
+    for p in crate::import::JIBI_PATHS.iter() {
+        println!("{}", p.display());
+    }
+    Ok(state.nil())
+}

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
+use crate::import::find_module;
 use crate::intern::Interned;
 use crate::*;
 
@@ -81,14 +82,24 @@ impl JState {
     }
 
     pub fn import_module<P: AsRef<Path>>(&mut self, p: P, env: JEnvRef) -> JResult {
-        let path = match std::fs::canonicalize(p) {
-            Ok(p) => p,
-            Err(e) => return Err(JError::new(OsError, &format!("{}", e))),
+        let p: &Path = p.as_ref();
+        let path = match find_module(p) {
+            Some(p) => p,
+            None => {
+                return Err(JError::new(
+                    Other("ImportError".to_string()),
+                    &format!("not found: {}", p.display()),
+                ))
+            }
         };
         if self.modules.contains_key(&path) {
             return Ok(JVal::Env(Rc::clone(self.modules.get(&path).unwrap())).into_ref());
         }
         let modenv = JEnv::new(Some(Rc::clone(&env))).into_ref();
+        modenv.define(
+            "#FILE",
+            self.string(path.as_os_str().to_string_lossy().to_string()),
+        );
         if let Err((pos, err, _)) = self.eval_file(path.clone(), Rc::clone(&modenv)) {
             return Err(JError::new(EvalError, &format!("{}: {}", pos, err)));
         };

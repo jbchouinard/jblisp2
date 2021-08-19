@@ -46,10 +46,12 @@
 //! let res = jibi.call("add", args).unwrap();
 //! println!("{}", res);
 //! ```
+mod apply;
 mod builtin;
 mod env;
 mod error;
 mod eval;
+mod import;
 mod interpreter;
 mod reader;
 mod repr;

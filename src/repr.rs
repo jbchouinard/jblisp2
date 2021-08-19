@@ -13,7 +13,8 @@ pub fn repr(expr: &JVal) -> String {
         JVal::SpecialForm(b) => format!("#[specialform {}]", b),
         JVal::Lambda(l) => format!("#[lambda {}]", l),
         JVal::Macro(l) => format!("#[macro {}]", l),
-        JVal::Pair(c) => repr_cell(c),
+        JVal::Pair(c) => repr_pair(c),
+        JVal::Vector(v) => repr_vec(v),
         JVal::Quote(val) => format!("'{}", repr(&*val)),
         JVal::Quasiquote(val) => format!("`{}", repr(&*val)),
         JVal::Unquote(val) => format!(",{}", repr(&*val)),
@@ -24,19 +25,28 @@ pub fn repr(expr: &JVal) -> String {
     }
 }
 
-fn repr_cell(cell: &JPair) -> String {
+fn repr_vec(v: &JVector) -> String {
+    let vecref = v.borrow();
+    format!(
+        "#({})",
+        vecref
+            .iter()
+            .map(|v| repr(v))
+            .collect::<Vec<String>>()
+            .join(" ")
+    )
+}
+
+fn repr_pair(cell: &JPair) -> String {
     match cell.iter() {
         Ok(iterator) => {
-            let mut parts = vec!["(".to_string()];
-            for val in iterator {
-                parts.push(repr(&val));
-                parts.push(" ".to_string());
-            }
-            if parts.len() > 1 {
-                parts.pop();
-            }
-            parts.push(")".to_string());
-            parts.join("")
+            format!(
+                "({})",
+                iterator
+                    .map(|v| repr(&v))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            )
         }
         // Not a list
         Err(_) => format!("({} . {})", repr(&cell.car()), repr(&cell.cdr())),

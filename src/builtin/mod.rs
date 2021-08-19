@@ -10,6 +10,7 @@ use math::*;
 use readermacro::*;
 use string::*;
 use sys::*;
+use vector::*;
 
 mod args;
 mod debug;
@@ -20,8 +21,7 @@ mod math;
 mod readermacro;
 mod string;
 mod sys;
-
-// TODO: loop, and, or, cond
+mod vector;
 
 fn jbuiltin_equal(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
     let [x, y] = get_n_args(args)?;
@@ -155,6 +155,7 @@ fn jbuiltin_type(args: JValRef, _env: JEnvRef, state: &mut JState) -> JResult {
         match *val {
             JVal::Nil => "nil",
             JVal::Pair(_) => "pair",
+            JVal::Vector(_) => "vector",
             JVal::UnquoteSplice(_) => "unquote-splice",
             JVal::Quote(_) => "quote",
             JVal::Quasiquote(_) => "quasiquote",
@@ -227,103 +228,107 @@ where
     env.define(name, state.specialform(name.to_string(), Rc::new(f)));
 }
 
-pub fn add_builtins(env: &JEnv, state: &mut JState) {
+pub fn add_builtins(env: JEnvRef, state: &mut JState) {
     // Constants
     env.define("INTMIN", state.int(JTInt::MIN));
     env.define("INTMAX", state.int(JTInt::MAX));
 
     // Program flow
-    add_builtin("begin", jbuiltin_begin, env, state);
-    add_special_form("cond", jspecial_cond, env, state);
+    add_builtin("begin", jbuiltin_begin, &env, state);
+    add_special_form("cond", jspecial_cond, &env, state);
 
     // Comparison
-    add_builtin("eq?", jbuiltin_eq, env, state);
-    add_builtin("equal?", jbuiltin_equal, env, state);
+    add_builtin("eq?", jbuiltin_eq, &env, state);
+    add_builtin("equal?", jbuiltin_equal, &env, state);
 
     // Print
-    add_builtin("repr", jbuiltin_repr, env, state);
-    add_builtin("print", jbuiltin_print, env, state);
-    add_builtin("type", jbuiltin_type, env, state);
+    add_builtin("repr", jbuiltin_repr, &env, state);
+    add_builtin("print", jbuiltin_print, &env, state);
+    add_builtin("type", jbuiltin_type, &env, state);
 
     // Number procedures
-    add_builtin("+", jbuiltin_add, env, state);
-    add_builtin("-", jbuiltin_sub, env, state);
-    add_builtin("*", jbuiltin_mul, env, state);
-    add_builtin("/", jbuiltin_div, env, state);
-    add_builtin("=", jbuiltin_num_eq, env, state);
-    add_builtin("<", jbuiltin_lt, env, state);
-    add_builtin("<=", jbuiltin_lte, env, state);
-    add_builtin(">", jbuiltin_gt, env, state);
-    add_builtin(">=", jbuiltin_gte, env, state);
-    add_builtin("as-float", jbuiltin_as_float, env, state);
-    add_builtin("as-integer", jbuiltin_as_int, env, state);
+    add_builtin("+", jbuiltin_add, &env, state);
+    add_builtin("-", jbuiltin_sub, &env, state);
+    add_builtin("*", jbuiltin_mul, &env, state);
+    add_builtin("/", jbuiltin_div, &env, state);
+    add_builtin("=", jbuiltin_num_eq, &env, state);
+    add_builtin("<", jbuiltin_lt, &env, state);
+    add_builtin("<=", jbuiltin_lte, &env, state);
+    add_builtin(">", jbuiltin_gt, &env, state);
+    add_builtin(">=", jbuiltin_gte, &env, state);
+    add_builtin("as-float", jbuiltin_as_float, &env, state);
+    add_builtin("as-integer", jbuiltin_as_int, &env, state);
 
     // Logical operators
-    add_builtin("not", jbuiltin_not, env, state);
-    add_special_form("or", jspecial_or, env, state);
-    add_special_form("and", jspecial_and, env, state);
+    add_builtin("not", jbuiltin_not, &env, state);
+    add_special_form("or", jspecial_or, &env, state);
+    add_special_form("and", jspecial_and, &env, state);
 
     // List
-    add_builtin("list", jbuiltin_list, env, state);
-    add_builtin("cons", jbuiltin_cons, env, state);
-    add_builtin("car", jbuiltin_car, env, state);
-    add_builtin("cdr", jbuiltin_cdr, env, state);
-    add_builtin("list?", jbuiltin_is_list, env, state);
+    add_builtin("list", jbuiltin_list, &env, state);
+    add_builtin("cons", jbuiltin_cons, &env, state);
+    add_builtin("car", jbuiltin_car, &env, state);
+    add_builtin("cdr", jbuiltin_cdr, &env, state);
+    add_builtin("list?", jbuiltin_is_list, &env, state);
 
     // String
-    add_builtin("len", jbuiltin_len, env, state);
-    add_builtin("concat", jbuiltin_concat, env, state);
-    add_builtin("contains?", jbuiltin_contains, env, state);
-    add_builtin("split", jbuiltin_split, env, state);
-    add_builtin("substring", jbuiltin_substring, env, state);
-    add_builtin("replace", jbuiltin_replace, env, state);
-    add_builtin("parse-integer", jbuiltin_parse_int, env, state);
-    add_builtin("parse-float", jbuiltin_parse_float, env, state);
+    add_builtin("len", jbuiltin_len, &env, state);
+    add_builtin("concat", jbuiltin_concat, &env, state);
+    add_builtin("contains?", jbuiltin_contains, &env, state);
+    add_builtin("split", jbuiltin_split, &env, state);
+    add_builtin("substring", jbuiltin_substring, &env, state);
+    add_builtin("replace", jbuiltin_replace, &env, state);
+    add_builtin("parse-integer", jbuiltin_parse_int, &env, state);
+    add_builtin("parse-float", jbuiltin_parse_float, &env, state);
 
     // Var, function definition
-    add_special_form("def", jspecial_def, env, state);
-    add_special_form("set!", jspecial_set, env, state);
-    add_special_form("fn", jspecial_lambda, env, state);
-    add_special_form("nfn", jspecial_named_lambda, env, state);
+    add_special_form("def", jspecial_def, &env, state);
+    add_special_form("set!", jspecial_set, &env, state);
+    add_special_form("fn", jspecial_lambda, &env, state);
+    add_special_form("nfn", jspecial_named_lambda, &env, state);
 
     // Exceptions
-    add_builtin("error", jbuiltin_error, env, state);
-    add_builtin("exception", jbuiltin_exception, env, state);
-    add_builtin("raise", jbuiltin_raise, env, state);
-    add_special_form("try", jspecial_try, env, state);
+    add_builtin("error", jbuiltin_error, &env, state);
+    add_builtin("exception", jbuiltin_exception, &env, state);
+    add_builtin("raise", jbuiltin_raise, &env, state);
+    add_special_form("try", jspecial_try, &env, state);
 
     // Modules
-    add_special_form("import", jspecial_import, env, state);
+    add_special_form("import", jspecial_import, &env, state);
 
     // Metaprogramming
-    add_builtin("eval", jbuiltin_eval, env, state);
-    add_builtin("evalfile", jbuiltin_evalfile, env, state);
-    add_special_form("quote", jspecial_quote, env, state);
-    add_special_form("macro", jspecial_macro, env, state);
-    add_special_form("nmacro", jspecial_named_macro, env, state);
+    add_builtin("eval", jbuiltin_eval, &env, state);
+    add_builtin("evalfile", jbuiltin_evalfile, &env, state);
+    add_special_form("quote", jspecial_quote, &env, state);
+    add_special_form("macro", jspecial_macro, &env, state);
+    add_special_form("nmacro", jspecial_named_macro, &env, state);
 
     // Env
-    add_builtin("env", jbuiltin_env, env, state);
-    add_builtin("env-lookup", jbuiltin_env_lookup, env, state);
-    add_builtin("env-def", jbuiltin_env_def, env, state);
-    add_builtin("env-set!", jbuiltin_env_set, env, state);
-    add_builtin("env-parent", jbuiltin_env_parent, env, state);
+    add_builtin("env", jbuiltin_env, &env, state);
+    add_builtin("env-lookup", jbuiltin_env_lookup, &env, state);
+    add_builtin("env-def", jbuiltin_env_def, &env, state);
+    add_builtin("env-set!", jbuiltin_env_set, &env, state);
+    add_builtin("env-parent", jbuiltin_env_parent, &env, state);
 
     // Sys
-    add_builtin("getenv", jbuiltin_get_env_var, env, state);
-    add_builtin("exit", jbuiltin_exit, env, state);
+    add_builtin("getenv", jbuiltin_get_env_var, &env, state);
+    add_builtin("exit", jbuiltin_exit, &env, state);
+    add_builtin("paths", jbuiltin_paths, &env, state);
 
     // Debug
-    add_builtin("dd", jbuiltin_display_debug, env, state);
-    add_builtin("ddp", jbuiltin_display_debug_pretty, env, state);
-    add_builtin("dda", jbuiltin_display_ptr, env, state);
-    add_builtin("ddc", jbuiltin_display_code, env, state);
-    add_special_form("ddm", jspecial_display_debug_macro, env, state);
+    add_builtin("dd", jbuiltin_display_debug, &env, state);
+    add_builtin("ddp", jbuiltin_display_debug_pretty, &env, state);
+    add_builtin("dda", jbuiltin_display_ptr, &env, state);
+    add_builtin("ddc", jbuiltin_display_code, &env, state);
+    add_special_form("ddm", jspecial_display_debug_macro, &env, state);
 
     // Reader macros
-    add_builtin("token", jbuiltin_token, env, state);
-    add_builtin("token-match", jbuiltin_tokenmatcher, env, state);
-    add_builtin("token-value", jbuiltin_token_value, env, state);
-    add_builtin("token-type", jbuiltin_token_type, env, state);
-    add_builtin("reader-macro!", jbuiltin_install_reader_macro, env, state);
+    add_builtin("token", jbuiltin_token, &env, state);
+    add_builtin("token-match", jbuiltin_tokenmatcher, &env, state);
+    add_builtin("token-value", jbuiltin_token_value, &env, state);
+    add_builtin("token-type", jbuiltin_token_type, &env, state);
+    add_builtin("reader-macro!", jbuiltin_install_reader_macro, &env, state);
+
+    // Vector module
+    env.define("vec", vector_mod(Rc::clone(&env), state));
 }

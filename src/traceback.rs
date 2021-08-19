@@ -10,7 +10,7 @@ pub enum JCallable {
 }
 
 impl JCallable {
-    pub fn from_jval(val: JValRef) -> Option<Self> {
+    pub fn from_jval(val: &JVal) -> Option<Self> {
         match &*val {
             JVal::Lambda(l) => Some(Self::Lambda("lambda".to_string(), l.as_ref().clone())),
             JVal::Macro(l) => Some(Self::Lambda("macro".to_string(), l.as_ref().clone())),
@@ -41,7 +41,7 @@ pub struct TracebackFrame {
 }
 
 impl TracebackFrame {
-    pub fn from_jval(val: JValRef, env: JEnvRef) -> Option<Self> {
+    pub fn from_jval(val: &JVal, env: JEnvRef) -> Option<Self> {
         use JCallable::*;
         let proc = JCallable::from_jval(val);
         match proc {

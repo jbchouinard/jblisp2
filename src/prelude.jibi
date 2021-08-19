@@ -157,17 +157,6 @@
 
 (defn all (. xs) (foldl and true xs))
 
-; TODO vectors
-(def vector list)
-
-; #(...) -> (vector ...)
-(reader-macro!
-    (token-match 'char "#")
-    (token-match 'char "(")
-    (fn (. _) (list
-        (token 'char "(")
-        (token 'ident 'vector))))
-
 ; foo::bar::baz -> (env-lookup-rec foo bar baz)
 (defn env-lookup-rec-toks (syms)
     (defn rec (syms) (if (empty? syms)

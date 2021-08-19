@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 use std::fmt;
 use std::rc::Rc;
 
-use crate::eval::apply_lambda;
+use crate::apply::apply_lambda;
 use crate::*;
 
 #[derive(Debug, Clone, PartialEq)]

@@ -747,8 +747,12 @@ to importers.
 Module files are only evaluated once, re-importing gets a reference to the existing
 module.
 
-At the moment only the current working directory is searched to find modules,
-thus importing "stl/unittest" looks for the file `./stl/unittest.jibi'.`
+Importing looks for module files in the following locations in order:
+
+- Paths in the `JIBI_PATH` environment variable (separated by `:`)
+- The jibi system library path (dependent on PREFIX environment variable at build time,
+  default: /usr/local/lib/jibi)
+- The current working directory when the interpreter was launched
 
 #### import
 ```nohighlight
@@ -1066,6 +1070,15 @@ or contains non-UTF8 characters.
 (exit :integer)
 ```
 Exit program with a status code.
+
+---
+
+#### paths
+```nohighlight
+(paths)
+```
+
+Print modules import paths.
 
 ---
 

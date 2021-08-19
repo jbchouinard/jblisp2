@@ -23,7 +23,6 @@ Features:
 - Exception handling
 - Namespaced modules
 - Automatic reference counting
-- Decimal floating point arithmetic
 
 ## Documentation
 - [Crate Docs](https://jbchouinard.github.io/jibi/crate/jibi/index.html)
@@ -41,20 +40,28 @@ cargo test
 ```
 
 ## Install
+
+User install:
+
 ```bash
-make
-make install
+PREFIX=~/.local make build install
+```
+
+System install:
+
+```bash
+make build
+sudo make install
 ```
 
 ## Todo?
-- quasiquote
-- ModuleImporter, JIBI_PATH
+- Documentation: quasiquote, vectors
+- Compiled modules
 - Lazy values, lazy lists
 - User-defined types, operator overloading
 - Specific error catch
 - Numeric data types: complex numbers, arbitrary precision int
-- Mutable data structures: vector, table, mutpair
-- Compiled modules
+- Mutable data structures: table, mutpair
 - C FFI
 - Continuations
 - Standard libraries: io, sockets, math

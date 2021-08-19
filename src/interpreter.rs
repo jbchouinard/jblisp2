@@ -38,7 +38,7 @@ impl Interpreter {
     }
     /// Create global bindings for builtin functions and macros.
     pub(crate) fn define_builtins(&mut self) {
-        add_builtins(&self.globals, &mut self.state);
+        add_builtins(Rc::clone(&self.globals), &mut self.state);
     }
     /// Execute the `jibi` [prelude](PRELUDE), which defines common constants, procedures
     /// and macros.
