@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["jibi"] = [{"text":"impl&lt;'a, 'b, T:&nbsp;<a class=\"trait\" href=\"jibi/trait.TokenProducer.html\" title=\"trait jibi::TokenProducer\">TokenProducer</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.54.0/core/iter/traits/iterator/trait.Iterator.html\" title=\"trait core::iter::traits::iterator::Iterator\">Iterator</a> for <a class=\"struct\" href=\"jibi/struct.TokenIterator.html\" title=\"struct jibi::TokenIterator\">TokenIterator</a>&lt;'a, 'b, T&gt;","synthetic":false,"types":["jibi::reader::tokenizer::TokenIterator"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -399,29 +399,61 @@
 <span id="397">397</span>
 <span id="398">398</span>
 <span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::fmt</span>;
 
 <span class="kw">use</span> <span class="ident">lazy_static::lazy_static</span>;
 <span class="kw">use</span> <span class="ident">regex::Regex</span>;
 
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::state::JState</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::types</span>::{<span class="ident">JTFloat</span>, <span class="ident">JTInt</span>};
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::PositionTag</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TokenValue</span> {
-    <span class="ident">LParen</span>,
-    <span class="ident">RParen</span>,
-    <span class="ident">Quote</span>,
+    <span class="ident">Char</span>(<span class="ident">char</span>),
     <span class="ident">Int</span>(<span class="ident">JTInt</span>),
     <span class="ident">Float</span>(<span class="ident">JTFloat</span>),
     <span class="ident">Ident</span>(<span class="ident">String</span>),
     <span class="ident">String</span>(<span class="ident">String</span>),
     <span class="ident">Eof</span>,
-    <span class="ident">Anychar</span>(<span class="ident">char</span>),
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Token</span> {
     <span class="kw">pub</span> <span class="ident">value</span>: <span class="ident">TokenValue</span>,
     <span class="kw">pub</span> <span class="ident">pos</span>: <span class="ident">PositionTag</span>,
@@ -433,11 +465,28 @@
     }
 }
 
+<span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">Token</span> {
+    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Token</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">value</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">value</span>
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Token</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">use</span> <span class="ident">TokenValue</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">value</span> {
+            <span class="ident">Int</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;INT({})&quot;</span>, <span class="ident">n</span>),
+            <span class="ident">Float</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;FLOAT({})&quot;</span>, <span class="ident">x</span>),
+            <span class="ident">Ident</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;IDENT({})&quot;</span>, <span class="ident">s</span>),
+            <span class="ident">String</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;STRING(\&quot;{}\&quot;)&quot;</span>, <span class="ident">s</span>),
+            <span class="ident">Eof</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;EOF&quot;</span>),
+            <span class="ident">Char</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;CHAR(&#39;{}&#39;)&quot;</span>, <span class="ident">c</span>),
+        }
+    }
+}
+
 <span class="macro">lazy_static!</span> {
     <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_WS</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^\s+&quot;</span>).<span class="ident">unwrap</span>();
-    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_LPAREN</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^\(&quot;</span>).<span class="ident">unwrap</span>();
-    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_RPAREN</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^\)&quot;</span>).<span class="ident">unwrap</span>();
-    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_QUOTE</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^&#39;&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_IDENT</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(
         <span class="string">r&quot;(?x)
             ^
@@ -450,22 +499,10 @@
     <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_FLOAT</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^-?([.][0-9]+|[0-9]+[.][0-9]*)&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_INT</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^-?[0-9]+&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_COMMENT</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^;[^\n]*&quot;</span>).<span class="ident">unwrap</span>();
-    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_ANYCHAR</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^.&quot;</span>).<span class="ident">unwrap</span>();
+    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RE_CHAR</span>: <span class="ident">Regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^.&quot;</span>).<span class="ident">unwrap</span>();
 }
 
 <span class="kw">type</span> <span class="ident">TResult</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">TokenValue</span>, <span class="ident">String</span><span class="op">&gt;</span>;
-
-<span class="kw">fn</span> <span class="ident">t_lparen</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TResult</span> {
-    <span class="prelude-val">Ok</span>(<span class="ident">TokenValue::LParen</span>)
-}
-
-<span class="kw">fn</span> <span class="ident">t_rparen</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TResult</span> {
-    <span class="prelude-val">Ok</span>(<span class="ident">TokenValue::RParen</span>)
-}
-
-<span class="kw">fn</span> <span class="ident">t_quote</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TResult</span> {
-    <span class="prelude-val">Ok</span>(<span class="ident">TokenValue::Quote</span>)
-}
 
 <span class="kw">fn</span> <span class="ident">t_int</span>(<span class="ident">val</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TResult</span> {
     <span class="kw">match</span> <span class="ident">val</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">JTInt</span><span class="op">&gt;</span>() {
@@ -489,12 +526,8 @@
     <span class="prelude-val">Ok</span>(<span class="ident">TokenValue::String</span>(<span class="ident">val</span>[<span class="number">1</span>..<span class="ident">val</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>].<span class="ident">to_string</span>()))
 }
 
-<span class="kw">fn</span> <span class="ident">t_anychar</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TResult</span> {
-    <span class="prelude-val">Ok</span>(<span class="ident">TokenValue::Anychar</span>(<span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">into_iter</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>()))
-}
-
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TokenIter</span> {
-    <span class="kw">fn</span> <span class="ident">next_token</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Token</span>, <span class="ident">TokenError</span><span class="op">&gt;</span>;
+<span class="kw">fn</span> <span class="ident">t_char</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TResult</span> {
+    <span class="prelude-val">Ok</span>(<span class="ident">TokenValue::Char</span>(<span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">into_iter</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>()))
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Tokenizer</span> {
@@ -571,34 +604,51 @@
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         }
     }
+}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tokenize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>, <span class="ident">TokenError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_token</span>()<span class="question-mark">?</span>;
-        <span class="kw">while</span> <span class="ident">next</span>.<span class="ident">value</span> <span class="op">!</span><span class="op">=</span> <span class="ident">TokenValue::Eof</span> {
-            <span class="ident">tokens</span>.<span class="ident">push</span>(<span class="ident">next</span>);
-            <span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_token</span>()<span class="question-mark">?</span>;
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TokenProducer</span> {
+    <span class="kw">fn</span> <span class="ident">next_token</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Token</span>, <span class="ident">TokenError</span><span class="op">&gt;</span>;
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TokenIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span>: <span class="ident">TokenProducer</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> {
+    <span class="ident">tokeniter</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> <span class="ident">JState</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span>: <span class="ident">TokenProducer</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">TokenIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Token</span>, <span class="ident">TokenError</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="self">self</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TokenIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Token</span>, <span class="ident">TokenError</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">tokeniter</span>.<span class="ident">next_token</span>(<span class="self">self</span>.<span class="ident">state</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">tok</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">tok</span>.<span class="ident">value</span> {
+                <span class="ident">TokenValue::Eof</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">tok</span>)),
+            },
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)),
         }
-        <span class="ident">tokens</span>.<span class="ident">push</span>(<span class="ident">next</span>);
-        <span class="prelude-val">Ok</span>(<span class="ident">tokens</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">TokenIter</span> <span class="kw">for</span> <span class="ident">Tokenizer</span> {
-    <span class="kw">fn</span> <span class="ident">next_token</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Token</span>, <span class="ident">TokenError</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TokenToIter</span> {
+    <span class="kw">fn</span> <span class="ident">to_iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="self">Self</span>: <span class="ident">TokenProducer</span>;
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">TokenProducer</span><span class="op">&gt;</span> <span class="ident">TokenToIter</span> <span class="kw">for</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">to_iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="ident">TokenIterator</span> {
+            <span class="ident">tokeniter</span>: <span class="self">self</span>,
+            <span class="ident">state</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">TokenProducer</span> <span class="kw">for</span> <span class="ident">Tokenizer</span> {
+    <span class="kw">fn</span> <span class="ident">next_token</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Token</span>, <span class="ident">TokenError</span><span class="op">&gt;</span> {
         <span class="kw">while</span> <span class="self">self</span>.<span class="ident">eat_whitespace</span>() <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">eat_comment</span>() {}
 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">pos</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">input</span>.<span class="ident">len</span>() {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Token::new</span>(<span class="ident">TokenValue::Eof</span>, <span class="self">self</span>.<span class="ident">ptag</span>(<span class="self">self</span>.<span class="ident">pos</span>)));
-        }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">token</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">try_token</span>(<span class="kw-2">&amp;</span><span class="ident">RE_LPAREN</span>, <span class="ident">t_lparen</span>)<span class="question-mark">?</span> {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">token</span>);
-        }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">token</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">try_token</span>(<span class="kw-2">&amp;</span><span class="ident">RE_RPAREN</span>, <span class="ident">t_rparen</span>)<span class="question-mark">?</span> {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">token</span>);
-        }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">token</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">try_token</span>(<span class="kw-2">&amp;</span><span class="ident">RE_QUOTE</span>, <span class="ident">t_quote</span>)<span class="question-mark">?</span> {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">token</span>);
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">token</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">try_token</span>(<span class="kw-2">&amp;</span><span class="ident">RE_FLOAT</span>, <span class="ident">t_float</span>)<span class="question-mark">?</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">token</span>);
@@ -612,7 +662,7 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">token</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">try_token</span>(<span class="kw-2">&amp;</span><span class="ident">RE_STRING</span>, <span class="ident">t_string</span>)<span class="question-mark">?</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">token</span>);
         }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">token</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">try_token</span>(<span class="kw-2">&amp;</span><span class="ident">RE_ANYCHAR</span>, <span class="ident">t_anychar</span>)<span class="question-mark">?</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">token</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">try_token</span>(<span class="kw-2">&amp;</span><span class="ident">RE_CHAR</span>, <span class="ident">t_char</span>)<span class="question-mark">?</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">token</span>);
         }
         <span class="prelude-val">Err</span>(<span class="ident">TokenError::new</span>(
@@ -625,8 +675,8 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">TokenIter</span> <span class="kw">for</span> <span class="ident">std::vec::IntoIter</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">next_token</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Token</span>, <span class="ident">TokenError</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">TokenProducer</span> <span class="kw">for</span> <span class="ident">std::vec::IntoIter</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next_token</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Token</span>, <span class="ident">TokenError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">next</span>() {
             <span class="prelude-val">Some</span>(<span class="ident">tok</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">tok</span>),
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Token::new</span>(<span class="ident">TokenValue::Eof</span>, <span class="ident">PositionTag::new</span>(<span class="string">&quot;&quot;</span>, <span class="number">0</span>, <span class="number">0</span>))),
@@ -634,34 +684,38 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TokenValidator</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TokenValidator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="ident">filename</span>: <span class="ident">String</span>,
     <span class="ident">balance</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TokenValue</span><span class="op">&gt;</span>,
     <span class="ident">tokens</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>,
     <span class="ident">lineno</span>: <span class="ident">usize</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">JState</span>,
 }
 
 <span class="doccomment">/// Balanced parens validation for multi-line input.</span>
-<span class="kw">impl</span> <span class="ident">TokenValidator</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">TokenValidator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">JState</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">filename</span>: <span class="ident">filename</span>.<span class="ident">to_string</span>(),
             <span class="ident">balance</span>: <span class="macro">vec!</span>[],
             <span class="ident">tokens</span>: <span class="macro">vec!</span>[],
             <span class="ident">lineno</span>: <span class="number">0</span>,
+            <span class="ident">state</span>,
         }
     }
     <span class="doccomment">/// Returns None when more input is expected based on counting parens.</span>
     <span class="doccomment">/// Returns tokens when it looks like it may form a complete expression.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">input</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">s</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">TokenError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">lineno</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-        <span class="kw">let</span> <span class="ident">new_toks</span> <span class="op">=</span> <span class="ident">Tokenizer::with_lineno</span>(<span class="self">self</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(), <span class="ident">s</span>, <span class="self">self</span>.<span class="ident">lineno</span>).<span class="ident">tokenize</span>()<span class="question-mark">?</span>;
-        <span class="kw">for</span> <span class="ident">tok</span> <span class="kw">in</span> <span class="ident">new_toks</span>.<span class="ident">into_iter</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tokenizer</span> <span class="op">=</span> <span class="ident">Tokenizer::with_lineno</span>(<span class="self">self</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(), <span class="ident">s</span>, <span class="self">self</span>.<span class="ident">lineno</span>);
+        <span class="kw">let</span> <span class="ident">new_toks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">tokenizer</span>
+            .<span class="ident">to_iter</span>(<span class="self">self</span>.<span class="ident">state</span>)
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>, <span class="ident">TokenError</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="kw">for</span> <span class="ident">tok</span> <span class="kw">in</span> <span class="ident">new_toks</span> {
             <span class="kw">match</span> <span class="ident">tok</span>.<span class="ident">value</span> {
-                <span class="ident">TokenValue::LParen</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">balance</span>.<span class="ident">push</span>(<span class="ident">TokenValue::LParen</span>),
-                <span class="ident">TokenValue::RParen</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">balance</span>.<span class="ident">pop</span>() {
-                    <span class="prelude-val">Some</span>(<span class="ident">TokenValue::LParen</span>) <span class="op">=</span><span class="op">&gt;</span> (),
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">balance</span>.<span class="ident">push</span>(<span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>)),
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">balance</span>.<span class="ident">pop</span>() {
+                    <span class="prelude-val">Some</span>(<span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>)) <span class="op">=</span><span class="op">&gt;</span> (),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TokenError::new</span>(<span class="string">&quot;unexpected closing parens&quot;</span>, <span class="ident">tok</span>.<span class="ident">pos</span>)),
                 },
                 <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
@@ -705,7 +759,11 @@
 
     <span class="kw">fn</span> <span class="ident">test_tokenizer</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">expected</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TokenValue</span><span class="op">&gt;</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tokenizer</span> <span class="op">=</span> <span class="ident">Tokenizer::new</span>(<span class="string">&quot;test&quot;</span>.<span class="ident">to_string</span>(), <span class="ident">input</span>.<span class="ident">to_string</span>());
-        <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="ident">tokenizer</span>.<span class="ident">tokenize</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">JState::new</span>();
+        <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="ident">tokenizer</span>
+            .<span class="ident">to_iter</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>)
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>, <span class="ident">TokenError</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+            .<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">tokvalues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TokenValue</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">tokens</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">t</span>.<span class="ident">value</span>).<span class="ident">collect</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">tokvalues</span>);
     }
@@ -715,12 +773,11 @@
         <span class="ident">test_tokenizer</span>(
             <span class="string">&quot;(* 12 -15)&quot;</span>,
             <span class="macro">vec!</span>[
-                <span class="ident">TokenValue::LParen</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>),
                 <span class="ident">TokenValue::Ident</span>(<span class="string">&quot;*&quot;</span>.<span class="ident">to_string</span>()),
                 <span class="ident">TokenValue::Int</span>(<span class="number">12</span>),
                 <span class="ident">TokenValue::Int</span>(<span class="op">-</span><span class="number">15</span>),
-                <span class="ident">TokenValue::RParen</span>,
-                <span class="ident">TokenValue::Eof</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>),
             ],
         );
     }
@@ -730,12 +787,11 @@
         <span class="ident">test_tokenizer</span>(
             <span class="string">&quot;(concat \&quot;foo\&quot; \&quot;bar\&quot;)&quot;</span>,
             <span class="macro">vec!</span>[
-                <span class="ident">TokenValue::LParen</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>),
                 <span class="ident">TokenValue::Ident</span>(<span class="string">&quot;concat&quot;</span>.<span class="ident">to_string</span>()),
                 <span class="ident">TokenValue::String</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>()),
                 <span class="ident">TokenValue::String</span>(<span class="string">&quot;bar&quot;</span>.<span class="ident">to_string</span>()),
-                <span class="ident">TokenValue::RParen</span>,
-                <span class="ident">TokenValue::Eof</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>),
             ],
         );
     }
@@ -745,16 +801,15 @@
         <span class="ident">test_tokenizer</span>(
             <span class="string">&quot;(quote &#39;(1 2 3))&quot;</span>,
             <span class="macro">vec!</span>[
-                <span class="ident">TokenValue::LParen</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>),
                 <span class="ident">TokenValue::Ident</span>(<span class="string">&quot;quote&quot;</span>.<span class="ident">to_string</span>()),
-                <span class="ident">TokenValue::Quote</span>,
-                <span class="ident">TokenValue::LParen</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;\&#39;&#39;</span>),
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>),
                 <span class="ident">TokenValue::Int</span>(<span class="number">1</span>),
                 <span class="ident">TokenValue::Int</span>(<span class="number">2</span>),
                 <span class="ident">TokenValue::Int</span>(<span class="number">3</span>),
-                <span class="ident">TokenValue::RParen</span>,
-                <span class="ident">TokenValue::RParen</span>,
-                <span class="ident">TokenValue::Eof</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>),
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>),
             ],
         );
     }
@@ -765,16 +820,15 @@
             <span class="string">&quot;(quote ; this is a comment!
                 &#39;(1 2 3))&quot;</span>,
             <span class="macro">vec!</span>[
-                <span class="ident">TokenValue::LParen</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>),
                 <span class="ident">TokenValue::Ident</span>(<span class="string">&quot;quote&quot;</span>.<span class="ident">to_string</span>()),
-                <span class="ident">TokenValue::Quote</span>,
-                <span class="ident">TokenValue::LParen</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;\&#39;&#39;</span>),
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>),
                 <span class="ident">TokenValue::Int</span>(<span class="number">1</span>),
                 <span class="ident">TokenValue::Int</span>(<span class="number">2</span>),
                 <span class="ident">TokenValue::Int</span>(<span class="number">3</span>),
-                <span class="ident">TokenValue::RParen</span>,
-                <span class="ident">TokenValue::RParen</span>,
-                <span class="ident">TokenValue::Eof</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>),
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>),
             ],
         );
     }
@@ -784,19 +838,33 @@
         <span class="ident">test_tokenizer</span>(
             <span class="string">&quot;(* 12.0 -0.5)&quot;</span>,
             <span class="macro">vec!</span>[
-                <span class="ident">TokenValue::LParen</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>),
                 <span class="ident">TokenValue::Ident</span>(<span class="string">&quot;*&quot;</span>.<span class="ident">to_string</span>()),
                 <span class="ident">TokenValue::Float</span>(<span class="number">12.0</span>),
                 <span class="ident">TokenValue::Float</span>(<span class="op">-</span><span class="number">0.5</span>),
-                <span class="ident">TokenValue::RParen</span>,
-                <span class="ident">TokenValue::Eof</span>,
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>),
             ],
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_tokenizer_6</span>() {
-        <span class="ident">test_tokenizer</span>(<span class="string">&quot;2.025&quot;</span>, <span class="macro">vec!</span>[<span class="ident">TokenValue::Float</span>(<span class="number">2.025</span>), <span class="ident">TokenValue::Eof</span>]);
+        <span class="ident">test_tokenizer</span>(<span class="string">&quot;2.025&quot;</span>, <span class="macro">vec!</span>[<span class="ident">TokenValue::Float</span>(<span class="number">2.025</span>)]);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_tokenizer_7</span>() {
+        <span class="ident">test_tokenizer</span>(
+            <span class="string">&quot;(token &#39;char \&quot;)\&quot;)&quot;</span>,
+            <span class="macro">vec!</span>[
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;(&#39;</span>),
+                <span class="ident">TokenValue::Ident</span>(<span class="string">&quot;token&quot;</span>.<span class="ident">to_string</span>()),
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;\&#39;&#39;</span>),
+                <span class="ident">TokenValue::Ident</span>(<span class="string">&quot;char&quot;</span>.<span class="ident">to_string</span>()),
+                <span class="ident">TokenValue::String</span>(<span class="string">&quot;)&quot;</span>.<span class="ident">to_string</span>()),
+                <span class="ident">TokenValue::Char</span>(<span class="string">&#39;)&#39;</span>),
+            ],
+        );
     }
 }
 </pre></div>

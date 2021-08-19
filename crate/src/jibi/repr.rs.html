@@ -39,6 +39,21 @@
 <span id="37">37</span>
 <span id="38">38</span>
 <span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="kw-2">*</span>;
 
@@ -54,26 +69,41 @@
         <span class="ident">JVal::Builtin</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;#[function {}]&quot;</span>, <span class="ident">b</span>),
         <span class="ident">JVal::SpecialForm</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;#[specialform {}]&quot;</span>, <span class="ident">b</span>),
         <span class="ident">JVal::Lambda</span>(<span class="ident">l</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;#[lambda {}]&quot;</span>, <span class="ident">l</span>),
-        <span class="ident">JVal::ProcMacro</span>(<span class="ident">l</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;#[macro {}]&quot;</span>, <span class="ident">l</span>),
-        <span class="ident">JVal::Pair</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">repr_cell</span>(<span class="ident">c</span>),
+        <span class="ident">JVal::Macro</span>(<span class="ident">l</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;#[macro {}]&quot;</span>, <span class="ident">l</span>),
+        <span class="ident">JVal::Pair</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">repr_pair</span>(<span class="ident">c</span>),
+        <span class="ident">JVal::Vector</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">repr_vec</span>(<span class="ident">v</span>),
         <span class="ident">JVal::Quote</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;&#39;{}&quot;</span>, <span class="ident">repr</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">val</span>)),
+        <span class="ident">JVal::Quasiquote</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;`{}&quot;</span>, <span class="ident">repr</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">val</span>)),
+        <span class="ident">JVal::Unquote</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;,{}&quot;</span>, <span class="ident">repr</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">val</span>)),
+        <span class="ident">JVal::UnquoteSplice</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;,@{}&quot;</span>, <span class="ident">repr</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">val</span>)),
         <span class="ident">JVal::Env</span>(<span class="ident">env</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">env</span>),
+        <span class="ident">JVal::Token</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;#[token {}]&quot;</span>, <span class="ident">t</span>),
+        <span class="ident">JVal::TokenMatcher</span>(<span class="ident">tm</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;#[tokenmatcher {}]&quot;</span>, <span class="ident">tm</span>),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">repr_cell</span>(<span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">JPair</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+<span class="kw">fn</span> <span class="ident">repr_vec</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">JVector</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+    <span class="kw">let</span> <span class="ident">vecref</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">borrow</span>();
+    <span class="macro">format!</span>(
+        <span class="string">&quot;#({})&quot;</span>,
+        <span class="ident">vecref</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">repr</span>(<span class="ident">v</span>))
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+            .<span class="ident">join</span>(<span class="string">&quot; &quot;</span>)
+    )
+}
+
+<span class="kw">fn</span> <span class="ident">repr_pair</span>(<span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">JPair</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
     <span class="kw">match</span> <span class="ident">cell</span>.<span class="ident">iter</span>() {
         <span class="prelude-val">Ok</span>(<span class="ident">iterator</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">parts</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="string">&quot;(&quot;</span>.<span class="ident">to_string</span>()];
-            <span class="kw">for</span> <span class="ident">val</span> <span class="kw">in</span> <span class="ident">iterator</span> {
-                <span class="ident">parts</span>.<span class="ident">push</span>(<span class="ident">repr</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>));
-                <span class="ident">parts</span>.<span class="ident">push</span>(<span class="string">&quot; &quot;</span>.<span class="ident">to_string</span>());
-            }
-            <span class="kw">if</span> <span class="ident">parts</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">1</span> {
-                <span class="ident">parts</span>.<span class="ident">pop</span>();
-            }
-            <span class="ident">parts</span>.<span class="ident">push</span>(<span class="string">&quot;)&quot;</span>.<span class="ident">to_string</span>());
-            <span class="ident">parts</span>.<span class="ident">join</span>(<span class="string">&quot;&quot;</span>)
+            <span class="macro">format!</span>(
+                <span class="string">&quot;({})&quot;</span>,
+                <span class="ident">iterator</span>
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">repr</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>))
+                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                    .<span class="ident">join</span>(<span class="string">&quot; &quot;</span>)
+            )
         }
         <span class="comment">// Not a list</span>
         <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;({} . {})&quot;</span>, <span class="ident">repr</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">car</span>()), <span class="ident">repr</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">cdr</span>())),

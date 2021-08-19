@@ -76,6 +76,9 @@
 <span id="74">74</span>
 <span id="75">75</span>
 <span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
 </pre><pre class="rust">
 <span class="doccomment">//! [Jibi Scheme Language Documentation](https://jbchouinard.github.io/jibi/)</span>
 <span class="doccomment">//!</span>
@@ -125,10 +128,12 @@
 <span class="doccomment">//! let res = jibi.call(&quot;add&quot;, args).unwrap();</span>
 <span class="doccomment">//! println!(&quot;{}&quot;, res);</span>
 <span class="doccomment">//! ```</span>
+<span class="kw">mod</span> <span class="ident">apply</span>;
 <span class="kw">mod</span> <span class="ident">builtin</span>;
 <span class="kw">mod</span> <span class="ident">env</span>;
 <span class="kw">mod</span> <span class="ident">error</span>;
 <span class="kw">mod</span> <span class="ident">eval</span>;
+<span class="kw">mod</span> <span class="ident">import</span>;
 <span class="kw">mod</span> <span class="ident">interpreter</span>;
 <span class="kw">mod</span> <span class="ident">reader</span>;
 <span class="kw">mod</span> <span class="ident">repr</span>;
@@ -146,7 +151,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">JError</span>, <span class="ident">JErrorKind</span>, <span class="ident">JResult</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">interpreter</span>::{<span class="ident">Interpreter</span>, <span class="ident">PRELUDE</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reader::parser::Parser</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reader::tokenizer</span>::{<span class="ident">Token</span>, <span class="ident">TokenError</span>, <span class="ident">TokenIter</span>, <span class="ident">TokenValidator</span>, <span class="ident">TokenValue</span>, <span class="ident">Tokenizer</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reader::readermacro</span>::{<span class="ident">ReaderMacro</span>, <span class="ident">TokenMatcher</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reader::tokenizer</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reader::PositionTag</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">state::JState</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">traceback::TracebackFrame</span>;

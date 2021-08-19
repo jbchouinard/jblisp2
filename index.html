@@ -89,7 +89,7 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#lambda">lambda</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#procmacro">procmacro</a>
+    <li class="toctree-l4"><a class="reference internal" href="#macro">macro</a>
     </li>
         </ul>
     </li>
@@ -179,7 +179,9 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#map">map</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#fold">fold</a>
+    <li class="toctree-l4"><a class="reference internal" href="#foldr">foldr</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#foldl">foldl</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#range">range</a>
     </li>
@@ -271,7 +273,7 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#defmacro">defmacro</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#macro">macro</a>
+    <li class="toctree-l4"><a class="reference internal" href="#macro_1">macro</a>
     </li>
         </ul>
     </li>
@@ -310,6 +312,22 @@
     <li class="toctree-l4"><a class="reference internal" href="#getenv">getenv</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#exit">exit</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#paths">paths</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#reader-macros">Reader Macros</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#token">token</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#token-match">token-match</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#token-value">token-value</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#token-type">token-type</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#reader-macro">reader-macro!</a>
     </li>
         </ul>
     </li>
@@ -459,7 +477,7 @@
 <p><em>Evaluation Rule:</em> <code>symbol</code> values are variable names. When evaluated, a
 <code>symbol</code> is replaced by the value of its binding in the nearest
 enclosing scope where it is defined. An error is raised if <code>symbol</code> is
-not bound in any enclosing scope.</p>
+not defined in any enclosing scope.</p>
 <hr />
 <h4 id="integer">integer</h4>
 <pre><code class="language-nohighlight">100
@@ -534,7 +552,8 @@ is useful to prevent <code>symbol</code> binding and procedure application. See
 <a href="#quoting-and-evaluation">Quoting and Evaluation</a>.</p>
 <hr />
 <h4 id="error">error</h4>
-<pre><code class="language-nohighlight">(error type &quot;some-message&quot;)
+<pre><code class="language-nohighlight">(exception &quot;some reason&quot;)
+(error type &quot;some reason&quot;)
 </code></pre>
 <p>Error values do no inherently do anything, until they are
 <a href="#raise"><code>raise</code></a>’d as exceptions. See <a href="#exceptions">Exceptions</a>.</p>
@@ -548,12 +567,12 @@ is useful to prevent <code>symbol</code> binding and procedure application. See
 <p><em>Evaluation Rule:</em> A <code>lambda</code> value evaluates to itself. It is applied
 when it is the first element of a <code>list</code>.</p>
 <hr />
-<h4 id="procmacro">procmacro</h4>
+<h4 id="macro">macro</h4>
 <pre><code class="language-nohighlight">(macro params :expr ...)
 </code></pre>
 <p>Procedural macros. See <a href="#macro-definition">Macro Definition</a>.</p>
-<p><em>Evaluation Rule:</em> A <code>procmacro</code> value evaluates to itself. It is
-applied when it is the first element of a <code>list</code>.</p>
+<p><em>Evaluation Rule:</em> A <code>macro</code> value evaluates to itself. It is applied
+when it is the first element of a <code>list</code>.</p>
 <hr />
 <h3 id="builtin-callable-types">Builtin Callable Types</h3>
 <h4 id="function">function</h4>
@@ -575,42 +594,45 @@ applied when it is the first element of a <code>list</code>.</p>
 <h4 id="def">def</h4>
 <pre><code class="language-nohighlight">(def name :expr)
 </code></pre>
-<p>Create and assign binding in local scope.</p>
+<p>Define <code>name</code> in the current local scope.</p>
 <hr />
 <h4 id="set">set!</h4>
 <pre><code class="language-nohighlight">(set! name :expr)
 </code></pre>
-<p>Change existing binding. Raises error if a binding does not already
-exists.</p>
+<p>Change value of <code>name</code> in the nearest enclosing scope where it is
+defined. Raises an error if <code>name</code> is not defined in any enclosing
+scope.</p>
 <hr />
 <h4 id="let">let</h4>
 <pre><code class="language-nohighlight">(lets ((name value:expr) ...) :expr ...)
 </code></pre>
-<p>Create bindings in a new local scopes.</p>
+<p>Define variables in a new local scopes.</p>
 <pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
 &gt;&gt;&gt; (let ((x 5) (y 7))
 ...    (display x)
 ...    (display y))
 5
 7
+&gt;&gt;&gt; x
+NotDefined: x
 </code></pre>
 <hr />
 <h4 id="defglobal">defglobal</h4>
 <pre><code class="language-nohighlight">(defglobal name :expr)
 </code></pre>
-<p>Create and assign binding in global env.</p>
+<p>Define a global variable.</p>
 <hr />
 <h4 id="setglobal">setglobal!</h4>
 <pre><code class="language-nohighlight">(setglobal! name :expr)
 </code></pre>
-<p>Change existing binding in global env. Raises error if a binding does
-not already exists.</p>
+<p>Change value of global variable. Raises error if the global variable is
+not defined.</p>
 <hr />
 <h3 id="function-definition">Function Definition</h3>
 <h4 id="defn">defn</h4>
 <pre><code class="language-nohighlight">(defn name parameters :expr ...)
 </code></pre>
-<p>Create lambda function and bind it to <code>name</code>.</p>
+<p>Creaet and define a lambda function as <code>name</code>.</p>
 <p>Variadic lambdas can be defined with formal parameters like <code>(x . xs)</code> -
 there must be a single parameter after <code>.</code>, which will be a list
 containing zero or more arguments depending on the number of arguments
@@ -762,14 +784,27 @@ true
 (2 4 6)
 </code></pre>
 <hr />
-<h4 id="fold">fold</h4>
-<pre><code class="language-nohighlight">(fold f:procedure init:expr vals:list)
+<h4 id="foldr">foldr</h4>
+<pre><code class="language-nohighlight">(foldr f:procedure init:expr vals:list)
 </code></pre>
-<p>Applies <code>f</code> to each value in a list and accumulate results in <code>init</code>.</p>
+<p>Applies <code>f</code> to each value in list (right first) and accumulate results
+in <code>init</code>.</p>
 <pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
-&gt;&gt;&gt; (fold + 0 (list 1 2 3))
+&gt;&gt;&gt; (foldr + 0 (list 1 2 3))
 6
-&gt;&gt;&gt; (fold cons () (list 1 2 3))
+&gt;&gt;&gt; (foldr cons () (list 1 2 3))
+(1 2 3)
+</code></pre>
+<hr />
+<h4 id="foldl">foldl</h4>
+<pre><code class="language-nohighlight">(foldl f:procedure init:expr vals:list)
+</code></pre>
+<p>Applies <code>f</code> to each value in list (left first) and accumulate results in
+<code>init</code>.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (foldl + 0 (list 1 2 3))
+6
+&gt;&gt;&gt; (foldl cons () (list 1 2 3))
 (3 2 1)
 </code></pre>
 <hr />
@@ -911,9 +946,13 @@ represented as a float).</p>
 accessible to importers.</p>
 <p>Module files are only evaluated once, re-importing gets a reference to
 the existing module.</p>
-<p>At the moment only the current working directory is searched to find
-modules, thus importing “stl/unittest” looks for the file
-<code>./stl/unittest.jibi'.</code></p>
+<p>Importing looks for module files in the following locations in order:</p>
+<ul>
+<li>Paths in the <code>JIBI_PATH</code> environment variable (separated by <code>:</code>)</li>
+<li>The jibi system library path (dependent on PREFIX environment
+    variable at build time, default: /usr/local/lib/jibi)</li>
+<li>The current working directory when the interpreter was launched</li>
+</ul>
 <h4 id="import">import</h4>
 <pre><code class="language-nohighlight">(import module:string as name)
 </code></pre>
@@ -1044,7 +1083,7 @@ local scope where the macro is called:</p>
 1005
 </code></pre>
 <hr />
-<h4 id="macro">macro</h4>
+<h4 id="macro_1">macro</h4>
 <pre><code class="language-nohighlight">(macro formals :expr ...)
 </code></pre>
 <p>Create macro. See <a href="#defmacro">‘defmacro’</a>.</p>
@@ -1129,6 +1168,75 @@ not set or contains non-UTF8 characters.</p>
 </code></pre>
 <p>Exit program with a status code.</p>
 <hr />
+<h4 id="paths">paths</h4>
+<pre><code class="language-nohighlight">(paths)
+</code></pre>
+<p>Print modules import paths.</p>
+<hr />
+<h3 id="reader-macros">Reader Macros</h3>
+<p>Reader macros are macros that operate on lexical tokens, before parsing.
+They allow extending the syntax of the language.</p>
+<p>A reader macro consists of a rule, and a transformer. The rule specifies
+a pattern of tokens to which the macro applies. Whenever the reader
+encounters a sequence of tokens that matches the pattern, the
+transformer is applied.</p>
+<p>The transformer is a lambda which takes the matching token sequence as
+input, and returns a list of tokens to replace them.</p>
+<p>Reader macros are applied in the order in which they were installed
+(with the <code>reader-macro!</code> procedure).</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; ;
+</code></pre>
+<h4 id="token">token</h4>
+<pre><code class="language-nohighlight">(token type [value])
+</code></pre>
+<p>Used to produce tokens in reader macro transformer functions.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (token 'lparen)
+#[token LPAREN]
+&gt;&gt;&gt; (token 'string &quot;foo&quot;)
+#[token STRING(&quot;foo&quot;)]
+</code></pre>
+<hr />
+<h4 id="token-match">token-match</h4>
+<pre><code class="language-nohighlight">(token-match type [value])
+</code></pre>
+<p>A matcher for lexical tokens. A reader macro rule consists of a list of
+token matchers.</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (token-match 'string)
+#[tokenmatcher String(#ANY)]
+&gt;&gt;&gt; (token-match 'any)
+#[tokenmatcher #ANY]
+</code></pre>
+<hr />
+<h4 id="token-value">token-value</h4>
+<pre><code class="language-nohighlight">(token-value :token)
+</code></pre>
+<p>Get value of token (or nil for tokens that have no value).</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (token-value (token 'string &quot;foo&quot;))
+foo
+</code></pre>
+<hr />
+<h4 id="token-type">token-type</h4>
+<pre><code class="language-nohighlight">(token-type :token)
+</code></pre>
+<p>Get type of token (symbol).</p>
+<pre><code class="language-nohighlight">&gt;&gt;&gt; ; Example
+&gt;&gt;&gt; (token-type (token 'lparen))
+lparen
+</code></pre>
+<hr />
+<h4 id="reader-macro">reader-macro!</h4>
+<pre><code class="language-nohighlight">(reader-macro! tokenmatcher [... tokenmatcher] transformer)
+</code></pre>
+<p>Install a new reader macro with the provided rule and transformer.</p>
+<p>The first n arguments are token matchers to match sequences of 1 or more
+tokens.</p>
+<p>The last argument is the token transfomer function to apply to
+(non-overlapping) sequences of tokens that match the rule.</p>
+<hr />
 <h3 id="debugging">Debugging</h3>
 <h4 id="dd">dd</h4>
 <pre><code class="language-nohighlight">(dd :expr)
@@ -1146,14 +1254,14 @@ not set or contains non-UTF8 characters.</p>
 <p>Print pointer address.</p>
 <hr />
 <h4 id="ddc">ddc</h4>
-<pre><code class="language-nohighlight">(ddc :lambda|:procmacro)
+<pre><code class="language-nohighlight">(ddc :lambda|:macro)
 </code></pre>
 <p>Print code of (non-builtin) lambda or macro.</p>
 <hr />
 <h4 id="ddm">ddm</h4>
-<pre><code class="language-nohighlight">(ddm :procmacro :expr ...)
+<pre><code class="language-nohighlight">(ddm :macro :expr ...)
 </code></pre>
-<p>Print code generated by a <code>procmacro</code> for the given arguments.</p>
+<p>Print code generated by a <code>macro</code> for the given arguments.</p>
 <hr />
 <h2 id="standard-library-stl">Standard Library (STL)</h2>
 <p>I hope you were not expecting a real standard library. You can have some
@@ -1445,5 +1553,5 @@ Exception: Some tests failed.
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-08-13 22:54:24.632534+00:00
+Build Date UTC : 2021-08-19 01:29:47.057058+00:00
 -->
